@@ -1,0 +1,226 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  STUDENT
+  ADMIN
+}
+
+enum Grade {
+  A
+  AB
+  B
+  BC
+  C
+  D
+  F
+}
+
+// User: Must be authenticated via wisc.edu email
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  role          UserRole  @default(STUDENT)
+
+  // Community
+  reviews       Review[]
+  comments      Comment[]
+  votes         Vote[]
+
+  // Personalization
+  savedCourses  SavedCourse[]
+  transcript    StudentCourseHistory[]
+
+  createdAt     DateTime  @default(now())
+}
+
+// School: e.g., "College of Engineering"
+model School {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  courses   Course[]
+}
+
+// Course: The static catalog data
+model Course {
+  id            String   @id @default(cuid())
+  code          String   @unique // e.g. "CS 577"
+  name          String
+  description   String   @db.Text
+  credits       Int
+
+  // Relations
+  schoolId      String
+  school        School   @relation(fields: [schoolId], references: [id])
+
+  // Prereq Logic for Visualization
+  prerequisiteText String? // Raw text from guide.wisc.edu
+  prerequisites    Course[] @relation("CoursePrereqs")
+  prerequisiteFor  Course[] @relation("CoursePrereqs")
+
+  // Attributes for Filtering
+  breadths      String[] // Array of strings: "Physical Science", etc.
+  genEds        String[] // Array of strings: "Comm A", etc.
+  level         String   // "Elementary", "Intermediate", "Advanced"
+
+  reviews       Review[]
+  instructors   CourseInstructor[]
+  savedBy       SavedCourse[]
+
+  // Statistics (updated via cron/trigger)
+  avgGPA        Float?   // Aggregate from GradeDistributions
+  avgRating     Float?   // Aggregate from Reviews
+
+  // Historical Data
+  gradeDistributions GradeDistribution[]
+
+  // Metadata
+  lastOffered   String?
+  updatedAt     DateTime @updatedAt
+
+  @@index([code])
+  @@index([schoolId])
+  @@index([level])
+}
+
+// Grade Distribution: Official historical data scraped from Madgrades/Registrar
+model GradeDistribution {
+  id        String   @id @default(cuid())
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id])
+  term      String   // e.g. "2023-Fall"
+
+  // Counts
+  aCount    Int      @default(0)
+  abCount   Int      @default(0)
+  bCount    Int      @default(0)
+  bcCount   Int      @default(0)
+  cCount    Int      @default(0)
+  dCount    Int      @default(0)
+  fCount    Int      @default(0)
+
+  totalGraded Int
+  avgGPA      Float
+
+  @@unique([courseId, term])
+}
+
+// Review: User generated content (NO SEED DATA ALLOWED)
+model Review {
+  id            String   @id @default(cuid())
+
+  // Core Metadata
+  term          String   // e.g., "Fall 2024"
+  title         String?  // Short review title
+  gradeReceived Grade    // Enum: A, AB, B, BC...
+
+  // MANDATORY Grading Dimensions (Grade Scale)
+  contentRating  String   // Stored as grade letter
+  teachingRating String
+  gradingRating  String
+  workloadRating String
+
+  // Specific Text Comments per Dimension
+  contentComment  String? @db.Text
+  teachingComment String? @db.Text
+  gradingComment  String? @db.Text
+  workloadComment String? @db.Text
+
+  // Metadata
+  assessments   String[] // Array: ["Midterm", "Final", "Essay"]
+  tags          String[]
+
+  // Resources (Optional)
+  resourceLink  String?  // Optional URL to Google Drive/Box for course materials
+
+  // Relations
+  instructorId  String
+  instructor    Instructor @relation(fields: [instructorId], references: [id])
+  courseId      String
+  course        Course   @relation(fields: [courseId], references: [id])
+  authorId      String
+  author        User     @relation(fields: [authorId], references: [id])
+
+  votes         Vote[]
+  comments      Comment[]
+  createdAt     DateTime @default(now())
+
+  @@index([courseId])
+  @@index([authorId])
+  @@index([createdAt])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  text      String   @db.Text
+
+  // Relations
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id])
+  reviewId  String
+  review    Review   @relation(fields: [reviewId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+model Vote {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  reviewId  String
+  review    Review   @relation(fields: [reviewId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, reviewId])
+}
+
+model Instructor {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  aliases   String[] // Alternative names
+  courses   CourseInstructor[]
+  reviews   Review[]
+}
+
+model CourseInstructor {
+  courseId     String
+  course       Course     @relation(fields: [courseId], references: [id])
+  instructorId String
+  instructor   Instructor @relation(fields: [instructorId], references: [id])
+
+  @@id([courseId, instructorId])
+}
+
+model SavedCourse {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, courseId])
+}
+
+// Transcript: Encrypted/Private user history for GPA Prediction
+model StudentCourseHistory {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  courseCode  String   // Store code string to survive catalog changes
+  term        String
+  grade       Grade
+  credits     Int
+}

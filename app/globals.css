@@ -1,0 +1,56 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --uw-red: #c5050c;
+    --uw-light: #d93036;
+    --uw-dark: #9b0000;
+  }
+
+  body {
+    @apply bg-slate-50/50 text-slate-900 font-sans antialiased;
+  }
+
+  /* Custom scrollbar styles */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-slate-100;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-slate-300 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-slate-400;
+  }
+}
+
+@layer components {
+  .nav-link {
+    @apply flex items-center space-x-3 px-3 py-2 text-sm rounded-lg text-slate-700 hover:bg-slate-50 transition-colors;
+  }
+
+  .nav-link.active {
+    @apply bg-slate-100 text-slate-900 font-medium;
+  }
+
+  .btn-primary {
+    @apply bg-uw-red text-white px-4 py-2 rounded-lg hover:bg-uw-dark transition-colors font-medium;
+  }
+
+  .btn-secondary {
+    @apply bg-slate-100 text-slate-700 px-4 py-2 rounded-lg hover:bg-slate-200 transition-colors font-medium;
+  }
+
+  .grade-badge {
+    @apply px-2 py-1 rounded-md text-xs font-semibold;
+  }
+}

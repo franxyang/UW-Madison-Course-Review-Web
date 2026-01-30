@@ -1,0 +1,193 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ===== 用户系统 (NextAuth) =====
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  image         String?
+  emailVerified DateTime?
+  createdAt     DateTime  @default(now())
+
+  reviews  Review[]
+  accounts Account[]
+  sessions Session[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ===== 课程系统 =====
+model Course {
+  id          String  @id @default(cuid())
+  code        String  @unique // "CS 577"
+  name        String // "Introduction to Algorithms"
+  description String? @db.Text
+  credits     Int     @default(3)
+
+  // 分类
+  department String // "Computer Sciences"
+  school     String // "L&S"
+  level      String // "500" (extracted from code)
+
+  // GenEd 要求
+  breadths String[] // ["Natural Science"]
+  genEds   String[] // ["Comm A"]
+
+  // 先修（文本描述）
+  prerequisites String? @db.Text
+
+  // 统计数据（定期更新）
+  avgGPA      Float?
+  avgRating   Float?
+  reviewCount Int    @default(0)
+
+  // 关系
+  reviews     Review[]
+  grades      GradeDistribution[]
+  instructors CourseInstructor[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([department])
+  @@index([level])
+  @@index([school])
+}
+
+model Instructor {
+  id    String  @id @default(cuid())
+  name  String
+  email String?
+
+  courses CourseInstructor[]
+  reviews Review[]
+}
+
+model CourseInstructor {
+  courseId     String
+  instructorId String
+  course       Course     @relation(fields: [courseId], references: [id])
+  instructor   Instructor @relation(fields: [instructorId], references: [id])
+
+  @@id([courseId, instructorId])
+}
+
+// ===== 成绩分布 (MadGrades) =====
+model GradeDistribution {
+  id       String @id @default(cuid())
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id])
+  term     String // "2024-Fall"
+
+  aCount  Int @default(0)
+  abCount Int @default(0)
+  bCount  Int @default(0)
+  bcCount Int @default(0)
+  cCount  Int @default(0)
+  dCount  Int @default(0)
+  fCount  Int @default(0)
+
+  totalStudents Int
+  avgGPA        Float
+
+  @@unique([courseId, term])
+}
+
+// ===== 评价系统 =====
+model Review {
+  id String @id @default(cuid())
+
+  // 关系
+  courseId     String
+  course       Course      @relation(fields: [courseId], references: [id])
+  authorId     String
+  author       User        @relation(fields: [authorId], references: [id])
+  instructorId String?
+  instructor   Instructor? @relation(fields: [instructorId], references: [id])
+
+  // 基本信息
+  term          String  // "Fall 2024"
+  gradeReceived String? // "A", "AB", "B", etc.
+
+  // 四维评分 (存储为 A/AB/B/BC/C/D/F)
+  contentRating  String
+  teachingRating String
+  gradingRating  String
+  workloadRating String
+
+  // 详细评价
+  contentComment  String? @db.Text
+  teachingComment String? @db.Text
+  gradingComment  String? @db.Text
+  workloadComment String? @db.Text
+  overallComment  String? @db.Text
+  tips            String? @db.Text // 给后来者的建议
+
+  // 考核方式
+  hasHomework     Boolean @default(false)
+  hasMidterm      Boolean @default(false)
+  hasFinal        Boolean @default(false)
+  hasProject      Boolean @default(false)
+  hasQuiz         Boolean @default(false)
+  hasEssay        Boolean @default(false)
+  hasPresentation Boolean @default(false)
+
+  // 状态
+  status ReviewStatus @default(PUBLISHED)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([courseId, status, createdAt(sort: Desc)])
+  @@index([authorId])
+}
+
+enum ReviewStatus {
+  DRAFT
+  PUBLISHED
+  HIDDEN
+}

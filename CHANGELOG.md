@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.3.0-dev] - 2026-02-04
+
+### Added
+- **tRPC Integration**: End-to-end type-safe API layer
+  - Course Router: list, byId, getSchools, getDepartments, search
+  - Review Router: create (with instructor auto-create), vote
+  - Comment Router: create, delete
+  - SessionProvider + tRPC Provider + React Query
+- **Full-text Search**: PostgreSQL tsvector with GIN index
+  - Weighted search (code/name = A, description = B)
+  - Auto-update trigger on Course changes
+  - Autocomplete/prefix matching endpoint
+  - All 4,787 courses indexed
+- **Redis Caching**: Upstash Redis with graceful degradation
+  - Generic `cached()` wrapper with TTL
+  - Cache invalidation utilities
+- **Loading States**: Skeleton UI for course list and detail pages
+- **Optimistic UI**: Instant feedback for votes and comments
+
+### Changed
+- Migrated all API calls from Server Actions to tRPC
+- Migrated pages to Client Components with tRPC hooks
+- Organized documentation into docs/ folder
+
+### Removed
+- Old Server Actions (backed up to backup/old-actions/)
+
+---
+
 ## [Unreleased]
 
 ### Planned

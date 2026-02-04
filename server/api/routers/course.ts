@@ -4,6 +4,7 @@ import { TRPCError } from '@trpc/server'
 import { Prisma } from '@prisma/client'
 import { cached, cacheKeys, TTL } from '@/lib/redis'
 import { expandSearchAliases } from '@/lib/courseAliases'
+import { computeContributorLevel } from '@/lib/contributorLevel'
 
 export const courseRouter = router({
   // Get course list with search and filters
@@ -316,9 +317,35 @@ export const courseRouter = router({
         (a, b) => (b.votes?.length || 0) - (a.votes?.length || 0)
       )
 
+      // Compute contributor levels for each review author
+      const authorIds = [...new Set(sortedReviews.map(r => r.authorId))]
+      const authorStats = await Promise.all(
+        authorIds.map(async (authorId) => {
+          const [reviewCount, upvotesReceived] = await Promise.all([
+            ctx.prisma.review.count({ where: { authorId } }),
+            ctx.prisma.vote.count({
+              where: { review: { authorId } },
+            }),
+          ])
+          return { authorId, reviewCount, upvotesReceived }
+        })
+      )
+
+      const authorLevelMap = new Map(
+        authorStats.map(s => [
+          s.authorId,
+          computeContributorLevel(s.reviewCount, s.upvotesReceived),
+        ])
+      )
+
+      const reviewsWithLevel = sortedReviews.map(review => ({
+        ...review,
+        authorLevel: authorLevelMap.get(review.authorId) || computeContributorLevel(0, 0),
+      }))
+
       return {
         ...course,
-        reviews: sortedReviews,
+        reviews: reviewsWithLevel,
         reviewAccess: {
           hasFullAccess,
           userReviewCount,

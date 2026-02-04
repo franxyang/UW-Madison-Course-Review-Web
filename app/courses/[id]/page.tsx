@@ -8,6 +8,7 @@ import { ArrowLeft, Clock, BookOpen, Users, Star, Calendar, Building, Hash, Aler
 import { ReviewForm } from '@/components/ReviewForm'
 import { CommentSection } from '@/components/CommentSection'
 import { ReviewGateOverlay, FrostedReview } from '@/components/ReviewGate'
+import { ContributorBadge } from '@/components/ContributorBadge'
 import { trpc } from '@/lib/trpc/client'
 import { useSession } from 'next-auth/react'
 
@@ -327,11 +328,14 @@ export default function CoursePage() {
                   <div key={review.id} className="bg-white rounded-lg border border-slate-200 p-6">
                     <div className="flex items-start justify-between mb-4">
                       <div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 flex-wrap">
                           <h4 className="font-medium text-slate-900">{review.title || 'Untitled Review'}</h4>
                           <span className={`px-2 py-1 text-xs font-medium rounded ${getGradeColor(review.gradeReceived)}`}>
                             Grade: {review.gradeReceived}
                           </span>
+                          {review.authorLevel && (
+                            <ContributorBadge contributor={review.authorLevel} />
+                          )}
                         </div>
                         <div className="text-sm text-slate-600 mt-1">
                           {review.term} · {review.instructor?.name || 'Unknown Instructor'}

@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { router, protectedProcedure } from '../trpc/trpc'
 import { TRPCError } from '@trpc/server'
+import { calculateReviewXP, computeContributorLevel } from '@/lib/contributorLevel'
 
 const gradeEnum = z.enum(['A', 'AB', 'B', 'BC', 'C', 'D', 'F'])
 
@@ -77,6 +78,12 @@ export const reviewRouter = router({
         })
       }
 
+      // Check if this is the first review on this course (bonus XP)
+      const existingCourseReviewCount = await ctx.prisma.review.count({
+        where: { courseId: input.courseId },
+      })
+      const isFirstReviewOnCourse = existingCourseReviewCount === 0
+
       // Create review
       const review = await ctx.prisma.review.create({
         data: {
@@ -106,6 +113,25 @@ export const reviewRouter = router({
         },
       })
 
+      // Award XP and update contributor level
+      const xpEarned = calculateReviewXP(isFirstReviewOnCourse)
+      const newXP = (user.xp || 0) + xpEarned
+
+      // Recount stats for accurate level
+      const [newReviewCount, upvotesReceived] = await Promise.all([
+        ctx.prisma.review.count({ where: { authorId: user.id } }),
+        ctx.prisma.vote.count({ where: { review: { authorId: user.id } } }),
+      ])
+      const newLevel = computeContributorLevel(newReviewCount, upvotesReceived)
+
+      await ctx.prisma.user.update({
+        where: { id: user.id },
+        data: {
+          xp: newXP,
+          level: newLevel.level,
+        },
+      })
+
       return review
     }),
 
@@ -129,6 +155,12 @@ export const reviewRouter = router({
         },
       })
 
+      // Get the review to find its author (for level updates)
+      const review = await ctx.prisma.review.findUnique({
+        where: { id: input.reviewId },
+        select: { authorId: true },
+      })
+
       if (existingVote) {
         // Remove vote
         await ctx.prisma.vote.delete({
@@ -139,6 +171,20 @@ export const reviewRouter = router({
             },
           },
         })
+
+        // Update review author's level (they lost an upvote)
+        if (review) {
+          const [reviewCount, upvotesReceived] = await Promise.all([
+            ctx.prisma.review.count({ where: { authorId: review.authorId } }),
+            ctx.prisma.vote.count({ where: { review: { authorId: review.authorId } } }),
+          ])
+          const newLevel = computeContributorLevel(reviewCount, upvotesReceived)
+          await ctx.prisma.user.update({
+            where: { id: review.authorId },
+            data: { level: newLevel.level },
+          })
+        }
+
         return { isVoted: false }
       } else {
         // Add vote
@@ -148,6 +194,23 @@ export const reviewRouter = router({
             reviewId: input.reviewId,
           },
         })
+
+        // Update review author's level (they gained an upvote) + award XP
+        if (review) {
+          const [reviewCount, upvotesReceived] = await Promise.all([
+            ctx.prisma.review.count({ where: { authorId: review.authorId } }),
+            ctx.prisma.vote.count({ where: { review: { authorId: review.authorId } } }),
+          ])
+          const newLevel = computeContributorLevel(reviewCount, upvotesReceived)
+          await ctx.prisma.user.update({
+            where: { id: review.authorId },
+            data: {
+              level: newLevel.level,
+              xp: { increment: 10 }, // XP_REWARDS.RECEIVE_UPVOTE
+            },
+          })
+        }
+
         return { isVoted: true }
       }
     }),

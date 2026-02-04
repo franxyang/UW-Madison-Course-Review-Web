@@ -70,6 +70,11 @@ model User {
   image         String?
   role          UserRole  @default(STUDENT)
 
+  // Contributor level system
+  level         Int       @default(0)
+  xp            Int       @default(0)
+  title         String?   // Custom title override (admin-granted)
+
   // NextAuth relations
   accounts      Account[]
   sessions      Session[]
@@ -101,6 +106,8 @@ model School {
   
   courses     Course[]
   departments Department[]
+
+  @@index([parentId])
 }
 
 // Department: e.g., "Computer Sciences", "Mathematics"
@@ -144,6 +151,9 @@ model Course {
   savedBy       SavedCourse[]
   departments   CourseDepartment[]
 
+  // Full-text search vector (managed by PostgreSQL trigger, not by Prisma)
+  searchVector  Unsupported("tsvector")?
+
   // Statistics (updated via cron/trigger)
   avgGPA        Float?   // Aggregate from GradeDistributions
   avgRating     Float?   // Aggregate from Reviews
@@ -158,6 +168,7 @@ model Course {
   @@index([code])
   @@index([schoolId])
   @@index([level])
+  @@index([searchVector], type: Gin)
 }
 
 // Many-to-many relationship: Course <-> Department

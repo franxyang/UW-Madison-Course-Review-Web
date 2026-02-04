@@ -430,7 +430,11 @@ export default async function CoursePage({ params }: { params: { id: string } })
                   </div>
 
                   {/* Comments Section */}
-                  <CommentSection reviewId={review.id} comments={review.comments} />
+                  <CommentSection
+                    reviewId={review.id}
+                    comments={review.comments}
+                    userEmail={session?.user?.email}
+                  />
                 </div>
               ))}
             </div>

@@ -3,6 +3,7 @@
 import React, { useState } from 'react'
 import { submitReview, ReviewFormData } from '@/app/actions/reviews'
 import { MessageSquare, X, AlertCircle } from 'lucide-react'
+import { toast } from 'sonner'
 
 interface ReviewFormProps {
   courseId: string
@@ -62,6 +63,10 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({ courseId, courseName }) 
 
       if (result.success) {
         setSuccess(true)
+        toast.success('Review submitted successfully! 🎉', {
+          description: 'Your review is now visible to other students.'
+        })
+        
         setTimeout(() => {
           setIsOpen(false)
           setSuccess(false)
@@ -77,12 +82,18 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({ courseId, courseName }) 
             assessments: [],
             instructorName: ''
           })
-        }, 2000)
+        }, 1500)
       } else {
         setError(result.error || 'Failed to submit review')
+        toast.error('Failed to submit review', {
+          description: result.error || 'Please try again later.'
+        })
       }
     } catch (err) {
       setError('An error occurred while submitting your review')
+      toast.error('An error occurred', {
+        description: 'Please try again later.'
+      })
     } finally {
       setIsSubmitting(false)
     }

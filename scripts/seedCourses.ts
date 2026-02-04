@@ -67,8 +67,8 @@ export async function seedCourses() {
       credits: inferCredits(courseNumber),
       level: inferLevel(courseNumber),
       schoolId,
-      breadths: [] as string[],     // Will be populated later from guide.wisc.edu
-      genEds: [] as string[],        // Will be populated later from guide.wisc.edu
+      breadths: null,     // Will be populated later from guide.wisc.edu as JSON string
+      genEds: null,        // Will be populated later from guide.wisc.edu as JSON string
       prerequisiteText: null,        // Will be populated later
       avgGPA: null,                  // Will be calculated from grade distributions
       avgRating: null,               // Will be calculated from reviews
@@ -89,18 +89,7 @@ export async function seedCourses() {
     console.log(`    Processing batch ${i + 1}/${batches.length} (${batch.length} courses)...`)
 
     try {
-      // Use createMany with skipDuplicates to handle any duplicate course codes
-      const result = await prisma.course.createMany({
-        data: batch,
-        skipDuplicates: true,
-      })
-      successCount += result.count
-      console.log(`      ✅ Inserted ${result.count} courses`)
-    } catch (error) {
-      console.error(`      ❌ Error in batch ${i + 1}:`, error)
-      errorCount += batch.length
-
-      // Try to insert individually to identify problematic records
+      // Insert individually using upsert to handle duplicates
       for (const course of batch) {
         try {
           await prisma.course.upsert({
@@ -116,10 +105,14 @@ export async function seedCourses() {
           })
           successCount++
         } catch (individualError) {
-          console.error(`        ❌ Failed to insert course ${course.code}`)
+          console.error(`        ❌ Failed to insert course ${course.code}:`, individualError)
           errorCount++
         }
       }
+      console.log(`      ✅ Processed batch ${i + 1}`)
+    } catch (error) {
+      console.error(`      ❌ Error in batch ${i + 1}:`, error)
+      errorCount += batch.length
     }
   }
 

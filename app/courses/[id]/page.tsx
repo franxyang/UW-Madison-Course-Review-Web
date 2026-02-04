@@ -208,7 +208,7 @@ export default async function CoursePage({ params }: { params: { id: string } })
             </div>
           )}
 
-          {course.breadths.length > 0 && (
+          {course.breadths && course.breadths.length > 0 && (
             <div className="mt-4">
               <h4 className="text-sm font-medium text-slate-900 mb-2">Breadth Requirements</h4>
               <div className="flex flex-wrap gap-2">
@@ -391,7 +391,7 @@ export default async function CoursePage({ params }: { params: { id: string } })
                   </div>
 
                   {/* Assessments */}
-                  {review.assessments.length > 0 && (
+                  {review.assessments && review.assessments.length > 0 && (
                     <div className="flex flex-wrap gap-2 mb-4">
                       {review.assessments.map(assessment => (
                         <span key={assessment} className="px-2 py-1 text-xs bg-slate-100 text-slate-700 rounded">

@@ -30,3 +30,9 @@ dist-ssr
 .env
 .env.local
 .env*.local
+
+# Database files
+*.db
+*.db-journal
+prisma/dev.db
+prisma/dev.db-journal

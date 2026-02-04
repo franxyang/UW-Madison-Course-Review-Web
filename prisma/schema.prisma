@@ -25,12 +25,54 @@ enum Grade {
   F
 }
 
+// NextAuth.js Models
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
 // User: Must be authenticated via wisc.edu email
 model User {
   id            String    @id @default(cuid())
   email         String    @unique
+  emailVerified DateTime?
   name          String?
+  image         String?
   role          UserRole  @default(STUDENT)
+
+  // NextAuth relations
+  accounts      Account[]
+  sessions      Session[]
 
   // Community
   reviews       Review[]
@@ -46,9 +88,24 @@ model User {
 
 // School: e.g., "College of Engineering"
 model School {
+  id          String       @id @default(cuid())
+  name        String       @unique
+  courses     Course[]
+  departments Department[]
+}
+
+// Department: e.g., "Computer Sciences", "Mathematics"
+model Department {
   id        String   @id @default(cuid())
-  name      String   @unique
-  courses   Course[]
+  code      String   @unique // e.g. "COMP SCI", "MATH"
+  name      String   // e.g. "Computer Sciences", "Mathematics"
+  
+  // Relations
+  schoolId  String
+  school    School   @relation(fields: [schoolId], references: [id])
+  courses   CourseDepartment[]
+  
+  @@index([schoolId])
 }
 
 // Course: The static catalog data
@@ -56,7 +113,7 @@ model Course {
   id            String   @id @default(cuid())
   code          String   @unique // e.g. "CS 577"
   name          String
-  description   String   @db.Text
+  description   String   @db.Text  
   credits       Int
 
   // Relations
@@ -64,18 +121,19 @@ model Course {
   school        School   @relation(fields: [schoolId], references: [id])
 
   // Prereq Logic for Visualization
-  prerequisiteText String? // Raw text from guide.wisc.edu
+  prerequisiteText String? @db.Text // Raw text from guide.wisc.edu
   prerequisites    Course[] @relation("CoursePrereqs")
   prerequisiteFor  Course[] @relation("CoursePrereqs")
 
   // Attributes for Filtering
-  breadths      String[] // Array of strings: "Physical Science", etc.
-  genEds        String[] // Array of strings: "Comm A", etc.
+  breadths      String? // JSON array: ["Physical Science", etc.]
+  genEds        String? // JSON array: ["Comm A", etc.]
   level         String   // "Elementary", "Intermediate", "Advanced"
 
   reviews       Review[]
   instructors   CourseInstructor[]
   savedBy       SavedCourse[]
+  departments   CourseDepartment[]
 
   // Statistics (updated via cron/trigger)
   avgGPA        Float?   // Aggregate from GradeDistributions
@@ -91,6 +149,16 @@ model Course {
   @@index([code])
   @@index([schoolId])
   @@index([level])
+}
+
+// Many-to-many relationship: Course <-> Department
+model CourseDepartment {
+  courseId     String
+  course       Course     @relation(fields: [courseId], references: [id])
+  departmentId String
+  department   Department @relation(fields: [departmentId], references: [id])
+
+  @@id([courseId, departmentId])
 }
 
 // Grade Distribution: Official historical data scraped from Madgrades/Registrar
@@ -131,14 +199,14 @@ model Review {
   workloadRating String
 
   // Specific Text Comments per Dimension
-  contentComment  String? @db.Text
-  teachingComment String? @db.Text
-  gradingComment  String? @db.Text
-  workloadComment String? @db.Text
+  contentComment  String?  @db.Text
+  teachingComment String?  @db.Text
+  gradingComment  String?  @db.Text
+  workloadComment String?  @db.Text
 
   // Metadata
-  assessments   String[] // Array: ["Midterm", "Final", "Essay"]
-  tags          String[]
+  assessments   String? // JSON array: ["Midterm", "Final", "Essay"]
+  tags          String?
 
   // Resources (Optional)
   resourceLink  String?  // Optional URL to Google Drive/Box for course materials
@@ -162,7 +230,7 @@ model Review {
 
 model Comment {
   id        String   @id @default(cuid())
-  text      String   @db.Text
+  text      String   @db.Text  
 
   // Relations
   authorId  String
@@ -188,7 +256,7 @@ model Vote {
 model Instructor {
   id        String   @id @default(cuid())
   name      String   @unique
-  aliases   String[] // Alternative names
+  aliases   String? // JSON array: Alternative names
   courses   CourseInstructor[]
   reviews   Review[]
 }

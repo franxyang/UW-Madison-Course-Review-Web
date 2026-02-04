@@ -1,8 +1,8 @@
 # WiscFlow Development Progress
 
-**Last Updated**: 2026-02-04 02:35 CST  
-**Current Phase**: Phase 2 - Core Feature Enhancement  
-**Overall Completion**: ~45%
+**Last Updated**: 2026-02-04 04:30 CST  
+**Current Phase**: Phase 2 - COMPLETE ✅  
+**Overall Completion**: ~55%
 
 ---
 
@@ -10,12 +10,12 @@
 
 ```
 Phase 1: Infrastructure  ████████████████████ 100% ✅
-Phase 2: Core Features   █████████░░░░░░░░░░░  45%
+Phase 2: Core Features   ████████████████████ 100% ✅
 Phase 3: UX Optimization ░░░░░░░░░░░░░░░░░░░░   0%
 Phase 4: Advanced Feat.  ░░░░░░░░░░░░░░░░░░░░   0%
 Phase 5: Admin Portal    ░░░░░░░░░░░░░░░░░░░░   0%
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Overall:                 █████████░░░░░░░░░░░  45%
+Overall:                 ███████████░░░░░░░░░  55%
 ```
 
 ---
@@ -62,7 +62,7 @@ Overall:                 █████████░░░░░░░░░�
 
 ---
 
-## 🔄 Phase 2: Core Features — 45% Complete
+## ✅ Phase 2: Core Features — 100% COMPLETE
 
 ### ✅ Completed
 - [x] User authentication (NextAuth + Google OAuth, @wisc.edu)
@@ -72,14 +72,14 @@ Overall:                 █████████░░░░░░░░░�
 - [x] Vote functionality (optimistic UI)
 - [x] Comment functionality (create, delete)
 - [x] Loading states (skeleton UI)
-
-### ⏳ To Do
-- [ ] Advanced search (by instructor, by semester, GPA range)
-- [ ] Review edit/delete (users manage own reviews)
-- [ ] Review reporting system
-- [ ] Instructor pages (/instructors, /instructors/[id])
-- [ ] User dashboard (my reviews, saved courses, course planner)
-- [ ] Mobile responsive optimization
+- [x] **Review-gated access** (frosted glass blur for non-contributors)
+- [x] **Contributor level system** (6 levels + XP + badges)
+- [x] **Review edit/delete** (ownership-verified, cascading delete)
+- [x] **Review reporting** (5 reasons, modal UI, duplicate prevention)
+- [x] **Advanced search** (GPA range + instructor name filters)
+- [x] **Instructor pages** (/instructors list + /instructors/[id] detail)
+- [x] **User dashboard** (reviews, upvotes, level progress, saved courses)
+- [x] **Mobile responsive** (hamburger nav, slide-over filters, responsive grids)
 
 ---
 
@@ -95,10 +95,10 @@ Overall:                 █████████░░░░░░░░░�
 
 ### Codebase
 ```
-Source files:  ~50 .ts/.tsx files (excl. backup/madgrades)
-Lines of code: ~6,355 lines
-Components:    ~15 components
-tRPC Routers:  3 (course, review, comment)
+Source files:  ~60 .ts/.tsx files (excl. backup/madgrades)
+Components:    ~22 components
+tRPC Routers:  4 (course, review, comment, instructor)
+Pages:         8 (home, courses, course detail, instructors, instructor detail, profile, signin, signup)
 Scripts:       7 (seed/check utilities)
 ```
 
@@ -125,12 +125,17 @@ Full-text:     All courses indexed (tsvector + GIN)
 ## 📝 Recent Commits
 
 ```
+ecff1d2 feat(mobile): responsive navigation, mobile filter panel, layout fixes
+e18e14d feat(profile): enhanced user dashboard with levels, XP, and stats
+f4a86db feat(instructor): instructor list and detail pages
+371b0b5 feat(search): add GPA range filter and instructor search
+cf846d7 feat(report): review reporting system with modal UI
+cf867b2 feat(review): add edit and delete for own reviews
+b3230d5 feat(incentive): contributor level system with XP and badges
+ecf5055 feat(incentive): review-gated access with frosted glass blur
+a699727 docs: rewrite README in English + add incentive system & USTSPACE analysis
 3dade6a fix: department filter accuracy + add pagination
 ff86d21 feat: cross-listed courses, multi-select filters, school hierarchy
-eca6c61 feat: complete course data (10k+), alias search, left sidebar filters
-9dfcb32 feat(departments): import 85 departments with course links
-ee90540 feat(search+cache): full-text search with tsvector + Redis caching
-cd81c24 feat(trpc): complete tRPC integration + docs cleanup
 ```
 
 ---

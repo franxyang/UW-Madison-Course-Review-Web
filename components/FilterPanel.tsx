@@ -10,6 +10,9 @@ export interface CourseFilters {
   levels?: string[]
   minCredits?: number
   maxCredits?: number
+  minGPA?: number
+  maxGPA?: number
+  instructorName?: string
   sortBy?: string
 }
 
@@ -56,6 +59,9 @@ export function FilterPanel({ filters, onFilterChange }: FilterPanelProps) {
     filters.levels?.length ?? 0,
     filters.minCredits !== undefined ? 1 : 0,
     filters.maxCredits !== undefined ? 1 : 0,
+    filters.minGPA !== undefined ? 1 : 0,
+    filters.maxGPA !== undefined ? 1 : 0,
+    filters.instructorName ? 1 : 0,
   ].reduce((sum: number, v: number) => sum + v, 0)
 
   const toggleArrayFilter = (key: 'schools' | 'departments' | 'levels', value: string) => {
@@ -220,6 +226,53 @@ export function FilterPanel({ filters, onFilterChange }: FilterPanelProps) {
           </div>
         </FilterSection>
 
+        {/* GPA Range Filter */}
+        <FilterSection title="📈 GPA Range">
+          <div className="flex items-center gap-2">
+            <select
+              value={filters.minGPA ?? ''}
+              onChange={(e) => onFilterChange({ 
+                ...filters, 
+                minGPA: e.target.value ? parseFloat(e.target.value) : undefined 
+              })}
+              className="flex-1 px-2 py-1.5 text-sm border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-uw-red/30"
+            >
+              <option value="">Min</option>
+              {[1.0, 1.5, 2.0, 2.5, 3.0, 3.2, 3.5, 3.7].map(n => (
+                <option key={n} value={n}>{n.toFixed(1)}</option>
+              ))}
+            </select>
+            <span className="text-slate-400">–</span>
+            <select
+              value={filters.maxGPA ?? ''}
+              onChange={(e) => onFilterChange({ 
+                ...filters, 
+                maxGPA: e.target.value ? parseFloat(e.target.value) : undefined 
+              })}
+              className="flex-1 px-2 py-1.5 text-sm border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-uw-red/30"
+            >
+              <option value="">Max</option>
+              {[2.0, 2.5, 3.0, 3.2, 3.5, 3.7, 3.9, 4.0].map(n => (
+                <option key={n} value={n}>{n.toFixed(1)}</option>
+              ))}
+            </select>
+          </div>
+        </FilterSection>
+
+        {/* Instructor Search */}
+        <FilterSection title="👨‍🏫 Instructor">
+          <input
+            type="text"
+            value={filters.instructorName || ''}
+            onChange={(e) => onFilterChange({
+              ...filters,
+              instructorName: e.target.value || undefined,
+            })}
+            placeholder="Search by instructor name..."
+            className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-uw-red/30"
+          />
+        </FilterSection>
+
         {/* Sort By */}
         <FilterSection title="📋 Sort By" defaultOpen>
           <select
@@ -269,6 +322,22 @@ export function FilterPanel({ filters, onFilterChange }: FilterPanelProps) {
                 </button>
               </span>
             ))}
+            {(filters.minGPA !== undefined || filters.maxGPA !== undefined) && (
+              <span className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-slate-100 text-slate-700 rounded-full">
+                GPA: {filters.minGPA?.toFixed(1) ?? '0'} – {filters.maxGPA?.toFixed(1) ?? '4.0'}
+                <button onClick={() => onFilterChange({ ...filters, minGPA: undefined, maxGPA: undefined })}>
+                  <X size={12} />
+                </button>
+              </span>
+            )}
+            {filters.instructorName && (
+              <span className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-slate-100 text-slate-700 rounded-full">
+                👨‍🏫 {filters.instructorName}
+                <button onClick={() => onFilterChange({ ...filters, instructorName: undefined })}>
+                  <X size={12} />
+                </button>
+              </span>
+            )}
           </div>
         </div>
       )}

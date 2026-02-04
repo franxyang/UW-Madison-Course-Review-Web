@@ -17,6 +17,9 @@ export const courseRouter = router({
         levels: z.array(z.string()).optional(),
         minCredits: z.number().min(0).max(10).optional(),
         maxCredits: z.number().min(0).max(10).optional(),
+        minGPA: z.number().min(0).max(4).optional(),
+        maxGPA: z.number().min(0).max(4).optional(),
+        instructorName: z.string().optional(),
         sortBy: z.enum(['code', 'relevance', 'gpa', 'reviews']).optional(),
         limit: z.number().min(1).max(100).default(50),
         offset: z.number().min(0).default(0),
@@ -66,6 +69,28 @@ export const courseRouter = router({
         if (input.maxCredits !== undefined) {
           filterClauses.push(`c."credits" <= $${paramIndex}`)
           filterParams.push(input.maxCredits)
+          paramIndex++
+        }
+
+        if (input.minGPA !== undefined) {
+          filterClauses.push(`c."avgGPA" >= $${paramIndex}`)
+          filterParams.push(input.minGPA)
+          paramIndex++
+        }
+
+        if (input.maxGPA !== undefined) {
+          filterClauses.push(`c."avgGPA" <= $${paramIndex}`)
+          filterParams.push(input.maxGPA)
+          paramIndex++
+        }
+
+        if (input.instructorName) {
+          filterClauses.push(`c."id" IN (
+            SELECT ci."courseId" FROM "CourseInstructor" ci
+            JOIN "Instructor" i ON ci."instructorId" = i."id"
+            WHERE i."name" ILIKE $${paramIndex}
+          )`)
+          filterParams.push(`%${input.instructorName}%`)
           paramIndex++
         }
 
@@ -175,6 +200,22 @@ export const courseRouter = router({
         where.credits = {}
         if (input.minCredits !== undefined) where.credits.gte = input.minCredits
         if (input.maxCredits !== undefined) where.credits.lte = input.maxCredits
+      }
+
+      if (input.minGPA !== undefined || input.maxGPA !== undefined) {
+        where.avgGPA = {}
+        if (input.minGPA !== undefined) where.avgGPA.gte = input.minGPA
+        if (input.maxGPA !== undefined) where.avgGPA.lte = input.maxGPA
+      }
+
+      if (input.instructorName) {
+        where.instructors = {
+          some: {
+            instructor: {
+              name: { contains: input.instructorName, mode: 'insensitive' },
+            },
+          },
+        }
       }
 
       // Sort

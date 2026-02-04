@@ -2,6 +2,8 @@ import { prisma } from '@/lib/prisma'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { Logo } from '@/components/Logo'
+import { VoteButton } from '@/components/VoteButton'
+import { auth } from '@/auth'
 import { ArrowLeft, Clock, BookOpen, Users, Star, Calendar, Building, Hash, AlertCircle, MessageSquare, ChevronRight } from 'lucide-react'
 import { ReviewForm } from '@/components/ReviewForm'
 import { CommentSection } from '@/components/CommentSection'
@@ -85,7 +87,10 @@ function getRatingColor(rating: string) {
 }
 
 export default async function CoursePage({ params }: { params: { id: string } }) {
-  const course = await getCourse(params.id)
+  const [course, session] = await Promise.all([
+    getCourse(params.id),
+    auth()
+  ])
 
   // Calculate average ratings
   const avgRatings = course.reviews.length > 0 ? {
@@ -409,6 +414,20 @@ export default async function CoursePage({ params }: { params: { id: string } })
                       </a>
                     </div>
                   )}
+
+                  {/* Vote Button */}
+                  <div className="mb-4 pt-4 border-t border-slate-100">
+                    <VoteButton
+                      reviewId={review.id}
+                      initialVoteCount={review.votes?.length || 0}
+                      initialIsVoted={
+                        session?.user?.email
+                          ? review.votes?.some((vote: any) => vote.user?.email === session.user.email) || false
+                          : false
+                      }
+                      userEmail={session?.user?.email}
+                    />
+                  </div>
 
                   {/* Comments Section */}
                   <CommentSection reviewId={review.id} comments={review.comments} />

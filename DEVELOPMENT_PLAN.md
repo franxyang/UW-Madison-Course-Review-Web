@@ -2,102 +2,78 @@
 **Date**: 2026-02-03  
 **Status**: Phase 1 in progress
 
-## 🎯 Phase 1A: Database & Infrastructure (Week 1)
+## ✅ Phase 1A: Database & Infrastructure - COMPLETE
 
-### ✅ Completed
+**Completed**: 2026-02-03
+
+- [x] PostgreSQL@16 installation via Homebrew
 - [x] Next.js 15 setup with TypeScript
-- [x] Prisma schema design
-- [x] Component structure
-- [x] Basic routing
+- [x] Prisma schema design (23 models)
+- [x] Database migration successful
+- [x] Seed script execution (10,174 courses, 23 schools)
+- [x] Course listing & detail pages working
+- [x] Component structure established
+- [x] Test user created (test@wisc.edu)
 
-### 🔄 In Progress
-- [ ] PostgreSQL installation & setup
-- [ ] Database migration & seed script execution
-- [ ] Verify 3000+ courses loaded
-
-### 📋 Todo
-- [ ] Environment variables cleanup
-- [ ] Error handling middleware
-- [ ] Logging system setup
+**Commits**: 
+- `90d776b` - [P1A] Database: PostgreSQL setup with 10k+ courses
 
 ---
 
-## 🎯 Phase 1B: Authentication System (Week 1)
+## ✅ Phase 1B: Authentication System - COMPLETE
 
-### Critical Features
-1. **Login/Register Pages**
-   - `/auth/signin` - Email input with @wisc.edu validation
-   - `/auth/signup` - User registration flow
-   - Google OAuth button (optional)
+**Completed**: 2026-02-03
 
-2. **NextAuth Middleware**
-   ```typescript
-   // middleware.ts
-   - Protect /courses/[id]/review routes
-   - Protect /profile routes
-   - Redirect unauthenticated users to /auth/signin
-   ```
+- [x] Login/Register pages created with UW branding
+- [x] UserMenu component with dropdown
+- [x] GuestMenu component (Sign In / Sign Up buttons)
+- [x] NextAuth configuration with @wisc.edu validation
+- [x] Middleware protection for /api/reviews routes
+- [x] Session management in course pages
+- [x] Avatar with initials fallback
 
-3. **Email Validation**
-   ```typescript
-   // Strict @wisc.edu check in signIn callback
-   if (!email.endsWith('@wisc.edu')) {
-     throw new Error('Only @wisc.edu emails allowed')
-   }
-   ```
-
-4. **User Session Management**
-   - Display user avatar/name in header
-   - Logout button
-   - Session persistence
-
-### File Changes Needed
-- ✅ `auth.config.ts` - Already exists, needs activation
-- ✅ `auth.ts` - Already exists
-- 🆕 `app/auth/signin/page.tsx` - CREATE
-- 🆕 `app/auth/signup/page.tsx` - CREATE
-- ✅ `middleware.ts` - Already exists, needs enhancement
-- 🆕 `components/UserMenu.tsx` - CREATE
-- ✏️ `app/layout.tsx` - Add user session check
+**Commits**:
+- `2f63f27` - [P1B] Auth: Login/Signup UI and NextAuth configuration
 
 ---
 
-## 🎯 Phase 2A: Review System (Week 2)
+## ✅ Phase 2A: Review System - COMPLETE
 
-### Core Features
-1. **Review Submission**
-   - Server Action: `app/actions/submitReview.ts`
-   - Zod validation schema
-   - Form error handling
-   - Success toast notification
+**Completed**: 2026-02-03
 
-2. **Review Display**
-   - Sort options (newest, helpful, grade)
-   - Pagination (10 per page)
-   - Skeleton loading states
+- [x] Review submission with Server Actions
+- [x] Zod validation schema
+- [x] Toast notifications (Sonner)
+- [x] Voting system with optimistic UI
+- [x] Comment threading
+- [x] Delete own comments
+- [x] Duplicate review prevention
+- [x] Full authentication integration
 
-3. **Voting System**
-   - Upvote/downvote buttons
-   - Optimistic UI updates
-   - Vote count display
-
-4. **Comment Threading**
-   - Nested replies (max 3 levels)
-   - Real-time comment addition
-   - Edit/delete own comments
-
-### File Changes Needed
-- 🆕 `app/actions/submitReview.ts` - CREATE
-- 🆕 `app/actions/voteReview.ts` - CREATE
-- 🆕 `app/actions/addComment.ts` - CREATE
-- ✏️ `components/ReviewForm.tsx` - Connect to Server Action
-- ✏️ `components/CommentSection.tsx` - Add interactivity
-- 🆕 `components/ReviewCard.tsx` - Extract from CourseDetail
-- 🆕 `components/VoteButton.tsx` - CREATE
+**Commits**:
+- `6bac3cb` - [P2A] Review: Server Actions and Toast notifications
+- `6d819ac` - [P2A] Voting: Implement upvote system with optimistic UI
+- `3649048` - [P2A] Comments: Interactive comment system with auth
 
 ---
 
-## 🎯 Phase 2B: UI/UX Enhancements (Week 2)
+## ✅ Phase 2B: OAuth Configuration - COMPLETE
+
+**Completed**: 2026-02-04
+
+- [x] Google OAuth Client ID/Secret configured
+- [x] NEXTAUTH_SECRET generated
+- [x] Callback URLs configured
+- [x] @wisc.edu domain restriction (hd parameter)
+- [x] OAuth buttons activated on signin/signup pages
+- [x] Link-based OAuth flow (fixed CSRF issue)
+
+**Commits**:
+- `f2ca1ef` - [P2B] OAuth: Google Sign-In configuration complete
+
+---
+
+## 🔄 Phase 2C: UI/UX Enhancements - IN PROGRESS
 
 ### Visual Improvements
 1. **Loading States**

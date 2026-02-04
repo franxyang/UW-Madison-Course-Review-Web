@@ -7,9 +7,78 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.4.0-dev] - 2026-02-04
+
+### Added — Phase 2: Core Features
+
+#### User Incentive System
+- **Review-Gated Access** (`ecf5055`): Frosted glass blur on reviews for non-contributors
+  - 1 visible review (highest-voted), rest blurred with `backdrop-filter: blur(6px)`
+  - Unlock CTA with sign-in or write-review prompts
+  - Backend: `reviewAccess { hasFullAccess, userReviewCount, totalReviews }` in course.byId
+- **Contributor Level System** (`b3230d5`): 6-tier progression
+  - Levels: Reader → Contributor (1 review) → Active (5) → Trusted (15+10 upvotes) → Expert (30+50) → Legend (50+100)
+  - XP rewards: +50 per review, +10 per upvote received, +100 bonus for first review on a course
+  - Enrollment season bonus (Nov/Apr): +25 XP
+  - Badges displayed on review cards via `ContributorBadge` component
+  - DB: `level`, `xp`, `title` fields on User model
+
+#### Review Management
+- **Review Edit/Delete** (`cf867b2`): Users can manage their own reviews
+  - `review.update` mutation: partial update with ownership verification
+  - `review.delete` mutation: cascading delete (votes → comments → review), level recalculation
+  - `ReviewActions` component: dropdown menu with delete confirmation modal
+- **Review Reporting** (`cf846d7`): Report inappropriate reviews
+  - `Report` model: reason (spam/offensive/irrelevant/misinformation/other), details, status
+  - Unique constraint per reporter+review; can't report own reviews
+  - `ReportButton` component: radio-select modal with success feedback
+
+#### Advanced Search & Filtering
+- **GPA Range Filter** (`371b0b5`): Filter courses by min/max average GPA
+- **Instructor Search** (`371b0b5`): Filter courses by instructor name (ILIKE)
+- Both filters work in full-text search and standard Prisma query paths
+- FilterPanel UI: GPA dropdown selects + instructor text input + active filter chips
+
+#### Instructor Pages
+- **Instructor List** (`f4a86db`): `/instructors` with search, sort (name/reviews/courses), pagination
+  - Avatar initials, course count, review count per instructor
+- **Instructor Detail** (`f4a86db`): `/instructors/[id]`
+  - 4-dimension average ratings (Content/Teaching/Grading/Workload)
+  - Courses taught sidebar with GPA and review counts
+  - Student reviews with compact ratings and preview text
+- New tRPC router: `instructor.list`, `instructor.byId`
+
+#### User Dashboard
+- **Enhanced Profile** (`e18e14d`): Complete rewrite of `/profile`
+  - Contributor level badge + progress bar + XP tracker
+  - Stats grid: reviews, upvotes (real data), comments, saved courses
+  - All reviews list with compact ratings and vote counts
+  - Contributor level ladder showing all 6 tiers
+  - Saved courses sidebar with GPA and credits
+
+#### Mobile Responsiveness
+- **Mobile Navigation** (`ecff1d2`): Hamburger menu → slide-over panel
+  - Nav links with active state, user info, sign-in CTA
+- **Mobile Filters** (`ecff1d2`): Filter button → slide-over FilterPanel
+  - Active filter count badge
+- **Responsive Grids**: Profile stats 2-col mobile → 4-col desktop
+
+### Changed
+- Reviews sorted by vote count (highest first) in course detail
+- Navigation updated across all pages to include Instructors link
+- `useSearchParams` wrapped in Suspense boundary (build fix)
+
+### Database Migrations
+- `20260204095105_add_user_level_xp`: User.level, User.xp, User.title
+- `20260204100000_fix_indexes`: Restore searchVector GIN + School.parentId indexes
+- `20260204095623_add_report_model`: Report table with unique constraint
+
+---
+
 ## [0.3.0-dev] - 2026-02-04
 
-### Added
+### Added — Phase 1: Infrastructure
+
 - **tRPC Integration**: End-to-end type-safe API layer
   - Course Router: list, byId, getSchools, getDepartments, search
   - Review Router: create (with instructor auto-create), vote
@@ -19,10 +88,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Weighted search (code/name = A, description = B)
   - Auto-update trigger on Course changes
   - Autocomplete/prefix matching endpoint
-  - All 4,787 courses indexed
+  - All 10,174 courses indexed
 - **Redis Caching**: Upstash Redis with graceful degradation
   - Generic `cached()` wrapper with TTL
   - Cache invalidation utilities
+- **Department Data**: 209 departments, 10,174 course-dept links, 1,368 cross-listed groups
+- **Course Data Expansion**: 4,787 → 10,174 courses
+- **Alias Search**: 60+ alias groups (CS ↔ COMP SCI)
+- **Left Sidebar Filters**: School/Dept/Level/Credits/Sort with multi-select
+- **School Hierarchy**: College > School > Dept (type + parentId)
+- **Pagination**: 30 per page with page controls
 - **Loading States**: Skeleton UI for course list and detail pages
 - **Optimistic UI**: Instant feedback for votes and comments
 

@@ -1,314 +1,314 @@
-# WiscFlow 项目蓝图 & 规划
+# WiscFlow Project Roadmap
 
-**最后更新**: 2026-02-03 23:27 CST  
-**当前阶段**: Phase 1 - 基础架构升级 (40%)  
-**下一步**: tRPC 集成
+**Last Updated**: 2026-02-03 23:27 CST  
+**Current Phase**: Phase 1 - Infrastructure Upgrade (40%)  
+**Next Step**: tRPC Integration
 
-## 🎯 项目愿景
+## 🎯 Project Vision
 
-一个为威斯康星大学麦迪逊分校（UW-Madison）学生设计的现代化课程评价平台，帮助学生做出明智的选课决策。
+A modern course review platform designed for UW-Madison students to make informed course selection decisions.
 
 ---
 
-## ✅ 已完成功能 (Phase 1)
+## ✅ Completed Features (Phase 1)
 
-### 1. 基础架构
-- [x] Next.js 15 + TypeScript 项目搭建
-- [x] Prisma ORM 数据库配置
-- [x] PostgreSQL 数据库连接
-- [x] Tailwind CSS 样式系统
-- [x] 项目文件结构优化
+### 1. Infrastructure
+- [x] Next.js 15 + TypeScript project setup
+- [x] Prisma ORM database configuration
+- [x] PostgreSQL database connection
+- [x] Tailwind CSS styling system
+- [x] Project file structure optimization
 
-### 2. 认证系统
-- [x] NextAuth.js v5 集成
-- [x] Google OAuth 登录
-- [x] UW-Madison 邮箱验证 (@wisc.edu)
-- [x] 会话管理
-- [x] 登录/注册页面
-- [x] 用户个人资料页面
+### 2. Authentication System
+- [x] NextAuth.js v5 integration
+- [x] Google OAuth login
+- [x] UW-Madison email verification (@wisc.edu)
+- [x] Session management
+- [x] Login/signup pages
+- [x] User profile page
 
-### 3. 数据库模型
-- [x] User（用户）
-- [x] School（学院）
-- [x] **Department（系/部门）** ⭐ 新增 2026-02-03
-- [x] Course（课程）
-- [x] Instructor（教师）
-- [x] Review（评价）
-- [x] Comment（评论）
-- [x] Vote（点赞）
-- [x] GradeDistribution（成绩分布）
-- [x] **CourseDepartment（课程-系关联）** ⭐ 新增 2026-02-03
+### 3. Database Models
+- [x] User
+- [x] School
+- [x] **Department** ⭐ Added 2026-02-03
+- [x] Course
+- [x] Instructor
+- [x] Review
+- [x] Comment
+- [x] Vote
+- [x] GradeDistribution
+- [x] **CourseDepartment (Many-to-Many)** ⭐ Added 2026-02-03
 
-### 4. 数据导入
-- [x] **学院数据种子脚本** (23 所学院) ✅
-- [x] **CSV 课程数据解析器** ✅
-- [x] **批量课程导入脚本** (4,787 门课程) ✅
-- [x] 关系数据（先修课程）处理
-- [ ] Department 数据导入 ⏳ 待完成
+### 4. Data Import
+- [x] **School data seeding script** (23 schools) ✅
+- [x] **CSV course data parser** ✅
+- [x] **Batch course import script** (4,787 courses) ✅
+- [x] Relationship data (prerequisites) handling
+- [ ] Department data import ⏳ Pending
 
-### 5. 课程浏览功能
-- [x] 课程列表页面（/courses）
-  - 搜索功能（按课程代码和名称）
-  - 学院筛选
-  - 显示课程基本信息
-  - 评论数量统计
-  - 平均GPA显示
-- [x] 课程详情页面（/courses/[id]）
-  - 课程完整信息
-  - 成绩分布图表
-  - 先修课程关系图
-  - Breadth Requirements 显示
-  - 学生评价列表
+### 5. Course Browsing
+- [x] Course list page (/courses)
+  - Search by course code and name
+  - School filter
+  - Display basic course info
+  - Review count statistics
+  - Average GPA display
+- [x] Course detail page (/courses/[id])
+  - Complete course information
+  - Grade distribution charts
+  - Prerequisite relationships
+  - Breadth requirements display
+  - Student reviews list
 
-### 6. 评价系统
-- [x] 评价表单组件（ReviewForm）
-  - 四维度评分（内容、教学、评分、工作量）
-  - 详细评论输入
-  - 获得成绩记录
-  - 学期选择
-  - 教师选择
-  - 考核方式标记
-  - 课程资源链接
-- [x] 评价展示卡片
-  - 评分可视化
-  - 分类评论显示
-  - 点赞功能
-  - 评论功能
+### 6. Review System
+- [x] Review form component (ReviewForm)
+  - Four-dimensional rating (content, teaching, grading, workload)
+  - Detailed comment input
+  - Grade received tracking
+  - Semester selection
+  - Instructor selection
+  - Assessment method tags
+  - Course resource links
+- [x] Review display cards
+  - Rating visualization
+  - Categorized comments display
+  - Vote functionality
+  - Comment functionality
 
-### 7. 互动功能
-- [x] 点赞系统（VoteButton）
-- [x] 评论系统（CommentSection）
-- [x] 实时评论更新
+### 7. Interactive Features
+- [x] Vote system (VoteButton)
+- [x] Comment system (CommentSection)
+- [x] Real-time comment updates
 
 ### 8. UI/UX
-- [x] 响应式设计
-- [x] 导航栏和菜单
-- [x] Logo 组件
-- [x] 用户菜单（登录/登出）
-- [x] 访客菜单
-- [x] 错误处理页面
+- [x] Responsive design
+- [x] Navigation bar and menus
+- [x] Logo component
+- [x] User menu (login/logout)
+- [x] Guest menu
+- [x] Error handling pages
 
 ---
 
-## 🚧 当前进度 (2026-02-03)
+## 🚧 Current Progress (2026-02-03)
 
-### ✅ 今天完成的工作
-- ✅ **PostgreSQL 迁移完成** - SQLite → Neon PostgreSQL
-- ✅ **Department 模型添加** - 支持多对多关系
-- ✅ **数据导入** - 23 所学院, 4,787 门课程
-- ✅ **文档系统整理** - 创建 docs/ + PROGRESS.md + CHANGELOG.md
-- ✅ **Bug 修复** - null 数组错误、数据库连接稳定性
+### ✅ Completed Today
+- ✅ **PostgreSQL Migration Complete** - SQLite → Neon PostgreSQL
+- ✅ **Department Model Added** - Supports many-to-many relationships
+- ✅ **Data Import** - 23 schools, 4,787 courses
+- ✅ **Documentation System Organized** - Created docs/ + PROGRESS.md + CHANGELOG.md
+- ✅ **Bug Fixes** - Null array errors, database connection stability
 
-### ⏳ 进行中
-- [ ] **tRPC 集成** (即将开始 - Day 3-5)
+### ⏳ In Progress
+- [ ] **tRPC Integration** (Starting soon - Day 3-5)
 
-### 📅 本周计划
-- [ ] 完成 tRPC 迁移 (2-3 天)
-- [ ] 导入 Department 数据 (1 天)
-- [ ] 实现基础 Filter 功能 (2-3 天)
-
----
-
-## 🔜 下一步计划 (Phase 2)
-
-### 优先级 1: 核心功能完善
-
-#### 1. 搜索和筛选增强
-- [ ] 高级搜索功能
-  - 按教师搜索
-  - 按学期搜索
-  - 按GPA范围筛选
-  - 按课程等级筛选（Elementary/Intermediate/Advanced）
-- [ ] 搜索结果排序
-  - 按相关性
-  - 按GPA
-  - 按评价数量
-  - 按最新评价时间
-
-#### 2. 评价系统增强
-- [ ] 评价编辑功能（用户可编辑自己的评价）
-- [ ] 评价删除功能（用户可删除自己的评价）
-- [ ] 评价举报系统（不当内容举报）
-- [ ] 评价验证标记（已选课学生验证）
-- [ ] 图片上传功能（课程笔记、作业样本）
-
-#### 3. 教师页面
-- [ ] 教师列表页面（/instructors）
-- [ ] 教师详情页面（/instructors/[id]）
-  - 教授的所有课程
-  - 平均教学评分
-  - 学生评价汇总
-  - 评分趋势图表
-
-#### 4. 用户个人中心
-- [ ] 我的评价列表
-- [ ] 我的收藏课程
-- [ ] 我的课程计划（Course Planner）
-- [ ] 个人统计数据
-- [ ] 个性化推荐
+### 📅 This Week's Plan
+- [ ] Complete tRPC migration (2-3 days)
+- [ ] Import Department data (1 day)
+- [ ] Implement basic Filter functionality (2-3 days)
 
 ---
 
-## 🎨 用户体验优化 (Phase 3)
+## 🔜 Next Steps (Phase 2)
 
-### 1. 可视化增强
-- [ ] 交互式成绩分布图表（使用 Chart.js 或 Recharts）
-- [ ] 评分趋势时间线
-- [ ] 课程先修关系可视化图谱
-- [ ] 学院课程地图
+### Priority 1: Core Feature Enhancement
 
-### 2. 响应式优化
-- [ ] 移动端优化
-- [ ] 平板端适配
-- [ ] 触摸手势支持
-- [ ] 暗黑模式
+#### 1. Advanced Search and Filtering
+- [ ] Advanced search features
+  - Search by instructor
+  - Search by semester
+  - Filter by GPA range
+  - Filter by course level (Elementary/Intermediate/Advanced)
+- [ ] Search result sorting
+  - By relevance
+  - By GPA
+  - By review count
+  - By latest review date
 
-### 3. 性能优化
-- [ ] 图片懒加载
-- [ ] 虚拟滚动（长列表）
-- [ ] 服务器端缓存
-- [ ] CDN 静态资源
-- [ ] 数据库查询优化（索引）
+#### 2. Review System Enhancement
+- [ ] Review editing (users can edit their own reviews)
+- [ ] Review deletion (users can delete their own reviews)
+- [ ] Review reporting system (report inappropriate content)
+- [ ] Review verification badge (verified course enrollment)
+- [ ] Image upload (course notes, assignment samples)
 
----
+#### 3. Instructor Pages
+- [ ] Instructor list page (/instructors)
+- [ ] Instructor detail page (/instructors/[id])
+  - All courses taught by instructor
+  - Average teaching rating
+  - Student review aggregation
+  - Rating trend charts
 
-## 🚀 高级功能 (Phase 4)
-
-### 1. AI 辅助功能
-- [ ] AI 评价摘要生成
-- [ ] 智能课程推荐
-- [ ] 选课冲突检测
-- [ ] 学分规划助手
-
-### 2. 社区功能
-- [ ] 用户关注系统
-- [ ] 学习小组创建
-- [ ] 课程讨论论坛
-- [ ] 私信功能
-
-### 3. 数据分析
-- [ ] 课程热度排行榜
-- [ ] 教师评分排行榜
-- [ ] 学期趋势分析
-- [ ] 专业选课统计
-
-### 4. 通知系统
-- [ ] 新评价通知
-- [ ] 评论回复通知
-- [ ] 课程更新通知
-- [ ] 邮件订阅功能
+#### 4. User Dashboard
+- [ ] My reviews list
+- [ ] My saved courses
+- [ ] My course plan (Course Planner)
+- [ ] Personal statistics
+- [ ] Personalized recommendations
 
 ---
 
-## 🔐 管理后台 (Phase 5)
+## 🎨 UX Optimization (Phase 3)
 
-### 1. 管理员功能
-- [ ] 用户管理（封禁、权限）
-- [ ] 评价审核
-- [ ] 课程数据管理
-- [ ] 举报处理
-- [ ] 系统日志查看
+### 1. Visualization Enhancement
+- [ ] Interactive grade distribution charts (Chart.js or Recharts)
+- [ ] Rating trend timeline
+- [ ] Prerequisite relationship graph visualization
+- [ ] School course map
 
-### 2. 数据导入工具
-- [ ] CSV 批量导入界面
-- [ ] 学期课程自动同步
-- [ ] 教师信息更新
-- [ ] 成绩分布数据导入
+### 2. Responsive Optimization
+- [ ] Mobile optimization
+- [ ] Tablet adaptation
+- [ ] Touch gesture support
+- [ ] Dark mode
 
----
-
-## 📊 数据需求
-
-### 当前数据状态
-- ✅ 学院数据（已导入）
-- ✅ 部分课程数据（通过 CSV 导入）
-- ⏳ 完整课程目录
-- ⏳ 教师信息
-- ⏳ 历史成绩分布
-- ⏳ 先修课程关系（部分）
-
-### 数据获取计划
-1. **官方数据源**
-   - UW-Madison Course Guide API（如果可用）
-   - Madgrades.com 数据（成绩分布）
-   - RateMyProfessors 数据（教师评价参考）
-
-2. **用户生成内容**
-   - 学生提交的评价
-   - 课程资源分享
-   - 笔记和学习材料
+### 3. Performance Optimization
+- [ ] Image lazy loading
+- [ ] Virtual scrolling (long lists)
+- [ ] Server-side caching
+- [ ] CDN for static assets
+- [ ] Database query optimization (indexing)
 
 ---
 
-## 🛠 技术栈规划
+## 🚀 Advanced Features (Phase 4)
 
-### 当前技术栈
+### 1. AI-Powered Features
+- [ ] AI review summaries
+- [ ] Smart course recommendations
+- [ ] Schedule conflict detection
+- [ ] Credit planning assistant
+
+### 2. Community Features
+- [ ] User follow system
+- [ ] Study group creation
+- [ ] Course discussion forums
+- [ ] Direct messaging
+
+### 3. Data Analytics
+- [ ] Course popularity rankings
+- [ ] Instructor rating rankings
+- [ ] Semester trend analysis
+- [ ] Major course statistics
+
+### 4. Notification System
+- [ ] New review notifications
+- [ ] Comment reply notifications
+- [ ] Course update notifications
+- [ ] Email subscription
+
+---
+
+## 🔐 Admin Portal (Phase 5)
+
+### 1. Admin Features
+- [ ] User management (ban, permissions)
+- [ ] Review moderation
+- [ ] Course data management
+- [ ] Report handling
+- [ ] System log viewer
+
+### 2. Data Import Tools
+- [ ] CSV batch import interface
+- [ ] Semester course auto-sync
+- [ ] Instructor info updates
+- [ ] Grade distribution data import
+
+---
+
+## 📊 Data Requirements
+
+### Current Data Status
+- ✅ School data (imported)
+- ✅ Partial course data (imported via CSV)
+- ⏳ Complete course catalog
+- ⏳ Instructor information
+- ⏳ Historical grade distributions
+- ⏳ Prerequisite relationships (partial)
+
+### Data Acquisition Plan
+1. **Official Data Sources**
+   - UW-Madison Course Guide API (if available)
+   - Madgrades.com data (grade distributions)
+   - RateMyProfessors data (instructor ratings reference)
+
+2. **User-Generated Content**
+   - Student-submitted reviews
+   - Course resource sharing
+   - Notes and study materials
+
+---
+
+## 🛠 Tech Stack Planning
+
+### Current Tech Stack
 - **Frontend**: Next.js 15, React, TypeScript
 - **Styling**: Tailwind CSS, Lucide Icons
 - **Backend**: Next.js API Routes
 - **Database**: PostgreSQL + Prisma ORM
 - **Auth**: NextAuth.js v5
-- **Deployment**: 待定（Vercel 推荐）
+- **Deployment**: TBD (Vercel recommended)
 
-### 计划添加
-- **Charts**: Recharts 或 Chart.js
+### Planned Additions
+- **Charts**: Recharts or Chart.js
 - **Forms**: React Hook Form + Zod
-- **State Management**: Zustand（如需要）
-- **File Upload**: Uploadthing 或 AWS S3
-- **Email**: Resend 或 SendGrid
+- **State Management**: Zustand (if needed)
+- **File Upload**: Uploadthing or AWS S3
+- **Email**: Resend or SendGrid
 - **Analytics**: Vercel Analytics
 - **Monitoring**: Sentry
 
 ---
 
-## 📅 时间线估算
+## 📅 Timeline Estimates
 
-### 短期目标（1-2周）
-- [ ] 完成搜索筛选增强
-- [ ] 实现评价编辑/删除功能
-- [ ] 创建教师页面基础版
-- [ ] 用户个人中心核心功能
+### Short-term Goals (1-2 weeks)
+- [ ] Complete search and filter enhancements
+- [ ] Implement review edit/delete functionality
+- [ ] Create basic instructor pages
+- [ ] User dashboard core features
 
-### 中期目标（1个月）
-- [ ] UI/UX 全面优化
-- [ ] 性能优化实施
-- [ ] 移动端完全适配
-- [ ] 完成数据导入
+### Mid-term Goals (1 month)
+- [ ] Complete UI/UX optimization
+- [ ] Implement performance optimizations
+- [ ] Full mobile adaptation
+- [ ] Complete data import
 
-### 长期目标（2-3个月）
-- [ ] AI 功能上线
-- [ ] 社区功能完善
-- [ ] 管理后台开发
-- [ ] 正式发布 Beta 版
-
----
-
-## 🎓 成功指标
-
-### 用户指标
-- 注册用户数 > 1000
-- 月活跃用户 > 500
-- 用户留存率 > 60%
-
-### 内容指标
-- 课程评价数 > 5000
-- 覆盖课程数 > 80% 常选课程
-- 每门课程平均评价数 > 5
-
-### 质量指标
-- 页面加载时间 < 2s
-- 移动端体验评分 > 90
-- 用户满意度 > 4.5/5
+### Long-term Goals (2-3 months)
+- [ ] Launch AI features
+- [ ] Complete community features
+- [ ] Develop admin portal
+- [ ] Official Beta release
 
 ---
 
-## 📝 备注
+## 🎓 Success Metrics
 
-- 所有功能需经过用户测试
-- 优先保证数据安全和隐私
-- 遵守 UW-Madison 相关政策
-- 定期收集用户反馈并迭代
+### User Metrics
+- Registered users > 1,000
+- Monthly active users > 500
+- User retention rate > 60%
+
+### Content Metrics
+- Course reviews > 5,000
+- Course coverage > 80% of popular courses
+- Average reviews per course > 5
+
+### Quality Metrics
+- Page load time < 2s
+- Mobile experience score > 90
+- User satisfaction > 4.5/5
 
 ---
 
-**下一次更新**: 完成 Phase 2 第一批功能后
+## 📝 Notes
+
+- All features require user testing
+- Prioritize data security and privacy
+- Comply with UW-Madison policies
+- Regularly collect user feedback and iterate
+
+---
+
+**Next Update**: After completing Phase 2 initial features

@@ -335,4 +335,58 @@ export const reviewRouter = router({
 
       return { success: true }
     }),
+
+  // Report a review
+  report: protectedProcedure
+    .input(
+      z.object({
+        reviewId: z.string(),
+        reason: z.enum(['spam', 'offensive', 'irrelevant', 'misinformation', 'other']),
+        details: z.string().max(500).optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id!
+
+      // Check if already reported by this user
+      const existingReport = await ctx.prisma.report.findUnique({
+        where: {
+          reporterId_reviewId: {
+            reporterId: userId,
+            reviewId: input.reviewId,
+          },
+        },
+      })
+
+      if (existingReport) {
+        throw new TRPCError({
+          code: 'CONFLICT',
+          message: 'You have already reported this review',
+        })
+      }
+
+      // Can't report your own review
+      const review = await ctx.prisma.review.findUnique({
+        where: { id: input.reviewId },
+        select: { authorId: true },
+      })
+
+      if (review?.authorId === userId) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'You cannot report your own review',
+        })
+      }
+
+      await ctx.prisma.report.create({
+        data: {
+          reviewId: input.reviewId,
+          reporterId: userId,
+          reason: input.reason,
+          details: input.details || null,
+        },
+      })
+
+      return { success: true }
+    }),
 })

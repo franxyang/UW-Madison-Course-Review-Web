@@ -10,6 +10,7 @@ import { CommentSection } from '@/components/CommentSection'
 import { ReviewGateOverlay, FrostedReview } from '@/components/ReviewGate'
 import { ContributorBadge } from '@/components/ContributorBadge'
 import { ReviewActions } from '@/components/ReviewActions'
+import { ReportButton } from '@/components/ReportButton'
 import { trpc } from '@/lib/trpc/client'
 import { useSession } from 'next-auth/react'
 
@@ -426,8 +427,8 @@ export default function CoursePage() {
                       </div>
                     )}
 
-                    {/* Vote Button */}
-                    <div className="mb-4 pt-4 border-t border-slate-100">
+                    {/* Vote Button + Report */}
+                    <div className="mb-4 pt-4 border-t border-slate-100 flex items-center justify-between">
                       <VoteButton
                         reviewId={review.id}
                         initialVoteCount={review.votes?.length || 0}
@@ -438,6 +439,12 @@ export default function CoursePage() {
                         }
                         userEmail={session?.user?.email || undefined}
                       />
+                      {session?.user && (
+                        <ReportButton
+                          reviewId={review.id}
+                          isOwner={session?.user?.email === review.author?.email}
+                        />
+                      )}
                     </div>
 
                     {/* Comments Section */}

@@ -88,6 +88,9 @@ model User {
   savedCourses  SavedCourse[]
   transcript    StudentCourseHistory[]
 
+  // Reports
+  reports       Report[]  @relation("ReportedBy")
+
   createdAt     DateTime  @default(now())
 }
 
@@ -241,6 +244,7 @@ model Review {
 
   votes         Vote[]
   comments      Comment[]
+  reports       Report[]
   createdAt     DateTime @default(now())
 
   @@index([courseId])
@@ -300,6 +304,26 @@ model SavedCourse {
   createdAt DateTime @default(now())
 
   @@unique([userId, courseId])
+}
+
+// Report: Users can report inappropriate reviews
+model Report {
+  id        String   @id @default(cuid())
+  reason    String   // e.g. "spam", "offensive", "irrelevant", "other"
+  details   String?  @db.Text // Optional additional details
+  status    String   @default("pending") // "pending", "reviewed", "dismissed", "actioned"
+
+  // Relations
+  reporterId String
+  reporter   User     @relation("ReportedBy", fields: [reporterId], references: [id])
+  reviewId   String
+  review     Review   @relation(fields: [reviewId], references: [id])
+
+  createdAt  DateTime @default(now())
+
+  @@unique([reporterId, reviewId]) // One report per user per review
+  @@index([status])
+  @@index([reviewId])
 }
 
 // Transcript: Encrypted/Private user history for GPA Prediction

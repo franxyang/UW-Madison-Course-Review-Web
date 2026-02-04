@@ -35,10 +35,10 @@ export async function addComment(reviewId: string, text: string) {
       }
     }
 
-    if (text.length > 1000) {
+    if (text.length > 3000) {
       return {
         success: false,
-        error: 'Comment is too long (max 1000 characters)'
+        error: 'Comment is too long (max 3000 characters)'
       }
     }
 

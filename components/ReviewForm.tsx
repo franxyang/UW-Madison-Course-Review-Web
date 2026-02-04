@@ -246,13 +246,19 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({ courseId, courseName }) 
                           ))}
                         </div>
                       </div>
-                      <textarea
-                        placeholder={`Comments about ${label.toLowerCase()} (optional)`}
-                        value={formData[comment as keyof typeof formData] as string || ''}
-                        onChange={(e) => setFormData({ ...formData, [comment]: e.target.value })}
-                        className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-uw-red/20 focus:border-uw-red resize-none"
-                        rows={2}
-                      />
+                      <div className="relative">
+                        <textarea
+                          placeholder={`Comments about ${label.toLowerCase()} (optional)`}
+                          value={formData[comment as keyof typeof formData] as string || ''}
+                          onChange={(e) => setFormData({ ...formData, [comment]: e.target.value })}
+                          maxLength={3000}
+                          className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-uw-red/20 focus:border-uw-red resize-none"
+                          rows={2}
+                        />
+                        <div className="text-xs text-slate-400 mt-1">
+                          {((formData[comment as keyof typeof formData] as string) || '').length}/3000
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>

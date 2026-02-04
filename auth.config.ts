@@ -13,23 +13,19 @@ export const authConfig: NextAuthConfig = {
     //   from: process.env.EMAIL_FROM || 'noreply@wiscflow.com',
     // }),
     
-    // Google OAuth (requires GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET)
-    ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
-      ? [
-          Google({
-            clientId: process.env.GOOGLE_CLIENT_ID,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-            authorization: {
-              params: {
-                prompt: 'consent',
-                access_type: 'offline',
-                response_type: 'code',
-                hd: 'wisc.edu' // Restrict to @wisc.edu domain
-              }
-            }
-          })
-        ]
-      : [])
+    // Google OAuth
+    Google({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      authorization: {
+        params: {
+          prompt: 'consent',
+          access_type: 'offline',
+          response_type: 'code',
+          hd: 'wisc.edu' // Restrict to @wisc.edu domain
+        }
+      }
+    })
   ],
   callbacks: {
     async signIn({ user, account, profile }) {

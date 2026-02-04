@@ -1,53 +1,53 @@
-# WiscFlow 开发进度追踪
+# WiscFlow Development Progress
 
-**最后更新**: 2026-02-03 23:27 CST  
-**当前阶段**: Phase 1 - 基础架构升级  
-**完成度**: 25%
+**Last Updated**: 2026-02-03 23:27 CST  
+**Current Phase**: Phase 1 - Infrastructure Upgrade  
+**Completion**: 25%
 
 ---
 
-## 🎯 总体进度
+## 🎯 Overall Progress
 
 ```
-Phase 1: 基础架构 ████████░░░░░░░░░░░░ 40%
-Phase 2: 核心功能   ██████░░░░░░░░░░░░░░ 30%
-Phase 3: 高级功能   ░░░░░░░░░░░░░░░░░░░░  0%
-Phase 4: 优化部署   ░░░░░░░░░░░░░░░░░░░░  0%
+Phase 1: Infrastructure  ████████░░░░░░░░░░░░ 40%
+Phase 2: Core Features   ██████░░░░░░░░░░░░░░ 30%
+Phase 3: Advanced Feat.  ░░░░░░░░░░░░░░░░░░░░  0%
+Phase 4: Optimization    ░░░░░░░░░░░░░░░░░░░░  0%
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-总进度:           ████░░░░░░░░░░░░░░░░ 25%
+Overall:                ████░░░░░░░░░░░░░░░░ 25%
 ```
 
 ---
 
-## ✅ Phase 1: 基础架构升级 (40% 完成)
+## ✅ Phase 1: Infrastructure Upgrade (40% Complete)
 
-### Week 1: PostgreSQL + tRPC (进行中)
+### Week 1: PostgreSQL + tRPC (In Progress)
 
-#### ✅ Day 1-2: PostgreSQL 迁移 (已完成 - 2026-02-03)
-- [x] **选择数据库服务商**: Neon PostgreSQL ✅
-- [x] **创建数据库**: 完成配置和连接
-- [x] **更新 Prisma Schema**: SQLite → PostgreSQL
-  - [x] 修改 datasource provider
-  - [x] 添加 @db.Text 到长文本字段
-  - [x] 优化数据类型
-- [x] **数据库迁移**: 
-  - [x] 创建 migration: `20260204050718_init_postgresql`
-  - [x] 删除旧的 SQLite 文件
-  - [x] 应用 migration 成功
-- [x] **数据导入**:
-  - [x] 学院数据: 23 所 ✅
-  - [x] 课程数据: 4,787 门 ✅
-- [x] **验证测试**:
-  - [x] 数据库连接正常
-  - [x] 应用启动成功
-  - [x] API 测试通过
+#### ✅ Day 1-2: PostgreSQL Migration (Completed - 2026-02-03)
+- [x] **Database provider selection**: Neon PostgreSQL ✅
+- [x] **Database setup**: Configuration and connection complete
+- [x] **Prisma Schema update**: SQLite → PostgreSQL
+  - [x] Modified datasource provider
+  - [x] Added @db.Text to long text fields
+  - [x] Optimized data types
+- [x] **Database migration**: 
+  - [x] Created migration: `20260204050718_init_postgresql`
+  - [x] Deleted old SQLite files
+  - [x] Migration applied successfully
+- [x] **Data import**:
+  - [x] Schools: 23 ✅
+  - [x] Courses: 4,787 ✅
+- [x] **Testing and validation**:
+  - [x] Database connection verified
+  - [x] Application starts successfully
+  - [x] API tests passed
 
-**耗时**: ~3 小时  
-**难度**: ⭐⭐ (中等)  
-**问题**: Advisory lock 超时（已通过重试解决）
+**Time Spent**: ~3 hours  
+**Difficulty**: ⭐⭐ (Medium)  
+**Issues**: Advisory lock timeout (resolved by retry)
 
-#### ✅ Day 2: Department 模型添加 (已完成 - 2026-02-03)
-- [x] **创建 Department 模型**
+#### ✅ Day 2: Department Model (Completed - 2026-02-03)
+- [x] **Created Department model**
   ```prisma
   model Department {
     id        String   @id @default(cuid())
@@ -58,7 +58,7 @@ Phase 4: 优化部署   ░░░░░░░░░░░░░░░░░░�
     courses   CourseDepartment[]
   }
   ```
-- [x] **创建多对多关系表**
+- [x] **Created many-to-many relationship table**
   ```prisma
   model CourseDepartment {
     courseId     String
@@ -66,165 +66,165 @@ Phase 4: 优化部署   ░░░░░░░░░░░░░░░░░░�
     @@id([courseId, departmentId])
   }
   ```
-- [x] **应用 migration**: `20260204052057_add_departments`
+- [x] **Applied migration**: `20260204052057_add_departments`
 
-**耗时**: ~30 分钟  
-**难度**: ⭐ (简单)
+**Time Spent**: ~30 minutes  
+**Difficulty**: ⭐ (Easy)
 
-#### ⏳ Day 3-5: tRPC 集成 (即将开始)
-- [ ] 安装 tRPC 依赖
-- [ ] 创建 tRPC Context
-- [ ] 创建基础 Router 结构
-- [ ] 迁移 Course API
-- [ ] 迁移 Review API
-- [ ] 迁移 Comment API
-- [ ] 更新前端使用 tRPC
+#### ⏳ Day 3-5: tRPC Integration (Starting Soon)
+- [ ] Install tRPC dependencies
+- [ ] Create tRPC Context
+- [ ] Create base Router structure
+- [ ] Migrate Course API
+- [ ] Migrate Review API
+- [ ] Migrate Comment API
+- [ ] Update frontend to use tRPC
 
-**预计耗时**: 2-3 天  
-**预计难度**: ⭐⭐⭐⭐ (较难)
+**Estimated Time**: 2-3 days  
+**Estimated Difficulty**: ⭐⭐⭐⭐ (Challenging)
 
-#### ⏳ Day 6-7: 完成 Week 1
-- [ ] 所有 API 迁移到 tRPC
-- [ ] 端到端类型安全验证
-- [ ] 性能测试
-- [ ] 文档更新
-
----
-
-### Week 2: 全文搜索 + Redis (计划中)
-
-#### ⏳ Day 8-10: PostgreSQL 全文搜索
-- [ ] 添加 searchVector 列
-- [ ] 创建 GIN 索引
-- [ ] 实现全文搜索查询
-- [ ] 性能对比测试
-
-#### ⏳ Day 11-14: 继续 tRPC 迁移
-- [ ] 课程详情页迁移
-- [ ] 评价系统迁移
-- [ ] 所有组件更新
-
-#### ⏳ Day 15-17: Redis 缓存
-- [ ] 设置 Upstash Redis
-- [ ] 实现缓存策略
-- [ ] 缓存失效机制
-- [ ] 性能测试
+#### ⏳ Day 6-7: Week 1 Completion
+- [ ] All APIs migrated to tRPC
+- [ ] End-to-end type safety verified
+- [ ] Performance testing
+- [ ] Documentation updates
 
 ---
 
-## 🔄 Phase 2: 核心功能完善 (30% 完成)
+### Week 2: Full-text Search + Redis (Planned)
 
-### ✅ 已完成功能
-- [x] 用户认证 (NextAuth + Google OAuth) ✅
-- [x] 课程列表页 (基础版) ✅
-- [x] 课程详情页 ✅
-- [x] 评价系统 (创建/显示) ✅
-- [x] 点赞功能 ✅
-- [x] 评论功能 ✅
-- [x] 成绩分布图表 ✅
+#### ⏳ Day 8-10: PostgreSQL Full-text Search
+- [ ] Add searchVector column
+- [ ] Create GIN index
+- [ ] Implement full-text search queries
+- [ ] Performance comparison testing
 
-### ⏳ 进行中
-- [ ] 高级搜索和筛选 (40% - 规划完成)
-  - [x] 基础搜索 ✅
-  - [x] 学院筛选 ✅
-  - [x] Department 模型 ✅
-  - [ ] Department 筛选
-  - [ ] Level 筛选
-  - [ ] Credits 筛选
-  - [ ] Gen Ed 筛选
-  - [ ] Breadth 筛选
-  - [ ] 评分/GPA 筛选
-  - [ ] 排序选项
+#### ⏳ Day 11-14: Continue tRPC Migration
+- [ ] Migrate course detail page
+- [ ] Migrate review system
+- [ ] Update all components
 
-### 📅 计划中
-- [ ] 教师页面
-  - [ ] 教师列表
-  - [ ] 教师详情
-  - [ ] 教师评分汇总
-  
-- [ ] 用户中心
-  - [ ] 我的评价
-  - [ ] 我的收藏
-  - [ ] 个人资料编辑
-  
-- [ ] 评价管理
-  - [ ] 编辑评价
-  - [ ] 删除评价
-  - [ ] 举报系统
+#### ⏳ Day 15-17: Redis Caching
+- [ ] Set up Upstash Redis
+- [ ] Implement caching strategy
+- [ ] Cache invalidation mechanism
+- [ ] Performance testing
 
 ---
 
-## 📦 Phase 3: 高级功能 (0% 完成)
+## 🔄 Phase 2: Core Features (30% Complete)
 
-### 计划功能
-- [ ] AI 辅助功能
-  - [ ] AI 评价摘要
-  - [ ] 智能课程推荐
-  - [ ] 选课冲突检测
+### ✅ Completed Features
+- [x] User authentication (NextAuth + Google OAuth) ✅
+- [x] Course list page (basic version) ✅
+- [x] Course detail page ✅
+- [x] Review system (create/display) ✅
+- [x] Vote functionality ✅
+- [x] Comment functionality ✅
+- [x] Grade distribution charts ✅
+
+### ⏳ In Progress
+- [ ] Advanced search and filters (40% - planning complete)
+  - [x] Basic search ✅
+  - [x] School filter ✅
+  - [x] Department model ✅
+  - [ ] Department filter
+  - [ ] Level filter
+  - [ ] Credits filter
+  - [ ] Gen Ed filter
+  - [ ] Breadth filter
+  - [ ] Rating/GPA filter
+  - [ ] Sort options
+
+### 📅 Planned
+- [ ] Instructor pages
+  - [ ] Instructor list
+  - [ ] Instructor details
+  - [ ] Instructor rating aggregation
   
-- [ ] 选课规划器
-  - [ ] 课表生成
-  - [ ] 时间冲突检测
-  - [ ] Degree Audit 集成
+- [ ] User dashboard
+  - [ ] My reviews
+  - [ ] My favorites
+  - [ ] Profile editing
   
-- [ ] 数据可视化
-  - [ ] 先修关系图谱
-  - [ ] GPA 趋势图
-  - [ ] 课程热度排行
-  
-- [ ] 社区功能
-  - [ ] 学习小组
-  - [ ] 课程讨论区
-  - [ ] 用户关注系统
+- [ ] Review management
+  - [ ] Edit reviews
+  - [ ] Delete reviews
+  - [ ] Report system
 
 ---
 
-## 🚀 Phase 4: 优化部署 (0% 完成)
+## 📦 Phase 3: Advanced Features (0% Complete)
 
-### 计划任务
-- [ ] 性能优化
-  - [ ] 代码分割
-  - [ ] 图片优化
-  - [ ] 虚拟滚动
+### Planned Features
+- [ ] AI-powered features
+  - [ ] AI review summaries
+  - [ ] Smart course recommendations
+  - [ ] Schedule conflict detection
   
-- [ ] SEO 优化
+- [ ] Course planner
+  - [ ] Schedule builder
+  - [ ] Time conflict detection
+  - [ ] Degree audit integration
+  
+- [ ] Data visualization
+  - [ ] Prerequisite relationship graph
+  - [ ] GPA trend charts
+  - [ ] Course popularity rankings
+  
+- [ ] Community features
+  - [ ] Study groups
+  - [ ] Course forums
+  - [ ] User follow system
+
+---
+
+## 🚀 Phase 4: Optimization & Deployment (0% Complete)
+
+### Planned Tasks
+- [ ] Performance optimization
+  - [ ] Code splitting
+  - [ ] Image optimization
+  - [ ] Virtual scrolling
+  
+- [ ] SEO optimization
   - [ ] Meta tags
   - [ ] Sitemap
   - [ ] Structured data
   
-- [ ] 生产部署
-  - [ ] Vercel 部署
-  - [ ] 域名配置
-  - [ ] SSL 证书
-  - [ ] CDN 配置
+- [ ] Production deployment
+  - [ ] Vercel deployment
+  - [ ] Domain configuration
+  - [ ] SSL certificates
+  - [ ] CDN configuration
   
-- [ ] 监控和分析
+- [ ] Monitoring and analytics
   - [ ] Vercel Analytics
-  - [ ] Sentry 错误监控
-  - [ ] 性能监控
+  - [ ] Sentry error monitoring
+  - [ ] Performance monitoring
 
 ---
 
-## 📊 数据统计
+## 📊 Statistics
 
-### 代码库
+### Codebase
 ```
-总文件数:   ~150 files
-代码行数:   ~8,000 lines
-组件数:     ~15 components
-API路由:    ~5 routes
-```
-
-### 数据库
-```
-学院:       23
-课程:       4,787
-Departments: 0 (待导入)
-用户:       0
-评价:       0
+Total files:   ~150 files
+Lines of code: ~14,000 lines
+Components:    ~15 components
+API routes:    ~5 routes
 ```
 
-### 技术栈
+### Database
+```
+Schools:       23
+Courses:       4,787
+Departments:   0 (pending import)
+Users:         0
+Reviews:       0
+```
+
+### Tech Stack
 ```
 ✅ Next.js 15
 ✅ TypeScript
@@ -232,66 +232,66 @@ Departments: 0 (待导入)
 ✅ Prisma ORM
 ✅ PostgreSQL (Neon)
 ✅ NextAuth.js
-⏳ tRPC (即将集成)
-⏳ Redis (计划中)
-⏳ React Query (计划中)
+⏳ tRPC (upcoming)
+⏳ Redis (planned)
+⏳ React Query (planned)
 ```
 
 ---
 
-## 🐛 已知问题
+## 🐛 Known Issues
 
-1. ~~PostgreSQL Advisory Lock 超时~~ ✅ 已解决
-2. 课程详情页 null 数组错误 ✅ 已解决
-3. Department 数据未导入 ⏳ 待处理
-4. 缺少全文搜索 ⏳ 计划中
-5. 缺少缓存层 ⏳ 计划中
-
----
-
-## 📝 最近的 Commits
-
-### 2026-02-03 (即将提交)
-**标题**: feat: PostgreSQL migration + Department model
-
-**变更内容**:
-- PostgreSQL 迁移完成
-- Department 模型添加
-- 文档系统整理
-- Filter 功能规划
-
-**详见**: CHANGELOG.md
+1. ~~PostgreSQL Advisory Lock timeout~~ ✅ Resolved
+2. ~~Null array errors in course detail page~~ ✅ Resolved
+3. Department data not imported ⏳ Pending
+4. Lack of full-text search ⏳ Planned
+5. No caching layer ⏳ Planned
 
 ---
 
-## 🎯 下个里程碑
+## 📝 Recent Commits
 
-**目标**: 完成 Phase 1 基础架构升级  
-**截止日期**: 2026-02-24 (3 周)  
-**剩余任务**:
-- [ ] tRPC 集成 (2-3 天)
-- [ ] 全文搜索 (2-3 天)
-- [ ] Redis 缓存 (2 天)
-- [ ] 性能测试和优化 (3-4 天)
+### 2026-02-03 (Latest)
+**Title**: feat(database): migrate to PostgreSQL + add Department model
 
-**成功标准**:
-- [x] PostgreSQL 生产就绪 ✅
-- [ ] 搜索响应 < 100ms
-- [ ] 缓存命中率 > 70%
-- [ ] 端到端类型安全
-- [ ] Lighthouse 分数 > 90
+**Changes**:
+- PostgreSQL migration complete
+- Department model added
+- Documentation system organized
+- Filter feature planning
+
+**See**: CHANGELOG.md
 
 ---
 
-## 📚 相关文档
+## 🎯 Next Milestone
 
-- **完整设计**: `docs/wiscflow完整设计方案.md`
-- **技术架构**: `docs/TECH_UPGRADE_PLAN.md`
-- **迁移指南**: `docs/MIGRATION_CHECKLIST.md`
-- **Filter 规划**: `docs/FILTER_IMPLEMENTATION.md`
-- **变更日志**: `CHANGELOG.md`
+**Goal**: Complete Phase 1 Infrastructure Upgrade  
+**Deadline**: 2026-02-24 (3 weeks)  
+**Remaining Tasks**:
+- [ ] tRPC integration (2-3 days)
+- [ ] Full-text search (2-3 days)
+- [ ] Redis caching (2 days)
+- [ ] Performance testing and optimization (3-4 days)
+
+**Success Criteria**:
+- [x] PostgreSQL production-ready ✅
+- [ ] Search response < 100ms
+- [ ] Cache hit rate > 70%
+- [ ] End-to-end type safety
+- [ ] Lighthouse score > 90
 
 ---
 
-**最后更新者**: Claude (Clawdbot)  
-**下次更新**: tRPC 集成完成后
+## 📚 Related Documentation
+
+- **Complete Design**: `docs/PRODUCT_DESIGN.md`
+- **Tech Architecture**: `docs/TECH_UPGRADE_PLAN.md`
+- **Migration Guide**: `docs/MIGRATION_CHECKLIST.md`
+- **Filter Planning**: `docs/FILTER_IMPLEMENTATION.md`
+- **Changelog**: `CHANGELOG.md`
+
+---
+
+**Last Updated By**: Claude (Clawdbot)  
+**Next Update**: After tRPC integration complete

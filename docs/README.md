@@ -1,125 +1,125 @@
-# WiscFlow 项目文档
+# WiscFlow Documentation
 
-**最后更新**: 2026-02-03
+**Last Updated**: 2026-02-03
 
-本文件夹包含 WiscFlow 项目的所有设计、规划和迁移文档。
-
----
-
-## 📁 文档分类
-
-### 🎯 产品设计文档 (✅ 应上传 GitHub)
-
-| 文件 | 描述 | GitHub |
-|------|------|--------|
-| `wiscflow完整设计方案.md` | 完整产品设计方案（竞品分析、功能设计、UI原型） | ✅ 推荐上传 |
-| `PROJECT_ROADMAP.md` | 项目路线图和功能规划 | ✅ 推荐上传 |
-
-**为什么上传**:
-- 帮助贡献者理解产品愿景
-- 方便团队协作
-- 展示项目规划能力
-- **不包含敏感信息**
+This folder contains all design, planning, and migration documentation for the WiscFlow project.
 
 ---
 
-### 🏗️ 技术架构文档 (✅ 应上传 GitHub)
+## 📁 Document Categories
 
-| 文件 | 描述 | GitHub |
-|------|------|--------|
-| `TECH_UPGRADE_PLAN.md` | 技术架构升级计划（Monorepo + tRPC + Redis） | ✅ 推荐上传 |
-| `EVALUATION_REPORT.md` | 设计方案 vs 现有代码对比评估 | ✅ 推荐上传 |
-| `SUPABASE_VS_NEON.md` | PostgreSQL 服务商对比分析 | ✅ 推荐上传 |
+### 🎯 Product Design Documents (✅ For GitHub)
 
-**为什么上传**:
-- 记录技术决策过程
-- 帮助理解架构选型
-- 其他开发者可以参考
-- **不包含敏感信息**
+| File | Description | GitHub |
+|------|-------------|--------|
+| `PRODUCT_DESIGN.md` | Complete product design (competitive analysis, features, UI mockups) | ✅ Recommended |
+| `PROJECT_ROADMAP.md` | Project roadmap and feature planning | ✅ Recommended |
 
----
-
-### 🔄 迁移文档 (⚠️ 部分上传)
-
-| 文件 | 描述 | GitHub |
-|------|------|--------|
-| `MIGRATION_CHECKLIST.md` | PostgreSQL + tRPC 迁移执行清单 | ✅ 推荐上传 |
-| `MIGRATION_COMPLETED.md` | 迁移完成报告 | ⚠️ **需要脱敏** |
-
-**MIGRATION_COMPLETED.md 需要移除**:
-- ❌ 数据库连接字符串
-- ❌ Neon 项目具体信息
-- ✅ 保留迁移步骤和经验总结
-
-**脱敏后可上传**，作为迁移经验分享。
+**Why upload**:
+- Helps contributors understand product vision
+- Facilitates team collaboration
+- Demonstrates planning capability
+- **Contains no sensitive information**
 
 ---
 
-### 📊 测试和开发文档 (❌ 不建议上传)
+### 🏗️ Technical Architecture Documents (✅ For GitHub)
 
-| 文件 | 描述 | GitHub |
-|------|------|--------|
-| `../TEST_REPORT.md` | 测试报告 | ❌ 本地使用 |
-| `../DEVELOPMENT_PLAN.md` | 开发计划 | ❌ 过时 |
-| `../OAUTH_SETUP.md` | OAuth 配置说明 | ⚠️ **包含敏感信息** |
+| File | Description | GitHub |
+|------|-------------|--------|
+| `TECH_UPGRADE_PLAN.md` | Technical architecture upgrade plan (Monorepo + tRPC + Redis) | ✅ Recommended |
+| `EVALUATION_REPORT.md` | Design vs. implementation evaluation | ✅ Recommended |
+| `SUPABASE_VS_NEON.md` | PostgreSQL provider comparison | ✅ Recommended |
 
-**为什么不上传**:
-- 包含具体配置细节
-- 可能包含敏感信息（Client ID/Secret）
-- 临时性文档，不具参考价值
+**Why upload**:
+- Documents technical decision process
+- Helps understand architecture choices
+- Valuable reference for other developers
+- **Contains no sensitive information**
 
 ---
 
-## 🔐 敏感信息检查清单
+### 🔄 Migration Documents (⚠️ Partially Upload)
 
-上传到 GitHub 前，确保移除：
+| File | Description | GitHub |
+|------|-------------|--------|
+| `MIGRATION_CHECKLIST.md` | PostgreSQL + tRPC migration checklist | ✅ Recommended |
+| `MIGRATION_COMPLETED.md` | Migration completion report | ⚠️ **Needs sanitization** |
 
-### ❌ 绝对不能上传的信息
+**MIGRATION_COMPLETED.md should remove**:
+- ❌ Database connection strings
+- ❌ Neon project specific information
+- ✅ Keep migration steps and lessons learned
+
+**Can upload after sanitization** as migration experience sharing.
+
+---
+
+### 📊 Testing and Development Documents (❌ Not Recommended)
+
+| File | Description | GitHub |
+|------|-------------|--------|
+| `../TEST_REPORT.md` | Test reports | ❌ Local use only |
+| `../DEVELOPMENT_PLAN.md` | Development plan | ❌ Outdated |
+| `../OAUTH_SETUP.md` | OAuth configuration | ⚠️ **Contains sensitive info** |
+
+**Why not upload**:
+- Contains specific configuration details
+- May contain sensitive information (Client ID/Secret)
+- Temporary documents with no reference value
+
+---
+
+## 🔐 Sensitive Information Checklist
+
+Before uploading to GitHub, ensure removal of:
+
+### ❌ Absolutely Cannot Upload
 ```bash
-# 数据库连接字符串
+# Database connection strings
 DATABASE_URL="postgresql://..."
 
-# API 密钥
+# API keys
 GOOGLE_CLIENT_SECRET=GOCSPX-...
 AUTH_SECRET=...
 
-# 具体的服务器地址
+# Specific server addresses
 ep-jolly-haze-ae0kcj2h-pooler.c-2.us-east-2.aws.neon.tech
 ```
 
-### ✅ 可以上传的信息
+### ✅ Safe to Upload
 ```bash
-# 泛化的示例
+# Generic examples
 DATABASE_URL="postgresql://user:password@hostname/database"
 
-# 架构图、流程图
-# 技术选型理由
-# 代码结构
+# Architecture diagrams, flowcharts
+# Technical selection reasoning
+# Code structure
 ```
 
 ---
 
-## 📋 推荐的 GitHub 文档结构
+## 📋 Recommended GitHub Documentation Structure
 
 ```
 wiscflow/
-├── README.md                    # 项目介绍
+├── README.md                    # Project introduction
 ├── docs/
-│   ├── README.md               # 本文件
-│   ├── DESIGN.md               # 产品设计 (wiscflow完整设计方案.md 重命名)
-│   ├── ARCHITECTURE.md         # 技术架构 (TECH_UPGRADE_PLAN.md 精简版)
-│   ├── ROADMAP.md              # 路线图 (PROJECT_ROADMAP.md)
-│   └── MIGRATION_GUIDE.md      # 迁移指南 (MIGRATION_CHECKLIST.md 脱敏版)
-└── .gitignore                  # 确保 .env 不上传
+│   ├── README.md               # This file
+│   ├── DESIGN.md               # Product design (renamed from PRODUCT_DESIGN.md)
+│   ├── ARCHITECTURE.md         # Tech architecture (simplified TECH_UPGRADE_PLAN.md)
+│   ├── ROADMAP.md              # Roadmap (PROJECT_ROADMAP.md)
+│   └── MIGRATION_GUIDE.md      # Migration guide (sanitized MIGRATION_CHECKLIST.md)
+└── .gitignore                  # Ensure .env not uploaded
 ```
 
 ---
 
-## 🚀 上传前检查
+## 🚀 Pre-upload Checklist
 
-### 1. 检查 .gitignore
+### 1. Check .gitignore
 ```bash
-# 确保这些文件在 .gitignore 中
+# Ensure these files are in .gitignore
 .env
 .env.local
 .env*.local
@@ -129,61 +129,63 @@ node_modules/
 .next/
 ```
 
-### 2. 搜索敏感信息
+### 2. Search for Sensitive Information
 ```bash
-# 在所有 .md 文件中搜索敏感信息
+# Search for sensitive info in all .md files
 grep -r "postgresql://" docs/
 grep -r "GOCSPX-" docs/
-grep -r "npg_" docs/  # Neon 密码前缀
+grep -r "npg_" docs/  # Neon password prefix
 grep -r "ep-.*\.neon\.tech" docs/
 ```
 
-### 3. 脱敏示例
+### 3. Sanitization Example
 
-**之前（包含敏感信息）**:
+**Before (contains sensitive info)**:
 ```md
-连接字符串：
+Connection string:
 postgresql://neondb_owner:npg_jWYRpew54frP@ep-jolly-haze-ae0kcj2h-pooler.c-2.us-east-2.aws.neon.tech/neondb
 ```
 
-**之后（脱敏）**:
+**After (sanitized)**:
 ```md
-连接字符串格式：
+Connection string format:
 postgresql://[username]:[password]@[host]/[database]?sslmode=require
 
-示例：
+Example:
 postgresql://user:pass@your-project.region.aws.neon.tech/dbname
 ```
 
 ---
 
-## 📝 建议的操作流程
+## 📝 Recommended Workflow
 
-### Step 1: 创建标准文档
+### Step 1: Create Standard Documents
 ```bash
-# 在 docs/ 中创建标准化文档
-cp wiscflow完整设计方案.md DESIGN.md
+# Create standardized documentation in docs/
+cp PRODUCT_DESIGN.md DESIGN.md
 cp PROJECT_ROADMAP.md ROADMAP.md
-# ... 根据需要重命名和精简
+# ... rename and simplify as needed
 ```
 
-### Step 2: 脱敏检查
+### Step 2: Sanitization Check
 ```bash
-# 运行脱敏检查脚本（待创建）
+# Run sanitization check script
 npm run docs:check-sensitive
+# or
+bash scripts/check-sensitive-info.sh
 ```
 
-### Step 3: 更新主 README
+### Step 3: Update Main README
 ```bash
-# 在项目根目录创建完善的 README.md
-# 包含：
-# - 项目介绍
-# - 快速开始
-# - 技术栈
-# - 文档链接
+# Create comprehensive README.md in project root
+# Include:
+# - Project introduction
+# - Quick start guide
+# - Tech stack
+# - Documentation links
 ```
 
-### Step 4: 提交到 GitHub
+### Step 4: Commit to GitHub
 ```bash
 git add docs/
 git add README.md
@@ -193,72 +195,72 @@ git push
 
 ---
 
-## 🎓 文档编写最佳实践
+## 🎓 Documentation Best Practices
 
-### 1. 使用相对路径
+### 1. Use Relative Paths
 ```markdown
-# ❌ 不要用绝对路径
+# ❌ Don't use absolute paths
 /Users/yifanyang/Desktop/wiscflow/...
 
-# ✅ 使用相对路径
+# ✅ Use relative paths
 ../scripts/seedCourses.ts
 ```
 
-### 2. 移除本地信息
+### 2. Remove Local Information
 ```markdown
-# ❌ 不要包含本地目录
+# ❌ Don't include local directories
 Working directory: /Users/yifanyang/Desktop/wiscflow
 
-# ✅ 使用泛化路径
+# ✅ Use generic paths
 Working directory: <project-root>
 ```
 
-### 3. 使用占位符
+### 3. Use Placeholders
 ```markdown
-# ❌ 不要暴露真实凭证
+# ❌ Don't expose real credentials
 GOOGLE_CLIENT_ID=843088484088-xxx
 
-# ✅ 使用占位符
+# ✅ Use placeholders
 GOOGLE_CLIENT_ID=your-client-id
 ```
 
 ---
 
-## 📚 文档维护
+## 📚 Documentation Maintenance
 
-### 定期更新
-- 功能完成后更新 ROADMAP.md
-- 架构变更后更新 ARCHITECTURE.md
-- 迁移完成后更新 MIGRATION_GUIDE.md
+### Regular Updates
+- Update ROADMAP.md after features complete
+- Update ARCHITECTURE.md after architectural changes
+- Update MIGRATION_GUIDE.md after migrations complete
 
-### 归档旧文档
+### Archive Old Documents
 ```bash
-# 将过时文档移到 archive/
+# Move outdated docs to archive/
 mkdir -p docs/archive
 mv docs/OLD_PLAN.md docs/archive/
 ```
 
-### 版本控制
+### Version Control
 ```markdown
-# 在文档顶部标注版本
-**版本**: v1.0.0
-**最后更新**: 2026-02-03
-**状态**: ✅ 当前 / 🔄 进行中 / 📦 已归档
+# Mark version at top of documents
+**Version**: v1.0.0
+**Last Updated**: 2026-02-03
+**Status**: ✅ Current / 🔄 In Progress / 📦 Archived
 ```
 
 ---
 
-## ✅ 推荐上传到 GitHub 的文档
+## ✅ Recommended for GitHub Upload
 
-最终推荐上传：
+Final recommendation:
 
-1. ✅ **DESIGN.md** - 产品设计（脱敏后的 wiscflow完整设计方案.md）
-2. ✅ **ROADMAP.md** - 项目路线图
-3. ✅ **ARCHITECTURE.md** - 技术架构（精简版 TECH_UPGRADE_PLAN.md）
-4. ✅ **MIGRATION_GUIDE.md** - 迁移指南（脱敏版）
-5. ✅ **CONTRIBUTING.md** - 贡献指南（待创建）
-6. ✅ **README.md** - 项目主文档（待完善）
+1. ✅ **DESIGN.md** - Product design (sanitized PRODUCT_DESIGN.md)
+2. ✅ **ROADMAP.md** - Project roadmap
+3. ✅ **ARCHITECTURE.md** - Tech architecture (simplified TECH_UPGRADE_PLAN.md)
+4. ✅ **MIGRATION_GUIDE.md** - Migration guide (sanitized)
+5. ✅ **CONTRIBUTING.md** - Contribution guidelines (to be created)
+6. ✅ **README.md** - Main project documentation (to be improved)
 
 ---
 
-**下一步**: 运行脱敏检查，然后上传到 GitHub！
+**Next Step**: Run sanitization check, then upload to GitHub!

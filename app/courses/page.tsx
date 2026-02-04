@@ -9,6 +9,8 @@ import { useSession } from 'next-auth/react'
 import { useState, useCallback, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { FilterPanel, type CourseFilters } from '@/components/FilterPanel'
+import { MobileNav } from '@/components/MobileNav'
+import { SlidersHorizontal, X } from 'lucide-react'
 
 export default function CoursesPage() {
   return (
@@ -30,6 +32,7 @@ function CoursesPageContent() {
   const [searchInput, setSearchInput] = useState(searchParams.get('search') || '')
   const [filters, setFilters] = useState<CourseFilters>({})
   const [page, setPage] = useState(0)
+  const [showMobileFilters, setShowMobileFilters] = useState(false)
   const PAGE_SIZE = 30
 
   // Fetch courses with tRPC (all filters sent to backend)
@@ -79,7 +82,7 @@ function CoursesPageContent() {
               </Link>
             </div>
             <div className="flex items-center gap-6">
-              <nav className="flex items-center gap-6">
+              <nav className="hidden lg:flex items-center gap-6">
                 <Link href="/courses" className="text-uw-red font-medium">
                   Courses
                 </Link>
@@ -90,7 +93,10 @@ function CoursesPageContent() {
                   About
                 </Link>
               </nav>
-              {session?.user ? <UserMenu user={session.user} /> : <GuestMenu />}
+              <div className="hidden lg:block">
+                {session?.user ? <UserMenu user={session.user} /> : <GuestMenu />}
+              </div>
+              <MobileNav user={session?.user} currentPath="/courses" />
             </div>
           </div>
         </div>
@@ -123,9 +129,43 @@ function CoursesPageContent() {
           </button>
         </form>
 
+        {/* Mobile Filter Button */}
+        <div className="lg:hidden mb-4">
+          <button
+            onClick={() => setShowMobileFilters(true)}
+            className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+          >
+            <SlidersHorizontal size={16} />
+            Filters
+            {Object.values(filters).filter(v => v !== undefined && (Array.isArray(v) ? v.length > 0 : true)).length > 0 && (
+              <span className="px-1.5 py-0.5 text-[10px] font-bold bg-uw-red text-white rounded-full">
+                {Object.values(filters).filter(v => v !== undefined && (Array.isArray(v) ? v.length > 0 : true)).length}
+              </span>
+            )}
+          </button>
+        </div>
+
+        {/* Mobile Filter Overlay */}
+        {showMobileFilters && (
+          <>
+            <div className="fixed inset-0 z-40 bg-black/30 lg:hidden" onClick={() => setShowMobileFilters(false)} />
+            <div className="fixed inset-y-0 left-0 z-50 w-80 bg-slate-50 shadow-xl lg:hidden overflow-y-auto">
+              <div className="flex items-center justify-between p-4 bg-white border-b border-slate-200 sticky top-0">
+                <span className="font-semibold text-slate-900">Filters</span>
+                <button onClick={() => setShowMobileFilters(false)} className="p-1 text-slate-500 hover:text-slate-700">
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="p-4">
+                <FilterPanel filters={filters} onFilterChange={handleFilterChange} />
+              </div>
+            </div>
+          </>
+        )}
+
         {/* Main Layout: Sidebar + Content */}
         <div className="flex gap-6">
-          {/* Left Sidebar - Filters */}
+          {/* Left Sidebar - Filters (Desktop) */}
           <aside className="w-72 flex-shrink-0 hidden lg:block">
             <FilterPanel filters={filters} onFilterChange={handleFilterChange} />
           </aside>

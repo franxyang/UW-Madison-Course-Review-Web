@@ -237,7 +237,7 @@ export const courseRouter = router({
       }))
     }),
 
-  // Get course by ID
+  // Get course by ID (with review-gating for non-contributors)
   byId: publicProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
@@ -294,7 +294,37 @@ export const courseRouter = router({
         })
       }
 
-      return course
+      // Review-gating: check if the user has contributed at least 1 review
+      let hasFullAccess = false
+      let userReviewCount = 0
+
+      if (ctx.session?.user?.email) {
+        const user = await ctx.prisma.user.findUnique({
+          where: { email: ctx.session.user.email },
+          select: { id: true },
+        })
+        if (user) {
+          userReviewCount = await ctx.prisma.review.count({
+            where: { authorId: user.id },
+          })
+          hasFullAccess = userReviewCount >= 1
+        }
+      }
+
+      // Sort reviews: highest-voted first for the preview
+      const sortedReviews = [...course.reviews].sort(
+        (a, b) => (b.votes?.length || 0) - (a.votes?.length || 0)
+      )
+
+      return {
+        ...course,
+        reviews: sortedReviews,
+        reviewAccess: {
+          hasFullAccess,
+          userReviewCount,
+          totalReviews: course.reviews.length,
+        },
+      }
     }),
 
   // Get all schools (cached for 24h)

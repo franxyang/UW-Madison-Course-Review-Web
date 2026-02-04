@@ -7,6 +7,7 @@ import { VoteButton } from '@/components/VoteButton'
 import { ArrowLeft, Clock, BookOpen, Users, Star, Calendar, Building, Hash, AlertCircle, MessageSquare, ChevronRight } from 'lucide-react'
 import { ReviewForm } from '@/components/ReviewForm'
 import { CommentSection } from '@/components/CommentSection'
+import { ReviewGateOverlay, FrostedReview } from '@/components/ReviewGate'
 import { trpc } from '@/lib/trpc/client'
 import { useSession } from 'next-auth/react'
 
@@ -306,7 +307,7 @@ export default function CoursePage() {
           </div>
 
           {/* Review Submission Form */}
-          <div className="bg-white rounded-lg border border-slate-200 p-6">
+          <div id="review-form" className="bg-white rounded-lg border border-slate-200 p-6 scroll-mt-24">
             <ReviewForm courseId={course.id} courseName={`${course.code}: ${course.name}`} />
           </div>
 
@@ -318,120 +319,145 @@ export default function CoursePage() {
             </div>
           ) : (
             <div className="space-y-4">
-              {reviewsWithParsedData.map(review => (
-                <div key={review.id} className="bg-white rounded-lg border border-slate-200 p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div>
-                      <div className="flex items-center gap-3">
-                        <h4 className="font-medium text-slate-900">{review.title || 'Untitled Review'}</h4>
-                        <span className={`px-2 py-1 text-xs font-medium rounded ${getGradeColor(review.gradeReceived)}`}>
-                          Grade: {review.gradeReceived}
-                        </span>
-                      </div>
-                      <div className="text-sm text-slate-600 mt-1">
-                        {review.term} · {review.instructor?.name || 'Unknown Instructor'}
-                      </div>
-                    </div>
-                    <div className="text-sm text-slate-500">
-                      {new Date(review.createdAt).toLocaleDateString()}
-                    </div>
-                  </div>
+              {reviewsWithParsedData.map((review, index) => {
+                // Review gating: only first review (highest-voted) is fully visible for non-contributors
+                const isGated = !course.reviewAccess.hasFullAccess && index > 0
 
-                  {/* Rating Cards */}
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-                    <div className={`p-3 rounded-lg border ${getRatingColor(review.contentRating)}`}>
-                      <div className="text-xs font-medium mb-1">Content</div>
-                      <div className="text-lg font-bold">{review.contentRating}</div>
-                    </div>
-                    <div className={`p-3 rounded-lg border ${getRatingColor(review.teachingRating)}`}>
-                      <div className="text-xs font-medium mb-1">Teaching</div>
-                      <div className="text-lg font-bold">{review.teachingRating}</div>
-                    </div>
-                    <div className={`p-3 rounded-lg border ${getRatingColor(review.gradingRating)}`}>
-                      <div className="text-xs font-medium mb-1">Grading</div>
-                      <div className="text-lg font-bold">{review.gradingRating}</div>
-                    </div>
-                    <div className={`p-3 rounded-lg border ${getRatingColor(review.workloadRating)}`}>
-                      <div className="text-xs font-medium mb-1">Workload</div>
-                      <div className="text-lg font-bold">{review.workloadRating}</div>
-                    </div>
-                  </div>
-
-                  {/* Comments */}
-                  <div className="space-y-3 mb-4">
-                    {review.contentComment && (
+                const reviewCard = (
+                  <div key={review.id} className="bg-white rounded-lg border border-slate-200 p-6">
+                    <div className="flex items-start justify-between mb-4">
                       <div>
-                        <span className="text-sm font-medium text-slate-700">Content:</span>
-                        <p className="text-sm text-slate-600 mt-1">{review.contentComment}</p>
+                        <div className="flex items-center gap-3">
+                          <h4 className="font-medium text-slate-900">{review.title || 'Untitled Review'}</h4>
+                          <span className={`px-2 py-1 text-xs font-medium rounded ${getGradeColor(review.gradeReceived)}`}>
+                            Grade: {review.gradeReceived}
+                          </span>
+                        </div>
+                        <div className="text-sm text-slate-600 mt-1">
+                          {review.term} · {review.instructor?.name || 'Unknown Instructor'}
+                        </div>
+                      </div>
+                      <div className="text-sm text-slate-500">
+                        {new Date(review.createdAt).toLocaleDateString()}
+                      </div>
+                    </div>
+
+                    {/* Rating Cards */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                      <div className={`p-3 rounded-lg border ${getRatingColor(review.contentRating)}`}>
+                        <div className="text-xs font-medium mb-1">Content</div>
+                        <div className="text-lg font-bold">{review.contentRating}</div>
+                      </div>
+                      <div className={`p-3 rounded-lg border ${getRatingColor(review.teachingRating)}`}>
+                        <div className="text-xs font-medium mb-1">Teaching</div>
+                        <div className="text-lg font-bold">{review.teachingRating}</div>
+                      </div>
+                      <div className={`p-3 rounded-lg border ${getRatingColor(review.gradingRating)}`}>
+                        <div className="text-xs font-medium mb-1">Grading</div>
+                        <div className="text-lg font-bold">{review.gradingRating}</div>
+                      </div>
+                      <div className={`p-3 rounded-lg border ${getRatingColor(review.workloadRating)}`}>
+                        <div className="text-xs font-medium mb-1">Workload</div>
+                        <div className="text-lg font-bold">{review.workloadRating}</div>
+                      </div>
+                    </div>
+
+                    {/* Comments */}
+                    <div className="space-y-3 mb-4">
+                      {review.contentComment && (
+                        <div>
+                          <span className="text-sm font-medium text-slate-700">Content:</span>
+                          <p className="text-sm text-slate-600 mt-1">{review.contentComment}</p>
+                        </div>
+                      )}
+                      {review.teachingComment && (
+                        <div>
+                          <span className="text-sm font-medium text-slate-700">Teaching:</span>
+                          <p className="text-sm text-slate-600 mt-1">{review.teachingComment}</p>
+                        </div>
+                      )}
+                      {review.gradingComment && (
+                        <div>
+                          <span className="text-sm font-medium text-slate-700">Grading:</span>
+                          <p className="text-sm text-slate-600 mt-1">{review.gradingComment}</p>
+                        </div>
+                      )}
+                      {review.workloadComment && (
+                        <div>
+                          <span className="text-sm font-medium text-slate-700">Workload:</span>
+                          <p className="text-sm text-slate-600 mt-1">{review.workloadComment}</p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Assessments */}
+                    {review.assessments && review.assessments.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {review.assessments.map((assessment: string) => (
+                          <span key={assessment} className="px-2 py-1 text-xs bg-slate-100 text-slate-700 rounded">
+                            {assessment}
+                          </span>
+                        ))}
                       </div>
                     )}
-                    {review.teachingComment && (
-                      <div>
-                        <span className="text-sm font-medium text-slate-700">Teaching:</span>
-                        <p className="text-sm text-slate-600 mt-1">{review.teachingComment}</p>
-                      </div>
-                    )}
-                    {review.gradingComment && (
-                      <div>
-                        <span className="text-sm font-medium text-slate-700">Grading:</span>
-                        <p className="text-sm text-slate-600 mt-1">{review.gradingComment}</p>
-                      </div>
-                    )}
-                    {review.workloadComment && (
-                      <div>
-                        <span className="text-sm font-medium text-slate-700">Workload:</span>
-                        <p className="text-sm text-slate-600 mt-1">{review.workloadComment}</p>
-                      </div>
-                    )}
-                  </div>
 
-                  {/* Assessments */}
-                  {review.assessments && review.assessments.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {review.assessments.map((assessment: string) => (
-                        <span key={assessment} className="px-2 py-1 text-xs bg-slate-100 text-slate-700 rounded">
-                          {assessment}
-                        </span>
-                      ))}
+                    {/* Resource Link */}
+                    {review.resourceLink && (
+                      <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                        <a
+                          href={review.resourceLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-blue-700 hover:text-blue-900"
+                        >
+                          📎 Course Resources Available
+                        </a>
+                      </div>
+                    )}
+
+                    {/* Vote Button */}
+                    <div className="mb-4 pt-4 border-t border-slate-100">
+                      <VoteButton
+                        reviewId={review.id}
+                        initialVoteCount={review.votes?.length || 0}
+                        initialIsVoted={
+                          session?.user?.email
+                            ? review.votes?.some((vote: any) => vote.user?.email === session?.user?.email) || false
+                            : false
+                        }
+                        userEmail={session?.user?.email || undefined}
+                      />
                     </div>
-                  )}
 
-                  {/* Resource Link */}
-                  {review.resourceLink && (
-                    <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                      <a
-                        href={review.resourceLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm text-blue-700 hover:text-blue-900"
-                      >
-                        📎 Course Resources Available
-                      </a>
-                    </div>
-                  )}
-
-                  {/* Vote Button */}
-                  <div className="mb-4 pt-4 border-t border-slate-100">
-                    <VoteButton
+                    {/* Comments Section */}
+                    <CommentSection
                       reviewId={review.id}
-                      initialVoteCount={review.votes?.length || 0}
-                      initialIsVoted={
-                        session?.user?.email
-                          ? review.votes?.some((vote: any) => vote.user?.email === session?.user?.email) || false
-                          : false
-                      }
-                      userEmail={session?.user?.email || undefined}
+                      comments={review.comments}
+                      userEmail={session?.user?.email}
                     />
                   </div>
+                )
 
-                  {/* Comments Section */}
-                  <CommentSection
-                    reviewId={review.id}
-                    comments={review.comments}
-                    userEmail={session?.user?.email}
-                  />
-                </div>
-              ))}
+                if (isGated) {
+                  // Show the first frosted review, then the gate overlay, then remaining frosted
+                  return (
+                    <div key={review.id}>
+                      {/* Show unlock CTA after the first frosted review */}
+                      {index === 1 && (
+                        <ReviewGateOverlay
+                          totalReviews={course.reviewAccess.totalReviews}
+                          userReviewCount={course.reviewAccess.userReviewCount}
+                          isLoggedIn={!!session?.user}
+                          courseId={course.id}
+                        />
+                      )}
+                      <FrostedReview>{reviewCard}</FrostedReview>
+                    </div>
+                  )
+                }
+
+                return reviewCard
+              })}
             </div>
           )}
         </div>

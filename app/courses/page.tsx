@@ -6,11 +6,23 @@ import { UserMenu, GuestMenu } from '@/components/UserMenu'
 import { Search, BookOpen, MessageSquare, Star } from 'lucide-react'
 import { trpc } from '@/lib/trpc/client'
 import { useSession } from 'next-auth/react'
-import { useState, useCallback } from 'react'
+import { useState, useCallback, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { FilterPanel, type CourseFilters } from '@/components/FilterPanel'
 
 export default function CoursesPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-slate-50/50 flex items-center justify-center">
+        <div className="animate-pulse text-slate-400">Loading courses...</div>
+      </div>
+    }>
+      <CoursesPageContent />
+    </Suspense>
+  )
+}
+
+function CoursesPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { data: session } = useSession()

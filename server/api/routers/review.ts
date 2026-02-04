@@ -214,4 +214,125 @@ export const reviewRouter = router({
         return { isVoted: true }
       }
     }),
+
+  // Update an existing review (author only)
+  update: protectedProcedure
+    .input(
+      z.object({
+        reviewId: z.string(),
+        title: z.string().min(1).max(200).optional(),
+        term: z.string().optional(),
+        gradeReceived: gradeEnum.optional(),
+        contentRating: gradeEnum.optional(),
+        teachingRating: gradeEnum.optional(),
+        gradingRating: gradeEnum.optional(),
+        workloadRating: gradeEnum.optional(),
+        contentComment: z.string().max(3000).optional(),
+        teachingComment: z.string().max(3000).optional(),
+        gradingComment: z.string().max(3000).optional(),
+        workloadComment: z.string().max(3000).optional(),
+        assessments: z.array(z.string()).optional(),
+        resourceLink: z.string().url().optional().or(z.literal('')),
+        instructorName: z.string().min(1).optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id!
+
+      // Verify ownership
+      const review = await ctx.prisma.review.findUnique({
+        where: { id: input.reviewId },
+        select: { authorId: true },
+      })
+
+      if (!review) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Review not found' })
+      }
+
+      if (review.authorId !== userId) {
+        throw new TRPCError({ code: 'FORBIDDEN', message: 'You can only edit your own reviews' })
+      }
+
+      // Handle instructor update if name changed
+      let instructorUpdate: { instructorId?: string } = {}
+      if (input.instructorName) {
+        let instructor = await ctx.prisma.instructor.findUnique({
+          where: { name: input.instructorName },
+        })
+        if (!instructor) {
+          instructor = await ctx.prisma.instructor.create({
+            data: { name: input.instructorName, aliases: null },
+          })
+        }
+        instructorUpdate = { instructorId: instructor.id }
+      }
+
+      const updated = await ctx.prisma.review.update({
+        where: { id: input.reviewId },
+        data: {
+          ...(input.title !== undefined && { title: input.title || null }),
+          ...(input.term && { term: input.term }),
+          ...(input.gradeReceived && { gradeReceived: input.gradeReceived }),
+          ...(input.contentRating && { contentRating: input.contentRating }),
+          ...(input.teachingRating && { teachingRating: input.teachingRating }),
+          ...(input.gradingRating && { gradingRating: input.gradingRating }),
+          ...(input.workloadRating && { workloadRating: input.workloadRating }),
+          ...(input.contentComment !== undefined && { contentComment: input.contentComment || null }),
+          ...(input.teachingComment !== undefined && { teachingComment: input.teachingComment || null }),
+          ...(input.gradingComment !== undefined && { gradingComment: input.gradingComment || null }),
+          ...(input.workloadComment !== undefined && { workloadComment: input.workloadComment || null }),
+          ...(input.assessments && { assessments: JSON.stringify(input.assessments) }),
+          ...(input.resourceLink !== undefined && { resourceLink: input.resourceLink || null }),
+          ...instructorUpdate,
+        },
+        include: {
+          author: true,
+          instructor: true,
+        },
+      })
+
+      return updated
+    }),
+
+  // Delete a review (author only)
+  delete: protectedProcedure
+    .input(z.object({ reviewId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id!
+
+      // Verify ownership
+      const review = await ctx.prisma.review.findUnique({
+        where: { id: input.reviewId },
+        select: { authorId: true },
+      })
+
+      if (!review) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Review not found' })
+      }
+
+      if (review.authorId !== userId) {
+        throw new TRPCError({ code: 'FORBIDDEN', message: 'You can only delete your own reviews' })
+      }
+
+      // Delete related data first (votes, comments), then review
+      await ctx.prisma.$transaction([
+        ctx.prisma.vote.deleteMany({ where: { reviewId: input.reviewId } }),
+        ctx.prisma.comment.deleteMany({ where: { reviewId: input.reviewId } }),
+        ctx.prisma.review.delete({ where: { id: input.reviewId } }),
+      ])
+
+      // Recalculate author's level (they lost a review)
+      const [reviewCount, upvotesReceived] = await Promise.all([
+        ctx.prisma.review.count({ where: { authorId: review.authorId } }),
+        ctx.prisma.vote.count({ where: { review: { authorId: review.authorId } } }),
+      ])
+      const newLevel = computeContributorLevel(reviewCount, upvotesReceived)
+
+      await ctx.prisma.user.update({
+        where: { id: review.authorId },
+        data: { level: newLevel.level },
+      })
+
+      return { success: true }
+    }),
 })

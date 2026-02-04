@@ -9,6 +9,7 @@ import { ReviewForm } from '@/components/ReviewForm'
 import { CommentSection } from '@/components/CommentSection'
 import { ReviewGateOverlay, FrostedReview } from '@/components/ReviewGate'
 import { ContributorBadge } from '@/components/ContributorBadge'
+import { ReviewActions } from '@/components/ReviewActions'
 import { trpc } from '@/lib/trpc/client'
 import { useSession } from 'next-auth/react'
 
@@ -341,8 +342,14 @@ export default function CoursePage() {
                           {review.term} · {review.instructor?.name || 'Unknown Instructor'}
                         </div>
                       </div>
-                      <div className="text-sm text-slate-500">
-                        {new Date(review.createdAt).toLocaleDateString()}
+                      <div className="flex items-center gap-2">
+                        <div className="text-sm text-slate-500">
+                          {new Date(review.createdAt).toLocaleDateString()}
+                        </div>
+                        <ReviewActions
+                          reviewId={review.id}
+                          isOwner={session?.user?.email === review.author?.email}
+                        />
                       </div>
                     </div>
 

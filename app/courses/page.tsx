@@ -17,9 +17,11 @@ export default function CoursesPage() {
   
   const [searchInput, setSearchInput] = useState(searchParams.get('search') || '')
   const [filters, setFilters] = useState<CourseFilters>({})
+  const [page, setPage] = useState(0)
+  const PAGE_SIZE = 30
 
   // Fetch courses with tRPC (all filters sent to backend)
-  const { data: courses, isLoading: coursesLoading } = trpc.course.list.useQuery({
+  const { data, isLoading: coursesLoading } = trpc.course.list.useQuery({
     search: searchParams.get('search') || undefined,
     schoolIds: filters.schools,
     departmentIds: filters.departments,
@@ -27,10 +29,13 @@ export default function CoursesPage() {
     minCredits: filters.minCredits,
     maxCredits: filters.maxCredits,
     sortBy: (filters.sortBy as 'code' | 'relevance' | 'gpa' | 'reviews') || undefined,
-    limit: 50,
+    limit: PAGE_SIZE,
+    offset: page * PAGE_SIZE,
   })
 
-  const sortedCourses = courses || []
+  const sortedCourses = data?.courses || []
+  const totalCourses = data?.total || 0
+  const totalPages = Math.ceil(totalCourses / PAGE_SIZE)
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -43,6 +48,7 @@ export default function CoursesPage() {
 
   const handleFilterChange = useCallback((newFilters: CourseFilters) => {
     setFilters(newFilters)
+    setPage(0) // Reset to first page when filters change
   }, [])
 
   return (
@@ -117,7 +123,7 @@ export default function CoursesPage() {
                 <div className="h-5 w-32 bg-slate-200 animate-pulse rounded" />
               ) : (
                 <p className="text-sm text-slate-600">
-                  Showing {sortedCourses.length} courses
+                  Showing {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, totalCourses)} of {totalCourses} courses
                   {searchParams.get('search') && ` for "${searchParams.get('search')}"`}
                 </p>
               )}
@@ -195,11 +201,59 @@ export default function CoursesPage() {
                 <button
                   onClick={() => {
                     setFilters({})
+                    setPage(0)
                     router.push('/courses')
                   }}
                   className="text-uw-red hover:text-uw-dark mt-2 inline-block"
                 >
                   Clear filters and view all courses
+                </button>
+              </div>
+            )}
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-2 mt-8">
+                <button
+                  onClick={() => setPage(Math.max(0, page - 1))}
+                  disabled={page === 0}
+                  className="px-4 py-2 text-sm border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  ← Previous
+                </button>
+                
+                {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
+                  let pageNum: number
+                  if (totalPages <= 7) {
+                    pageNum = i
+                  } else if (page < 3) {
+                    pageNum = i
+                  } else if (page > totalPages - 4) {
+                    pageNum = totalPages - 7 + i
+                  } else {
+                    pageNum = page - 3 + i
+                  }
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => setPage(pageNum)}
+                      className={`w-10 h-10 text-sm rounded-lg ${
+                        page === pageNum
+                          ? 'bg-uw-red text-white'
+                          : 'border border-slate-200 hover:bg-slate-50'
+                      }`}
+                    >
+                      {pageNum + 1}
+                    </button>
+                  )
+                })}
+                
+                <button
+                  onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
+                  disabled={page >= totalPages - 1}
+                  className="px-4 py-2 text-sm border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  Next →
                 </button>
               </div>
             )}

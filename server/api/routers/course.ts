@@ -110,28 +110,45 @@ export const courseRouter = router({
           OFFSET ${input.offset}
         `, ...filterParams)
 
+        // Count total for pagination (same WHERE, no LIMIT)
+        const countResult = await ctx.prisma.$queryRawUnsafe<any[]>(`
+          SELECT COUNT(*)::int as total
+          FROM "Course" c
+          WHERE (
+            c."searchVector" @@ plainto_tsquery('english', $1)
+            OR ${aliasSQL}
+            OR c."code" ILIKE $1 || '%'
+            OR c."name" ILIKE '%' || $1 || '%'
+          )
+          ${filterSQL}
+        `, ...filterParams)
+        const total = countResult[0]?.total || 0
+
         // Transform raw results to match Prisma format
-        return courses.map(c => ({
-          id: c.id,
-          code: c.code,
-          name: c.name,
-          description: c.description,
-          credits: c.credits,
-          level: c.level,
-          avgGPA: c.avgGPA,
-          lastOffered: c.lastOffered,
-          schoolId: c.schoolId,
-          breadths: c.breadths,
-          genEds: c.genEds,
-          school: {
-            id: c.school_id,
-            name: c.school_name,
-          },
-          _count: {
-            reviews: c.review_count,
-          },
-          _searchRank: c.rank,
-        }))
+        return {
+          courses: courses.map(c => ({
+            id: c.id,
+            code: c.code,
+            name: c.name,
+            description: c.description,
+            credits: c.credits,
+            level: c.level,
+            avgGPA: c.avgGPA,
+            lastOffered: c.lastOffered,
+            schoolId: c.schoolId,
+            breadths: c.breadths,
+            genEds: c.genEds,
+            school: {
+              id: c.school_id,
+              name: c.school_name,
+            },
+            _count: {
+              reviews: c.review_count,
+            },
+            _searchRank: c.rank,
+          })),
+          total,
+        }
       }
 
       // Fallback to standard Prisma query (no search term)
@@ -164,20 +181,23 @@ export const courseRouter = router({
       if (input.sortBy === 'gpa') orderBy = { avgGPA: 'desc' }
       else if (input.sortBy === 'reviews') orderBy = { reviews: { _count: 'desc' } }
 
-      const courses = await ctx.prisma.course.findMany({
-        where,
-        include: {
-          school: true,
-          _count: {
-            select: { reviews: true },
+      const [courses, total] = await Promise.all([
+        ctx.prisma.course.findMany({
+          where,
+          include: {
+            school: true,
+            _count: {
+              select: { reviews: true },
+            },
           },
-        },
-        take: input.limit,
-        skip: input.offset,
-        orderBy,
-      })
+          take: input.limit,
+          skip: input.offset,
+          orderBy,
+        }),
+        ctx.prisma.course.count({ where }),
+      ])
 
-      return courses
+      return { courses, total }
     }),
 
   // Full-text search with suggestions (for autocomplete / quick search)

@@ -2,11 +2,13 @@ import { Logo } from '@/components/Logo'
 import Link from 'next/link'
 import { AlertCircle } from 'lucide-react'
 
-export default function AuthErrorPage({
+export default async function AuthErrorPage({
   searchParams,
 }: {
-  searchParams: { error?: string }
+  searchParams: Promise<{ error?: string }>
 }) {
+  const params = await searchParams
+  
   const errorMessages: Record<string, string> = {
     Configuration: 'There is a problem with the server configuration.',
     AccessDenied: 'You must use a @wisc.edu email address.',
@@ -14,7 +16,7 @@ export default function AuthErrorPage({
     Default: 'An error occurred during authentication.',
   }
 
-  const error = searchParams.error || 'Default'
+  const error = params.error || 'Default'
   const message = errorMessages[error] || errorMessages.Default
 
   return (

@@ -82,7 +82,7 @@ export async function submitReview(data: ReviewFormData) {
       instructor = await prisma.instructor.create({
         data: {
           name: validatedData.instructorName,
-          aliases: []
+          aliases: null
         }
       })
     }
@@ -137,9 +137,9 @@ export async function submitReview(data: ReviewFormData) {
         gradingComment: validatedData.gradingComment || null,
         workloadComment: validatedData.workloadComment || null,
         
-        // Metadata
-        assessments: validatedData.assessments,
-        tags: validatedData.tags || [],
+        // Metadata (convert arrays to JSON strings)
+        assessments: validatedData.assessments ? JSON.stringify(validatedData.assessments) : null,
+        tags: validatedData.tags ? JSON.stringify(validatedData.tags) : null,
         resourceLink: validatedData.resourceLink || null,
       },
       include: {

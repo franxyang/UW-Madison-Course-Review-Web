@@ -1,13 +1,31 @@
 'use client'
 
 import React, { useState } from 'react'
-import { submitReview, ReviewFormData } from '@/app/actions/reviews'
 import { MessageSquare, X, AlertCircle } from 'lucide-react'
 import { toast } from 'sonner'
+import { trpc } from '@/lib/trpc/client'
 
 interface ReviewFormProps {
   courseId: string
   courseName: string
+}
+
+type ReviewFormData = {
+  courseId: string
+  term: string
+  title?: string
+  gradeReceived: string
+  contentRating: string
+  teachingRating: string
+  gradingRating: string
+  workloadRating: string
+  contentComment?: string
+  teachingComment?: string
+  gradingComment?: string
+  workloadComment?: string
+  assessments: string[]
+  resourceLink?: string
+  instructorName: string
 }
 
 const GRADES = ['A', 'AB', 'B', 'BC', 'C', 'D', 'F']
@@ -29,9 +47,7 @@ function getRatingColor(rating: string) {
 
 export const ReviewForm: React.FC<ReviewFormProps> = ({ courseId, courseName }) => {
   const [isOpen, setIsOpen] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState(false)
 
   const [formData, setFormData] = useState<Partial<ReviewFormData>>({
     courseId,
@@ -45,6 +61,41 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({ courseId, courseName }) 
     instructorName: ''
   })
 
+  const utils = trpc.useUtils()
+  const createReviewMutation = trpc.review.create.useMutation({
+    onSuccess: () => {
+      toast.success('Review submitted successfully! 🎉', {
+        description: 'Your review is now visible to other students.'
+      })
+      
+      // Invalidate course query to refresh reviews
+      utils.course.byId.invalidate({ id: courseId })
+      
+      // Reset form and close modal after a short delay
+      setTimeout(() => {
+        setIsOpen(false)
+        setError(null)
+        setFormData({
+          courseId,
+          term: TERMS[0],
+          gradeReceived: '',
+          contentRating: '',
+          teachingRating: '',
+          gradingRating: '',
+          workloadRating: '',
+          assessments: [],
+          instructorName: ''
+        })
+      }, 1500)
+    },
+    onError: (error) => {
+      setError(error.message)
+      toast.error('Failed to submit review', {
+        description: error.message
+      })
+    }
+  })
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
@@ -56,47 +107,34 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({ courseId, courseName }) 
       return
     }
 
-    setIsSubmitting(true)
-
-    try {
-      const result = await submitReview(formData as ReviewFormData)
-
-      if (result.success) {
-        setSuccess(true)
-        toast.success('Review submitted successfully! 🎉', {
-          description: 'Your review is now visible to other students.'
-        })
-        
-        setTimeout(() => {
-          setIsOpen(false)
-          setSuccess(false)
-          // Reset form
-          setFormData({
-            courseId,
-            term: TERMS[0],
-            gradeReceived: '',
-            contentRating: '',
-            teachingRating: '',
-            gradingRating: '',
-            workloadRating: '',
-            assessments: [],
-            instructorName: ''
-          })
-        }, 1500)
-      } else {
-        setError(result.error || 'Failed to submit review')
-        toast.error('Failed to submit review', {
-          description: result.error || 'Please try again later.'
-        })
-      }
-    } catch (err) {
-      setError('An error occurred while submitting your review')
-      toast.error('An error occurred', {
-        description: 'Please try again later.'
-      })
-    } finally {
-      setIsSubmitting(false)
+    // Validate rating values
+    const validRatings = ['A', 'AB', 'B', 'BC', 'C', 'D', 'F']
+    if (!validRatings.includes(formData.gradeReceived) ||
+        !validRatings.includes(formData.contentRating) ||
+        !validRatings.includes(formData.teachingRating) ||
+        !validRatings.includes(formData.gradingRating) ||
+        !validRatings.includes(formData.workloadRating)) {
+      setError('Invalid rating values')
+      return
     }
+
+    createReviewMutation.mutate({
+      courseId: formData.courseId!,
+      term: formData.term!,
+      title: formData.title,
+      gradeReceived: formData.gradeReceived as 'A' | 'AB' | 'B' | 'BC' | 'C' | 'D' | 'F',
+      contentRating: formData.contentRating as 'A' | 'AB' | 'B' | 'BC' | 'C' | 'D' | 'F',
+      teachingRating: formData.teachingRating as 'A' | 'AB' | 'B' | 'BC' | 'C' | 'D' | 'F',
+      gradingRating: formData.gradingRating as 'A' | 'AB' | 'B' | 'BC' | 'C' | 'D' | 'F',
+      workloadRating: formData.workloadRating as 'A' | 'AB' | 'B' | 'BC' | 'C' | 'D' | 'F',
+      contentComment: formData.contentComment,
+      teachingComment: formData.teachingComment,
+      gradingComment: formData.gradingComment,
+      workloadComment: formData.workloadComment,
+      assessments: formData.assessments,
+      resourceLink: formData.resourceLink,
+      instructorName: formData.instructorName!,
+    })
   }
 
   const toggleAssessment = (assessment: string) => {
@@ -124,7 +162,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({ courseId, courseName }) 
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
         {/* Background overlay */}
-        <div className="fixed inset-0 transition-opacity" onClick={() => setIsOpen(false)}>
+        <div className="fixed inset-0 transition-opacity" onClick={() => !createReviewMutation.isPending && setIsOpen(false)}>
           <div className="absolute inset-0 bg-slate-900 opacity-50"></div>
         </div>
 
@@ -138,8 +176,9 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({ courseId, courseName }) 
                 <p className="mt-1 text-sm text-slate-600">{courseName}</p>
               </div>
               <button
-                onClick={() => setIsOpen(false)}
-                className="text-slate-400 hover:text-slate-600 transition-colors"
+                onClick={() => !createReviewMutation.isPending && setIsOpen(false)}
+                className="text-slate-400 hover:text-slate-600 transition-colors disabled:opacity-50"
+                disabled={createReviewMutation.isPending}
               >
                 <X size={24} />
               </button>
@@ -155,7 +194,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({ courseId, courseName }) 
               </div>
             )}
 
-            {success && (
+            {createReviewMutation.isSuccess && (
               <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
                 <span className="text-sm text-green-700">Review submitted successfully!</span>
               </div>
@@ -172,6 +211,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({ courseId, courseName }) 
                     value={formData.term}
                     onChange={(e) => setFormData({ ...formData, term: e.target.value })}
                     className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-uw-red/20 focus:border-uw-red"
+                    disabled={createReviewMutation.isPending}
                   >
                     {TERMS.map(term => (
                       <option key={term} value={term}>{term}</option>
@@ -189,6 +229,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({ courseId, courseName }) 
                     onChange={(e) => setFormData({ ...formData, instructorName: e.target.value })}
                     placeholder="Professor name"
                     className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-uw-red/20 focus:border-uw-red"
+                    disabled={createReviewMutation.isPending}
                   />
                 </div>
               </div>
@@ -209,6 +250,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({ courseId, courseName }) 
                           ? 'bg-uw-red border-uw-red text-white'
                           : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
                       }`}
+                      disabled={createReviewMutation.isPending}
                     >
                       {grade}
                     </button>
@@ -240,6 +282,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({ courseId, courseName }) 
                                   ? 'bg-white/80 text-slate-900 shadow-sm'
                                   : 'hover:bg-white/40'
                               }`}
+                              disabled={createReviewMutation.isPending}
                             >
                               {rating}
                             </button>
@@ -254,6 +297,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({ courseId, courseName }) 
                           maxLength={3000}
                           className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-uw-red/20 focus:border-uw-red resize-none"
                           rows={2}
+                          disabled={createReviewMutation.isPending}
                         />
                         <div className="text-xs text-slate-400 mt-1">
                           {((formData[comment as keyof typeof formData] as string) || '').length}/3000
@@ -275,6 +319,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({ courseId, courseName }) 
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   placeholder="Summarize your experience"
                   className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-uw-red/20 focus:border-uw-red"
+                  disabled={createReviewMutation.isPending}
                 />
               </div>
 
@@ -294,6 +339,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({ courseId, courseName }) 
                           ? 'bg-uw-red border-uw-red text-white'
                           : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
                       }`}
+                      disabled={createReviewMutation.isPending}
                     >
                       {assessment}
                     </button>
@@ -312,6 +358,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({ courseId, courseName }) 
                   onChange={(e) => setFormData({ ...formData, resourceLink: e.target.value })}
                   placeholder="Google Drive or Box link to notes/resources"
                   className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-uw-red/20 focus:border-uw-red"
+                  disabled={createReviewMutation.isPending}
                 />
               </div>
             </div>
@@ -322,16 +369,16 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({ courseId, courseName }) 
                 type="button"
                 onClick={() => setIsOpen(false)}
                 className="flex-1 px-4 py-2 border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
-                disabled={isSubmitting}
+                disabled={createReviewMutation.isPending}
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 className="flex-1 px-4 py-2 bg-uw-red text-white rounded-lg hover:bg-uw-dark transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={isSubmitting}
+                disabled={createReviewMutation.isPending}
               >
-                {isSubmitting ? 'Submitting...' : 'Submit Review'}
+                {createReviewMutation.isPending ? 'Submitting...' : 'Submit Review'}
               </button>
             </div>
           </form>

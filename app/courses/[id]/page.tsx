@@ -1,66 +1,14 @@
-import { prisma } from '@/lib/prisma'
-import { notFound } from 'next/navigation'
+'use client'
+
+import { notFound, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { Logo } from '@/components/Logo'
 import { VoteButton } from '@/components/VoteButton'
-import { auth } from '@/auth'
 import { ArrowLeft, Clock, BookOpen, Users, Star, Calendar, Building, Hash, AlertCircle, MessageSquare, ChevronRight } from 'lucide-react'
 import { ReviewForm } from '@/components/ReviewForm'
 import { CommentSection } from '@/components/CommentSection'
-
-async function getCourse(id: string) {
-  try {
-    const course = await prisma.course.findUnique({
-      where: { id },
-      include: {
-        school: true,
-        reviews: {
-          include: {
-            author: true,
-            instructor: true,
-            comments: {
-              include: {
-                author: true
-              }
-            }
-          },
-          orderBy: {
-            createdAt: 'desc'
-          }
-        },
-        instructors: true,
-        gradeDistributions: {
-          orderBy: {
-            term: 'desc'
-          }
-        },
-        prerequisites: {
-          select: {
-            id: true,
-            code: true,
-            name: true
-          }
-        },
-        prerequisiteFor: {
-          select: {
-            id: true,
-            code: true,
-            name: true
-          }
-        }
-      }
-    })
-
-    if (!course) {
-      notFound()
-    }
-
-    return course
-  } catch (error) {
-    console.error('Error fetching course:', error)
-    notFound()
-  }
-}
+import { trpc } from '@/lib/trpc/client'
+import { useSession } from 'next-auth/react'
 
 function getGradeColor(grade: string) {
   const gradeColors: Record<string, string> = {
@@ -86,18 +34,65 @@ function getRatingColor(rating: string) {
   return colors[rating] || 'bg-slate-50 border-slate-200 text-slate-700'
 }
 
-export default async function CoursePage({ params }: { params: { id: string } }) {
-  const [course, session] = await Promise.all([
-    getCourse(params.id),
-    auth()
-  ])
+export default function CoursePage() {
+  const params = useParams()
+  const id = params.id as string
+  const { data: session } = useSession()
+
+  // Fetch course with tRPC
+  const { data: course, isLoading, error } = trpc.course.byId.useQuery({ id })
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-50/50">
+        {/* Header Skeleton */}
+        <header className="bg-white border-b border-slate-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-16">
+              <div className="flex items-center gap-3">
+                <Link href="/" className="flex items-center gap-2">
+                  <Logo size={32} />
+                  <span className="text-xl font-bold text-slate-900">WiscFlow</span>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Loading State */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="animate-pulse space-y-6">
+            <div className="h-8 w-48 bg-slate-200 rounded" />
+            <div className="bg-white rounded-lg border border-slate-200 p-6">
+              <div className="h-10 w-32 bg-slate-200 rounded mb-4" />
+              <div className="h-6 w-64 bg-slate-200 rounded mb-6" />
+              <div className="h-24 w-full bg-slate-200 rounded" />
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (error || !course) {
+    notFound()
+  }
+
+  // Parse JSON fields
+  const breadths = course.breadths ? (typeof course.breadths === 'string' ? JSON.parse(course.breadths) : course.breadths) : []
+  
+  // Parse reviews' assessments
+  const reviewsWithParsedData = course.reviews.map(review => ({
+    ...review,
+    assessments: review.assessments ? (typeof review.assessments === 'string' ? JSON.parse(review.assessments) : review.assessments) : []
+  }))
 
   // Calculate average ratings
-  const avgRatings = course.reviews.length > 0 ? {
-    content: course.reviews.reduce((sum, r) => sum + (r.contentRating ? ['F', 'D', 'C', 'B', 'A'].indexOf(r.contentRating) + 1 : 0), 0) / course.reviews.length,
-    teaching: course.reviews.reduce((sum, r) => sum + (r.teachingRating ? ['F', 'D', 'C', 'B', 'A'].indexOf(r.teachingRating) + 1 : 0), 0) / course.reviews.length,
-    grading: course.reviews.reduce((sum, r) => sum + (r.gradingRating ? ['F', 'D', 'C', 'B', 'A'].indexOf(r.gradingRating) + 1 : 0), 0) / course.reviews.length,
-    workload: course.reviews.reduce((sum, r) => sum + (r.workloadRating ? ['F', 'D', 'C', 'B', 'A'].indexOf(r.workloadRating) + 1 : 0), 0) / course.reviews.length
+  const avgRatings = reviewsWithParsedData.length > 0 ? {
+    content: reviewsWithParsedData.reduce((sum, r) => sum + (r.contentRating ? ['F', 'D', 'C', 'B', 'A'].indexOf(r.contentRating) + 1 : 0), 0) / reviewsWithParsedData.length,
+    teaching: reviewsWithParsedData.reduce((sum, r) => sum + (r.teachingRating ? ['F', 'D', 'C', 'B', 'A'].indexOf(r.teachingRating) + 1 : 0), 0) / reviewsWithParsedData.length,
+    grading: reviewsWithParsedData.reduce((sum, r) => sum + (r.gradingRating ? ['F', 'D', 'C', 'B', 'A'].indexOf(r.gradingRating) + 1 : 0), 0) / reviewsWithParsedData.length,
+    workload: reviewsWithParsedData.reduce((sum, r) => sum + (r.workloadRating ? ['F', 'D', 'C', 'B', 'A'].indexOf(r.workloadRating) + 1 : 0), 0) / reviewsWithParsedData.length
   } : null
 
   // Calculate grade distribution totals
@@ -208,11 +203,11 @@ export default async function CoursePage({ params }: { params: { id: string } })
             </div>
           )}
 
-          {course.breadths && course.breadths.length > 0 && (
+          {breadths && breadths.length > 0 && (
             <div className="mt-4">
               <h4 className="text-sm font-medium text-slate-900 mb-2">Breadth Requirements</h4>
               <div className="flex flex-wrap gap-2">
-                {course.breadths.map(breadth => (
+                {breadths.map((breadth: string) => (
                   <span key={breadth} className="px-2 py-1 text-xs bg-slate-100 text-slate-700 rounded">
                     {breadth}
                   </span>
@@ -298,7 +293,7 @@ export default async function CoursePage({ params }: { params: { id: string } })
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold text-slate-900">
-              Student Reviews ({course.reviews.length})
+              Student Reviews ({reviewsWithParsedData.length})
             </h3>
             {avgRatings && (
               <div className="flex items-center gap-4 text-sm">
@@ -316,14 +311,14 @@ export default async function CoursePage({ params }: { params: { id: string } })
           </div>
 
           {/* Existing Reviews */}
-          {course.reviews.length === 0 ? (
+          {reviewsWithParsedData.length === 0 ? (
             <div className="bg-white rounded-lg border border-slate-200 p-12 text-center">
               <MessageSquare className="mx-auto h-12 w-12 text-slate-300 mb-4" />
               <p className="text-slate-600">No reviews yet. Be the first to review this course!</p>
             </div>
           ) : (
             <div className="space-y-4">
-              {course.reviews.map(review => (
+              {reviewsWithParsedData.map(review => (
                 <div key={review.id} className="bg-white rounded-lg border border-slate-200 p-6">
                   <div className="flex items-start justify-between mb-4">
                     <div>
@@ -393,7 +388,7 @@ export default async function CoursePage({ params }: { params: { id: string } })
                   {/* Assessments */}
                   {review.assessments && review.assessments.length > 0 && (
                     <div className="flex flex-wrap gap-2 mb-4">
-                      {review.assessments.map(assessment => (
+                      {review.assessments.map((assessment: string) => (
                         <span key={assessment} className="px-2 py-1 text-xs bg-slate-100 text-slate-700 rounded">
                           {assessment}
                         </span>
@@ -422,10 +417,10 @@ export default async function CoursePage({ params }: { params: { id: string } })
                       initialVoteCount={review.votes?.length || 0}
                       initialIsVoted={
                         session?.user?.email
-                          ? review.votes?.some((vote: any) => vote.user?.email === session.user.email) || false
+                          ? review.votes?.some((vote: any) => vote.user?.email === session?.user?.email) || false
                           : false
                       }
-                      userEmail={session?.user?.email}
+                      userEmail={session?.user?.email || undefined}
                     />
                   </div>
 

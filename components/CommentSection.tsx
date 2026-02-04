@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState } from 'react'
 import { MessageSquare, Send, Trash2 } from 'lucide-react'
-import { addComment, deleteComment } from '@/app/actions/comments'
 import { toast } from 'sonner'
+import { trpc } from '@/lib/trpc/client'
 
 interface Comment {
   id: string
@@ -25,7 +25,35 @@ interface CommentSectionProps {
 export function CommentSection({ reviewId, comments, userEmail }: CommentSectionProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [commentText, setCommentText] = useState('')
-  const [isPending, startTransition] = useTransition()
+
+  const utils = trpc.useUtils()
+
+  const createCommentMutation = trpc.comment.create.useMutation({
+    onSuccess: () => {
+      toast.success('Comment added!')
+      setCommentText('')
+      // Invalidate course query to refresh comments
+      utils.course.byId.invalidate()
+    },
+    onError: (error) => {
+      toast.error('Failed to add comment', {
+        description: error.message
+      })
+    }
+  })
+
+  const deleteCommentMutation = trpc.comment.delete.useMutation({
+    onSuccess: () => {
+      toast.success('Comment deleted')
+      // Invalidate course query to refresh comments
+      utils.course.byId.invalidate()
+    },
+    onError: (error) => {
+      toast.error('Failed to delete comment', {
+        description: error.message
+      })
+    }
+  })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -40,17 +68,9 @@ export function CommentSection({ reviewId, comments, userEmail }: CommentSection
       return
     }
 
-    startTransition(async () => {
-      const result = await addComment(reviewId, commentText)
-
-      if (result.success) {
-        toast.success('Comment added!')
-        setCommentText('')
-      } else {
-        toast.error('Failed to add comment', {
-          description: result.error
-        })
-      }
+    createCommentMutation.mutate({
+      reviewId,
+      text: commentText
     })
   }
 
@@ -59,18 +79,10 @@ export function CommentSection({ reviewId, comments, userEmail }: CommentSection
       return
     }
 
-    startTransition(async () => {
-      const result = await deleteComment(commentId)
-
-      if (result.success) {
-        toast.success('Comment deleted')
-      } else {
-        toast.error('Failed to delete comment', {
-          description: result.error
-        })
-      }
-    })
+    deleteCommentMutation.mutate({ commentId })
   }
+
+  const isPending = createCommentMutation.isPending || deleteCommentMutation.isPending
 
   return (
     <div className="mt-4 pt-4 border-t border-slate-100">
@@ -97,6 +109,7 @@ export function CommentSection({ reviewId, comments, userEmail }: CommentSection
                 onChange={(e) => setCommentText(e.target.value)}
                 placeholder="Add a comment..."
                 disabled={isPending}
+                maxLength={500}
                 className="flex-1 px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-uw-red/20 focus:border-uw-red disabled:opacity-50"
               />
               <button

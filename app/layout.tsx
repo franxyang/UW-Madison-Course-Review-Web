@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import { Toaster } from '@/components/Toaster'
+import { Providers } from './providers'
 
 export const metadata: Metadata = {
   title: 'WiscFlow - UW Madison Course Reviews',
@@ -15,8 +16,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="bg-slate-50/50 text-slate-900 font-sans antialiased">
-        {children}
-        <Toaster />
+        <Providers>
+          {children}
+          <Toaster />
+        </Providers>
       </body>
     </html>
   )

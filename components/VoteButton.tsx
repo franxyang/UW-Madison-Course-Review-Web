@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState } from 'react'
 import { ThumbsUp } from 'lucide-react'
-import { toggleVote } from '@/app/actions/votes'
 import { toast } from 'sonner'
+import { trpc } from '@/lib/trpc/client'
 
 interface VoteButtonProps {
   reviewId: string
@@ -20,7 +20,33 @@ export function VoteButton({
 }: VoteButtonProps) {
   const [isVoted, setIsVoted] = useState(initialIsVoted)
   const [voteCount, setVoteCount] = useState(initialVoteCount)
-  const [isPending, startTransition] = useTransition()
+
+  const utils = trpc.useUtils()
+  const voteMutation = trpc.review.vote.useMutation({
+    onMutate: async () => {
+      // Optimistic update
+      const newIsVoted = !isVoted
+      const newVoteCount = newIsVoted ? voteCount + 1 : voteCount - 1
+      
+      setIsVoted(newIsVoted)
+      setVoteCount(newVoteCount)
+    },
+    onError: (error) => {
+      // Revert optimistic update on error
+      setIsVoted(!isVoted)
+      setVoteCount(isVoted ? voteCount - 1 : voteCount + 1)
+      toast.error('Failed to vote', {
+        description: error.message
+      })
+    },
+    onSuccess: (data) => {
+      // Update state from server response
+      setIsVoted(data.isVoted)
+      
+      // Optionally invalidate course query to refresh all reviews
+      // utils.course.byId.invalidate()
+    }
+  })
 
   const handleVote = async () => {
     if (!userEmail) {
@@ -30,36 +56,18 @@ export function VoteButton({
       return
     }
 
-    // Optimistic update
-    const newIsVoted = !isVoted
-    const newVoteCount = newIsVoted ? voteCount + 1 : voteCount - 1
-    
-    setIsVoted(newIsVoted)
-    setVoteCount(newVoteCount)
-
-    startTransition(async () => {
-      const result = await toggleVote(reviewId)
-
-      if (!result.success) {
-        // Revert optimistic update on error
-        setIsVoted(isVoted)
-        setVoteCount(voteCount)
-        toast.error('Failed to vote', {
-          description: result.error
-        })
-      }
-    })
+    voteMutation.mutate({ reviewId })
   }
 
   return (
     <button
       onClick={handleVote}
-      disabled={isPending}
+      disabled={voteMutation.isPending}
       className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all ${
         isVoted
           ? 'bg-uw-red text-white border-uw-red hover:bg-uw-dark'
           : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50 hover:border-slate-400'
-      } ${isPending ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+      } ${voteMutation.isPending ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
     >
       <ThumbsUp size={16} className={isVoted ? 'fill-current' : ''} />
       <span className="text-sm font-medium">

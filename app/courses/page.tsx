@@ -1,6 +1,8 @@
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import { Logo } from '@/components/Logo'
+import { UserMenu, GuestMenu } from '@/components/UserMenu'
+import { auth } from '@/auth'
 import { Search, Filter, BookOpen, Users, Star, GraduationCap, MessageSquare } from 'lucide-react'
 
 async function getCourses(searchParams: Promise<{ search?: string; school?: string }>) {
@@ -56,9 +58,10 @@ export default async function CoursesPage({
   searchParams: Promise<{ search?: string; school?: string }>
 }) {
   const params = await searchParams
-  const [courses, schools] = await Promise.all([
+  const [courses, schools, session] = await Promise.all([
     getCourses(searchParams),
-    getSchools()
+    getSchools(),
+    auth()
   ])
 
   return (
@@ -73,17 +76,20 @@ export default async function CoursesPage({
                 <span className="text-xl font-bold text-slate-900">WiscFlow</span>
               </Link>
             </div>
-            <nav className="flex items-center gap-6">
-              <Link href="/courses" className="text-uw-red font-medium">
-                Courses
-              </Link>
-              <Link href="/reviews" className="text-slate-600 hover:text-slate-900">
-                Reviews
-              </Link>
-              <Link href="/about" className="text-slate-600 hover:text-slate-900">
-                About
-              </Link>
-            </nav>
+            <div className="flex items-center gap-6">
+              <nav className="flex items-center gap-6">
+                <Link href="/courses" className="text-uw-red font-medium">
+                  Courses
+                </Link>
+                <Link href="/reviews" className="text-slate-600 hover:text-slate-900">
+                  Reviews
+                </Link>
+                <Link href="/about" className="text-slate-600 hover:text-slate-900">
+                  About
+                </Link>
+              </nav>
+              {session?.user ? <UserMenu user={session.user} /> : <GuestMenu />}
+            </div>
           </div>
         </div>
       </header>

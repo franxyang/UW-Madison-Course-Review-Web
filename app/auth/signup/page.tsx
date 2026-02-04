@@ -1,8 +1,8 @@
 import { Logo } from '@/components/Logo'
 import Link from 'next/link'
-import { Mail, Lock, AlertCircle } from 'lucide-react'
+import { Mail, User, AlertCircle } from 'lucide-react'
 
-export default function SignInPage() {
+export default function SignUpPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center px-4">
       <div className="max-w-md w-full">
@@ -11,21 +11,39 @@ export default function SignInPage() {
           <div className="flex justify-center mb-4">
             <Logo size={48} />
           </div>
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Welcome to WiscFlow</h1>
-          <p className="text-slate-600">Sign in with your @wisc.edu email</p>
+          <h1 className="text-3xl font-bold text-slate-900 mb-2">Join WiscFlow</h1>
+          <p className="text-slate-600">Create your account to start reviewing courses</p>
         </div>
 
-        {/* Sign In Card */}
+        {/* Sign Up Card */}
         <div className="bg-white rounded-xl shadow-lg p-8 border border-slate-200">
           {/* Email Requirement Notice */}
           <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg flex gap-3">
             <AlertCircle className="text-blue-600 flex-shrink-0 mt-0.5" size={20} />
             <div className="text-sm text-blue-800">
-              <strong>UW Madison students only.</strong> You must use a @wisc.edu email address to access WiscFlow.
+              <strong>UW Madison students only.</strong> You must use a @wisc.edu email address.
             </div>
           </div>
 
-          <form action="/api/auth/signin/email" method="POST" className="space-y-4">
+          <form action="/api/auth/signup" method="POST" className="space-y-4">
+            {/* Name Input */}
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium text-slate-700 mb-2">
+                Full Name
+              </label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  placeholder="Bucky Badger"
+                  required
+                  className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-uw-red/20 focus:border-uw-red"
+                />
+              </div>
+            </div>
+
             {/* Email Input */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-2">
@@ -48,12 +66,33 @@ export default function SignInPage() {
               </p>
             </div>
 
+            {/* Terms Checkbox */}
+            <div className="flex items-start gap-2">
+              <input
+                type="checkbox"
+                id="terms"
+                name="terms"
+                required
+                className="mt-1 w-4 h-4 text-uw-red border-slate-300 rounded focus:ring-uw-red/20"
+              />
+              <label htmlFor="terms" className="text-sm text-slate-600">
+                I agree to the{' '}
+                <Link href="/terms" className="text-uw-red hover:text-uw-dark font-medium">
+                  Terms of Service
+                </Link>{' '}
+                and{' '}
+                <Link href="/privacy" className="text-uw-red hover:text-uw-dark font-medium">
+                  Privacy Policy
+                </Link>
+              </label>
+            </div>
+
             {/* Submit Button */}
             <button
               type="submit"
               className="w-full bg-uw-red text-white py-3 rounded-lg font-medium hover:bg-uw-dark transition-colors"
             >
-              Continue with Email
+              Create Account
             </button>
           </form>
 
@@ -79,29 +118,22 @@ export default function SignInPage() {
               <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
               <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
             </svg>
-            Sign in with Google (Coming Soon)
+            Sign up with Google (Coming Soon)
           </button>
 
           {/* Help Text */}
           <p className="mt-6 text-center text-sm text-slate-600">
-            Don't have an account?{' '}
-            <Link href="/auth/signup" className="text-uw-red hover:text-uw-dark font-medium">
-              Sign up
+            Already have an account?{' '}
+            <Link href="/auth/signin" className="text-uw-red hover:text-uw-dark font-medium">
+              Sign in
             </Link>
           </p>
         </div>
 
-        {/* Footer */}
-        <div className="mt-6 text-center text-xs text-slate-500">
-          <p>
-            By continuing, you agree to WiscFlow's{' '}
-            <Link href="/terms" className="underline hover:text-slate-700">
-              Terms of Service
-            </Link>{' '}
-            and{' '}
-            <Link href="/privacy" className="underline hover:text-slate-700">
-              Privacy Policy
-            </Link>
+        {/* Community Guidelines */}
+        <div className="mt-6 p-4 bg-white/50 rounded-lg border border-slate-200">
+          <p className="text-xs text-slate-600 text-center">
+            <strong>Community Guidelines:</strong> Be respectful, honest, and constructive in your reviews. False or misleading information will result in account suspension.
           </p>
         </div>
       </div>

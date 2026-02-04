@@ -1,8 +1,8 @@
 # WiscFlow Project Roadmap
 
-**Last Updated**: 2026-02-03 23:27 CST  
-**Current Phase**: Phase 1 - Infrastructure Upgrade (40%)  
-**Next Step**: tRPC Integration
+**Last Updated**: 2026-02-04 02:45 CST  
+**Current Phase**: Phase 2 - Core Feature Enhancement  
+**Next Step**: User Incentive System (frosted glass + contributor levels)
 
 ## 🎯 Project Vision
 
@@ -90,22 +90,28 @@ A modern course review platform designed for UW-Madison students to make informe
 
 ---
 
-## 🚧 Current Progress (2026-02-03)
+## 🚧 Current Progress (2026-02-04)
 
-### ✅ Completed Today
-- ✅ **PostgreSQL Migration Complete** - SQLite → Neon PostgreSQL
-- ✅ **Department Model Added** - Supports many-to-many relationships
-- ✅ **Data Import** - 23 schools, 4,787 courses
-- ✅ **Documentation System Organized** - Created docs/ + PROGRESS.md + CHANGELOG.md
-- ✅ **Bug Fixes** - Null array errors, database connection stability
+### ✅ Phase 1 — COMPLETE
+- ✅ PostgreSQL Migration (SQLite → Neon)
+- ✅ tRPC Integration (all Server Actions migrated)
+- ✅ Full-text Search (tsvector + GIN index)
+- ✅ Redis Caching (Upstash, graceful degradation)
+- ✅ Department Data (209 departments, 10,174 course-dept links)
+- ✅ Course Data Expansion (4,787 → 10,174 courses)
+- ✅ Alias Search (60+ alias groups, CS↔COMP SCI)
+- ✅ Left Sidebar Filters (school/dept/level/credits/sort, multi-select)
+- ✅ School Hierarchy (College>School>Dept)
+- ✅ Cross-listed Courses (1,368 groups)
+- ✅ Department Filter Fix + Pagination (30/page)
 
-### ⏳ In Progress
-- [ ] **tRPC Integration** (Starting soon - Day 3-5)
-
-### 📅 This Week's Plan
-- [ ] Complete tRPC migration (2-3 days)
-- [ ] Import Department data (1 day)
-- [ ] Implement basic Filter functionality (2-3 days)
+### 🔄 Phase 2 — In Progress
+- [ ] **User Incentive System** (review-gated access + contributor levels) 🔥
+- [ ] Advanced search (instructor, semester, GPA range)
+- [ ] Review management (edit, delete, report)
+- [ ] Instructor pages
+- [ ] User dashboard
+- [ ] Mobile responsiveness
 
 ---
 
@@ -125,7 +131,15 @@ A modern course review platform designed for UW-Madison students to make informe
   - By review count
   - By latest review date
 
-#### 2. Review System Enhancement
+#### 2. User Incentive System 🔥 NEW
+- [ ] Review-gated access (frosted glass blur for non-contributors)
+- [ ] 1-review minimum to unlock all reviews platform-wide
+- [ ] Contributor level system (Reader → Contributor → Active → Trusted → Expert → Legend)
+- [ ] Level badges displayed on reviews and profiles
+- [ ] Seasonal engagement boosts (enrollment period XP multipliers)
+- See: [docs/INCENTIVE_SYSTEM.md](INCENTIVE_SYSTEM.md)
+
+#### 3. Review System Enhancement
 - [ ] Review editing (users can edit their own reviews)
 - [ ] Review deletion (users can delete their own reviews)
 - [ ] Review reporting system (report inappropriate content)
@@ -249,6 +263,12 @@ A modern course review platform designed for UW-Madison students to make informe
 - **Database**: PostgreSQL + Prisma ORM
 - **Auth**: NextAuth.js v5
 - **Deployment**: TBD (Vercel recommended)
+
+### Recently Added
+- **tRPC**: End-to-end type-safe API ✅
+- **React Query**: Server state management ✅
+- **Redis**: Upstash caching layer ✅
+- **Full-text Search**: PostgreSQL tsvector ✅
 
 ### Planned Additions
 - **Charts**: Recharts or Chart.js

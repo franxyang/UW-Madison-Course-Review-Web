@@ -1,98 +1,93 @@
 # WiscFlow Development Progress
 
-**Last Updated**: 2026-02-04 01:40 CST  
-**Current Phase**: Phase 1 - Infrastructure Upgrade  
-**Completion**: 100%
+**Last Updated**: 2026-02-04 02:35 CST  
+**Current Phase**: Phase 2 - Core Feature Enhancement  
+**Overall Completion**: ~45%
 
 ---
 
 ## 🎯 Overall Progress
 
 ```
-Phase 1: Infrastructure  ████████████████████ 100%
-Phase 2: Core Features   ████████░░░░░░░░░░░░ 40%
-Phase 3: Advanced Feat.  ░░░░░░░░░░░░░░░░░░░░  0%
-Phase 4: Optimization    ░░░░░░░░░░░░░░░░░░░░  0%
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Overall:                ████████░░░░░░░░░░░░ 40%
+Phase 1: Infrastructure  ████████████████████ 100% ✅
+Phase 2: Core Features   █████████░░░░░░░░░░░  45%
+Phase 3: UX Optimization ░░░░░░░░░░░░░░░░░░░░   0%
+Phase 4: Advanced Feat.  ░░░░░░░░░░░░░░░░░░░░   0%
+Phase 5: Admin Portal    ░░░░░░░░░░░░░░░░░░░░   0%
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Overall:                 █████████░░░░░░░░░░░  45%
 ```
 
 ---
 
-## ✅ Phase 1: Infrastructure Upgrade (85% Complete)
+## ✅ Phase 1: Infrastructure Upgrade — 100% COMPLETE
 
-### ✅ PostgreSQL Migration (Complete - 2026-02-03)
-- [x] Neon PostgreSQL setup
-- [x] Prisma Schema migration (SQLite → PostgreSQL)
-- [x] Data import: 23 schools, 4,787 courses
-- [x] Testing and validation
+### PostgreSQL Migration ✅
+- Neon PostgreSQL (Serverless, US East Ohio)
+- Prisma ORM with full schema
 
-### ✅ Department Model (Complete - 2026-02-03)
-- [x] Department model with many-to-many relation
-- [x] Migration applied
+### Department Model ✅
+- 209 departments with school associations
+- Many-to-many CourseDepartment links (10,174 links)
 
-### ✅ tRPC Integration (Complete - 2026-02-04)
-- [x] tRPC server setup (trpc.ts, context.ts)
-- [x] Course Router: list, byId, getSchools, getDepartments, search
-- [x] Review Router: create (with instructor auto-create), vote
-- [x] Comment Router: create, delete
-- [x] Frontend migration to tRPC React hooks
-- [x] SessionProvider + tRPC Provider + React Query
-- [x] Optimistic UI for votes and comments
-- [x] End-to-end type safety verified
+### tRPC Integration ✅ (cd81c24)
+- Course Router: list, byId, getSchools, getDepartments, search
+- Review Router: create (with instructor auto-create), vote
+- Comment Router: create, delete
+- End-to-end type safety
 
-### ✅ Full-text Search (Complete - 2026-02-04)
-- [x] Added `searchVector` tsvector column to Course table
-- [x] Created GIN index for fast search
-- [x] Auto-update trigger on INSERT/UPDATE
-- [x] All 4,787 courses indexed
-- [x] Weighted search: code/name (A), description (B)
-- [x] Integrated into tRPC course.list endpoint
-- [x] Added course.search endpoint (autocomplete/prefix matching)
-- [x] Results ranked by relevance
+### Full-text Search ✅ (ee90540)
+- PostgreSQL tsvector + GIN index
+- Weighted search (code/name=A, description=B)
+- Auto-update trigger, all courses indexed
 
-### ✅ Redis Caching (Complete - 2026-02-04)
-- [x] Upstash Redis client setup
-- [x] Generic `cached()` wrapper with TTL
-- [x] Cache invalidation utilities
-- [x] Graceful degradation (works without Redis configured)
-- [x] Integrated into Schools and Departments queries
-- [x] Cache key builder utilities
+### Redis Caching ✅ (ee90540)
+- Upstash Redis client with generic `cached()` wrapper
+- Graceful degradation (works without Redis configured)
 
-### ✅ Department Data Import (Complete - 2026-02-04)
-- [x] Extracted 85 departments from course codes
-- [x] Created department records with school associations
-- [x] Linked all 4,787 courses to departments
-- [x] Department filter working in tRPC
+### Course Data Import ✅ (eca6c61)
+- 10,174 courses (expanded from 4,787)
+- 23 schools, 209 departments
+- Course code alias search (CS↔COMP SCI, 60+ alias groups)
 
-### ⏳ Remaining Phase 1 Tasks
-- [ ] Configure Upstash Redis credentials (needs user action)
-- [ ] Performance benchmarking (search < 100ms target)
+### Filtering System ✅ (eca6c61 + ff86d21)
+- Left sidebar FilterPanel with school/dept/level/credits/sort
+- Multi-select filters (schoolIds[], departmentIds[], levels[])
+- School hierarchy (College>School>Dept, type+parentId)
+- Cross-listed courses (1,368 groups)
+
+### Department Filter Fix + Pagination ✅ (3dade6a)
+- Department filter accuracy fixed
+- Pagination implemented (30 per page, page controls)
 
 ---
 
-## 🔄 Phase 2: Core Features (30% Complete)
+## 🔄 Phase 2: Core Features — 45% Complete
 
-### ✅ Completed Features
-- [x] User authentication (NextAuth + Google OAuth)
-- [x] Course list page
-- [x] Course detail page
-- [x] Review system (create/display)
-- [x] Vote functionality
-- [x] Comment functionality
-- [x] Grade distribution charts
+### ✅ Completed
+- [x] User authentication (NextAuth + Google OAuth, @wisc.edu)
+- [x] Course list page with search + filters + pagination
+- [x] Course detail page (grade distributions, prereqs, reviews)
+- [x] Review system (create with 4-dimension ratings)
+- [x] Vote functionality (optimistic UI)
+- [x] Comment functionality (create, delete)
+- [x] Loading states (skeleton UI)
 
-### ⏳ Planned
-- [ ] Advanced search and filters UI
-- [ ] Instructor pages
-- [ ] User dashboard
-- [ ] Review management (edit, delete, report)
+### ⏳ To Do
+- [ ] Advanced search (by instructor, by semester, GPA range)
+- [ ] Review edit/delete (users manage own reviews)
+- [ ] Review reporting system
+- [ ] Instructor pages (/instructors, /instructors/[id])
+- [ ] User dashboard (my reviews, saved courses, course planner)
+- [ ] Mobile responsive optimization
 
 ---
 
-## 📦 Phase 3 & 4: Not Started
+## 📦 Phase 3–5: Not Started
 
-See `docs/DEVELOPMENT_PLAN.md` for full roadmap.
+- **Phase 3**: UX/Visualization (charts, dark mode, mobile, performance)
+- **Phase 4**: Advanced features (AI summaries, community, analytics, notifications)
+- **Phase 5**: Admin portal (moderation, data management)
 
 ---
 
@@ -100,41 +95,45 @@ See `docs/DEVELOPMENT_PLAN.md` for full roadmap.
 
 ### Codebase
 ```
-Total files:   ~160 files
-Lines of code: ~15,000 lines
+Source files:  ~50 .ts/.tsx files (excl. backup/madgrades)
+Lines of code: ~6,355 lines
 Components:    ~15 components
 tRPC Routers:  3 (course, review, comment)
+Scripts:       7 (seed/check utilities)
 ```
 
 ### Database
 ```
 Schools:       23
 Courses:       10,174
-Departments:   209 (imported)
-Full-text:     4,787 courses indexed
+Departments:   209
+Course-Dept:   10,174 links
+Cross-listed:  1,368 groups
+Full-text:     All courses indexed (tsvector + GIN)
 ```
 
 ### Tech Stack
 ```
-✅ Next.js 15        ✅ TypeScript
-✅ Tailwind CSS      ✅ Prisma ORM
-✅ PostgreSQL (Neon)  ✅ NextAuth.js
-✅ tRPC              ✅ React Query
-✅ Full-text Search  ✅ Redis (Upstash) - code ready
+✅ Next.js 15        ✅ TypeScript       ✅ Tailwind CSS
+✅ Prisma ORM        ✅ PostgreSQL (Neon) ✅ NextAuth.js v5
+✅ tRPC              ✅ React Query       ✅ Full-text Search
+✅ Redis (Upstash)   ✅ Zod validation    ✅ Course Aliases
 ```
 
 ---
 
 ## 📝 Recent Commits
 
-### 2026-02-04
-- `cd81c24` - feat(trpc): complete tRPC integration + docs cleanup
-
-### 2026-02-03
-- `212b50c` - docs: create Chinese backups and translation tracking
-- `dc038dd` - feat(database): migrate to PostgreSQL + add Department model
+```
+3dade6a fix: department filter accuracy + add pagination
+ff86d21 feat: cross-listed courses, multi-select filters, school hierarchy
+eca6c61 feat: complete course data (10k+), alias search, left sidebar filters
+9dfcb32 feat(departments): import 85 departments with course links
+ee90540 feat(search+cache): full-text search with tsvector + Redis caching
+cd81c24 feat(trpc): complete tRPC integration + docs cleanup
+```
 
 ---
 
 **Last Updated By**: dev-agent  
-**Next Update**: After Phase 1 completion
+**Next Update**: After next feature completion

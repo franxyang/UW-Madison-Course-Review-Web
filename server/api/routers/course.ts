@@ -11,9 +11,12 @@ export const courseRouter = router({
     .input(
       z.object({
         search: z.string().optional(),
-        schoolId: z.string().optional(),
-        departmentId: z.string().optional(),
-        level: z.string().optional(),
+        schoolIds: z.array(z.string()).optional(),
+        departmentIds: z.array(z.string()).optional(),
+        levels: z.array(z.string()).optional(),
+        minCredits: z.number().min(0).max(10).optional(),
+        maxCredits: z.number().min(0).max(10).optional(),
+        sortBy: z.enum(['code', 'relevance', 'gpa', 'reviews']).optional(),
         limit: z.number().min(1).max(100).default(50),
         offset: z.number().min(0).default(0),
       })
@@ -32,15 +35,36 @@ export const courseRouter = router({
         const filterParams: any[] = [searchTerm]
         let paramIndex = 2
 
-        if (input.schoolId) {
-          filterClauses.push(`c."schoolId" = $${paramIndex}`)
-          filterParams.push(input.schoolId)
+        if (input.schoolIds && input.schoolIds.length > 0) {
+          const placeholders = input.schoolIds.map((_, i) => `$${paramIndex + i}`).join(', ')
+          filterClauses.push(`c."schoolId" IN (${placeholders})`)
+          filterParams.push(...input.schoolIds)
+          paramIndex += input.schoolIds.length
+        }
+
+        if (input.levels && input.levels.length > 0) {
+          const placeholders = input.levels.map((_, i) => `$${paramIndex + i}`).join(', ')
+          filterClauses.push(`c."level" IN (${placeholders})`)
+          filterParams.push(...input.levels)
+          paramIndex += input.levels.length
+        }
+
+        if (input.departmentIds && input.departmentIds.length > 0) {
+          const placeholders = input.departmentIds.map((_, i) => `$${paramIndex + i}`).join(', ')
+          filterClauses.push(`c."id" IN (SELECT "courseId" FROM "CourseDepartment" WHERE "departmentId" IN (${placeholders}))`)
+          filterParams.push(...input.departmentIds)
+          paramIndex += input.departmentIds.length
+        }
+
+        if (input.minCredits !== undefined) {
+          filterClauses.push(`c."credits" >= $${paramIndex}`)
+          filterParams.push(input.minCredits)
           paramIndex++
         }
 
-        if (input.level) {
-          filterClauses.push(`c."level" = $${paramIndex}`)
-          filterParams.push(input.level)
+        if (input.maxCredits !== undefined) {
+          filterClauses.push(`c."credits" <= $${paramIndex}`)
+          filterParams.push(input.maxCredits)
           paramIndex++
         }
 
@@ -113,21 +137,32 @@ export const courseRouter = router({
       // Fallback to standard Prisma query (no search term)
       const where: any = {}
 
-      if (input.schoolId) {
-        where.schoolId = input.schoolId
+      if (input.schoolIds && input.schoolIds.length > 0) {
+        where.schoolId = { in: input.schoolIds }
       }
 
-      if (input.level) {
-        where.level = input.level
+      if (input.levels && input.levels.length > 0) {
+        where.level = { in: input.levels }
       }
 
-      if (input.departmentId) {
+      if (input.departmentIds && input.departmentIds.length > 0) {
         where.departments = {
           some: {
-            departmentId: input.departmentId,
+            departmentId: { in: input.departmentIds },
           },
         }
       }
+
+      if (input.minCredits !== undefined || input.maxCredits !== undefined) {
+        where.credits = {}
+        if (input.minCredits !== undefined) where.credits.gte = input.minCredits
+        if (input.maxCredits !== undefined) where.credits.lte = input.maxCredits
+      }
+
+      // Sort
+      let orderBy: any = { code: 'asc' }
+      if (input.sortBy === 'gpa') orderBy = { avgGPA: 'desc' }
+      else if (input.sortBy === 'reviews') orderBy = { reviews: { _count: 'desc' } }
 
       const courses = await ctx.prisma.course.findMany({
         where,
@@ -139,7 +174,7 @@ export const courseRouter = router({
         },
         take: input.limit,
         skip: input.offset,
-        orderBy: { code: 'asc' },
+        orderBy,
       })
 
       return courses

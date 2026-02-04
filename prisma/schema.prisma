@@ -86,10 +86,19 @@ model User {
   createdAt     DateTime  @default(now())
 }
 
-// School: e.g., "College of Engineering"
+// School: Represents both Colleges and Schools in UW-Madison's hierarchy
+// UW-Madison structure: College > School > Department
+// Some entities are both (e.g., "Letters & Science" is a College containing Schools)
 model School {
   id          String       @id @default(cuid())
   name        String       @unique
+  type        String       @default("school") // "college", "school", "institute", "division"
+  
+  // Hierarchy: a School can have a parent College
+  parentId    String?
+  parent      School?      @relation("SchoolHierarchy", fields: [parentId], references: [id])
+  children    School[]     @relation("SchoolHierarchy")
+  
   courses     Course[]
   departments Department[]
 }

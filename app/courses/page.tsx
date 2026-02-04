@@ -18,43 +18,19 @@ export default function CoursesPage() {
   const [searchInput, setSearchInput] = useState(searchParams.get('search') || '')
   const [filters, setFilters] = useState<CourseFilters>({})
 
-  // Fetch courses with tRPC (combining search + filters)
+  // Fetch courses with tRPC (all filters sent to backend)
   const { data: courses, isLoading: coursesLoading } = trpc.course.list.useQuery({
     search: searchParams.get('search') || undefined,
-    schoolId: filters.schools?.[0], // For now, single school filter in backend
-    level: filters.levels?.[0], // For now, single level filter in backend
+    schoolIds: filters.schools,
+    departmentIds: filters.departments,
+    levels: filters.levels,
+    minCredits: filters.minCredits,
+    maxCredits: filters.maxCredits,
+    sortBy: (filters.sortBy as 'code' | 'relevance' | 'gpa' | 'reviews') || undefined,
     limit: 50,
   })
 
-  // Client-side filtering for multi-select (until backend supports arrays)
-  const filteredCourses = courses?.filter(course => {
-    // Multi-school filter
-    if (filters.schools && filters.schools.length > 0) {
-      if (!filters.schools.includes(course.schoolId)) return false
-    }
-    // Multi-level filter
-    if (filters.levels && filters.levels.length > 0) {
-      if (!filters.levels.includes(course.level)) return false
-    }
-    // Credits filter
-    if (filters.minCredits !== undefined && course.credits < filters.minCredits) return false
-    if (filters.maxCredits !== undefined && course.credits > filters.maxCredits) return false
-    return true
-  }) || []
-
-  // Sort
-  const sortedCourses = [...filteredCourses].sort((a, b) => {
-    switch (filters.sortBy) {
-      case 'gpa':
-        return (b.avgGPA || 0) - (a.avgGPA || 0)
-      case 'reviews':
-        return (b._count.reviews || 0) - (a._count.reviews || 0)
-      case 'relevance':
-        return ((b as any)._searchRank || 0) - ((a as any)._searchRank || 0)
-      default:
-        return a.code.localeCompare(b.code)
-    }
-  })
+  const sortedCourses = courses || []
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()

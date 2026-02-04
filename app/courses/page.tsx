@@ -83,8 +83,8 @@ function CoursesPageContent() {
                 <Link href="/courses" className="text-uw-red font-medium">
                   Courses
                 </Link>
-                <Link href="/reviews" className="text-slate-600 hover:text-slate-900">
-                  Reviews
+                <Link href="/instructors" className="text-slate-600 hover:text-slate-900">
+                  Instructors
                 </Link>
                 <Link href="/about" className="text-slate-600 hover:text-slate-900">
                   About

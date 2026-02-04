@@ -3,6 +3,7 @@ import { router, publicProcedure } from '../trpc/trpc'
 import { TRPCError } from '@trpc/server'
 import { Prisma } from '@prisma/client'
 import { cached, cacheKeys, TTL } from '@/lib/redis'
+import { expandSearchAliases } from '@/lib/courseAliases'
 
 export const courseRouter = router({
   // Get course list with search and filters
@@ -21,6 +22,10 @@ export const courseRouter = router({
       // Use full-text search when search term is provided
       if (input.search && input.search.trim().length > 0) {
         const searchTerm = input.search.trim()
+        
+        // Expand search to include course code aliases
+        // e.g., "CS 577" → also search "COMP SCI 577"
+        const aliases = expandSearchAliases(searchTerm)
 
         // Build additional WHERE clauses for filters
         const filterClauses: string[] = []
@@ -43,20 +48,40 @@ export const courseRouter = router({
           ? 'AND ' + filterClauses.join(' AND ')
           : ''
 
-        // Full-text search with ranking
+        // Build alias ILIKE conditions for code matching
+        const aliasConditions = aliases.map((_, i) => {
+          filterParams.push(`%${aliases[i]}%`)
+          return `c."code" ILIKE $${paramIndex + i}`
+        })
+        paramIndex += aliases.length
+        const aliasSQL = aliasConditions.length > 0
+          ? aliasConditions.join(' OR ')
+          : 'FALSE'
+
+        // Combined search: full-text OR code alias match
         const courses = await ctx.prisma.$queryRawUnsafe<any[]>(`
           SELECT 
             c."id", c."code", c."name", c."description", c."credits",
             c."level", c."avgGPA", c."lastOffered", c."schoolId",
             c."breadths", c."genEds",
             s."id" as "school_id", s."name" as "school_name",
-            ts_rank(c."searchVector", plainto_tsquery('english', $1)) AS rank,
+            GREATEST(
+              ts_rank(c."searchVector", plainto_tsquery('english', $1)),
+              CASE WHEN ${aliasSQL} THEN 1.0 ELSE 0.0 END
+            ) AS rank,
             (SELECT COUNT(*)::int FROM "Review" r WHERE r."courseId" = c."id") as review_count
           FROM "Course" c
           JOIN "School" s ON c."schoolId" = s."id"
-          WHERE c."searchVector" @@ plainto_tsquery('english', $1)
+          WHERE (
+            c."searchVector" @@ plainto_tsquery('english', $1)
+            OR ${aliasSQL}
+            OR c."code" ILIKE $1 || '%'
+            OR c."name" ILIKE '%' || $1 || '%'
+          )
           ${filterSQL}
-          ORDER BY rank DESC
+          ORDER BY 
+            CASE WHEN c."code" ILIKE $1 || '%' OR ${aliasSQL} THEN 0 ELSE 1 END,
+            rank DESC
           LIMIT ${input.limit}
           OFFSET ${input.offset}
         `, ...filterParams)

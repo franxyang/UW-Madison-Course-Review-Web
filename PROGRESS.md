@@ -2,14 +2,14 @@
 
 **Last Updated**: 2026-02-04 01:40 CST  
 **Current Phase**: Phase 1 - Infrastructure Upgrade  
-**Completion**: 85%
+**Completion**: 95%
 
 ---
 
 ## 🎯 Overall Progress
 
 ```
-Phase 1: Infrastructure  █████████████████░░░ 85%
+Phase 1: Infrastructure  ███████████████████░ 95%
 Phase 2: Core Features   ██████░░░░░░░░░░░░░░ 30%
 Phase 3: Advanced Feat.  ░░░░░░░░░░░░░░░░░░░░  0%
 Phase 4: Optimization    ░░░░░░░░░░░░░░░░░░░░  0%
@@ -59,10 +59,15 @@ Overall:                ██████░░░░░░░░░░░░�
 - [x] Integrated into Schools and Departments queries
 - [x] Cache key builder utilities
 
+### ✅ Department Data Import (Complete - 2026-02-04)
+- [x] Extracted 85 departments from course codes
+- [x] Created department records with school associations
+- [x] Linked all 4,787 courses to departments
+- [x] Department filter working in tRPC
+
 ### ⏳ Remaining Phase 1 Tasks
 - [ ] Configure Upstash Redis credentials (needs user action)
 - [ ] Performance benchmarking (search < 100ms target)
-- [ ] Department data import
 
 ---
 
@@ -105,7 +110,7 @@ tRPC Routers:  3 (course, review, comment)
 ```
 Schools:       23
 Courses:       4,787
-Departments:   0 (pending import)
+Departments:   85 (imported)
 Full-text:     4,787 courses indexed
 ```
 

@@ -15,27 +15,29 @@ import { trpc } from '@/lib/trpc/client'
 import { useSession } from 'next-auth/react'
 
 function getGradeColor(grade: string) {
+  // 方案 C 柔和配色：emerald → amber → orange → red
   const gradeColors: Record<string, string> = {
-    'A': 'bg-green-100 text-green-700',
-    'AB': 'bg-green-100 text-green-700',
-    'B': 'bg-blue-100 text-blue-700',
-    'BC': 'bg-blue-100 text-blue-700',
-    'C': 'bg-yellow-100 text-yellow-700',
-    'D': 'bg-orange-100 text-orange-700',
-    'F': 'bg-red-100 text-red-700'
+    'A': 'bg-emerald-50 text-emerald-700 border border-emerald-200',
+    'AB': 'bg-emerald-50 text-emerald-600 border border-emerald-100',
+    'B': 'bg-amber-50 text-amber-700 border border-amber-200',
+    'BC': 'bg-amber-50 text-amber-600 border border-amber-100',
+    'C': 'bg-orange-50 text-orange-700 border border-orange-200',
+    'D': 'bg-red-50 text-red-600 border border-red-200',
+    'F': 'bg-red-50 text-red-700 border border-red-300'
   }
-  return gradeColors[grade] || 'bg-slate-100 text-slate-700'
+  return gradeColors[grade] || 'bg-surface-secondary text-text-secondary border border-surface-tertiary'
 }
 
 function getRatingColor(rating: string) {
+  // 方案 C 柔和配色
   const colors: Record<string, string> = {
-    'A': 'bg-green-50 border-green-200 text-green-700',
-    'B': 'bg-blue-50 border-blue-200 text-blue-700',
-    'C': 'bg-yellow-50 border-yellow-200 text-yellow-700',
-    'D': 'bg-orange-50 border-orange-200 text-orange-700',
-    'F': 'bg-red-50 border-red-200 text-red-700'
+    'A': 'bg-emerald-50 border-emerald-200 text-emerald-700',
+    'B': 'bg-amber-50 border-amber-200 text-amber-700',
+    'C': 'bg-orange-50 border-orange-200 text-orange-700',
+    'D': 'bg-red-50 border-red-200 text-red-600',
+    'F': 'bg-red-50 border-red-300 text-red-700'
   }
-  return colors[rating] || 'bg-slate-50 border-slate-200 text-slate-700'
+  return colors[rating] || 'bg-surface-secondary border-surface-tertiary text-text-secondary'
 }
 
 export default function CoursePage() {
@@ -48,15 +50,15 @@ export default function CoursePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-50/50">
+      <div className="min-h-screen bg-surface-primary">
         {/* Header Skeleton */}
-        <header className="bg-white border-b border-slate-200">
+        <header className="bg-surface-primary border-b border-surface-tertiary">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               <div className="flex items-center gap-3">
                 <Link href="/" className="flex items-center gap-2">
                   <Logo size={32} />
-                  <span className="text-xl font-bold text-slate-900">WiscFlow</span>
+                  <span className="text-xl font-bold text-text-primary">WiscFlow</span>
                 </Link>
               </div>
             </div>
@@ -66,11 +68,11 @@ export default function CoursePage() {
         {/* Loading State */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="animate-pulse space-y-6">
-            <div className="h-8 w-48 bg-slate-200 rounded" />
-            <div className="bg-white rounded-lg border border-slate-200 p-6">
-              <div className="h-10 w-32 bg-slate-200 rounded mb-4" />
-              <div className="h-6 w-64 bg-slate-200 rounded mb-6" />
-              <div className="h-24 w-full bg-slate-200 rounded" />
+            <div className="h-8 w-48 bg-surface-tertiary rounded" />
+            <div className="card p-6">
+              <div className="h-10 w-32 bg-surface-tertiary rounded mb-4" />
+              <div className="h-6 w-64 bg-surface-tertiary rounded mb-6" />
+              <div className="h-24 w-full bg-surface-tertiary rounded" />
             </div>
           </div>
         </div>
@@ -114,25 +116,25 @@ export default function CoursePage() {
   const maxCount = Math.max(...gradeData.map(g => g.count), 1)
 
   return (
-    <div className="min-h-screen bg-slate-50/50">
+    <div className="min-h-screen bg-surface-primary">
       {/* Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
+      <header className="bg-surface-primary border-b border-surface-tertiary sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
               <Link href="/" className="flex items-center gap-2">
                 <Logo size={32} />
-                <span className="text-xl font-bold text-slate-900">WiscFlow</span>
+                <span className="text-xl font-bold text-text-primary">WiscFlow</span>
               </Link>
             </div>
             <nav className="flex items-center gap-6">
-              <Link href="/courses" className="text-slate-600 hover:text-slate-900">
+              <Link href="/courses" className="text-wf-crimson font-medium">
                 Courses
               </Link>
-              <Link href="/reviews" className="text-slate-600 hover:text-slate-900">
-                Reviews
+              <Link href="/instructors" className="text-text-secondary hover:text-text-primary transition-colors">
+                Instructors
               </Link>
-              <Link href="/about" className="text-slate-600 hover:text-slate-900">
+              <Link href="/about" className="text-text-secondary hover:text-text-primary transition-colors">
                 About
               </Link>
             </nav>
@@ -142,30 +144,30 @@ export default function CoursePage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-sm text-slate-600 mb-6">
-          <Link href="/courses" className="hover:text-slate-900">Courses</Link>
+        <div className="flex items-center gap-2 text-sm text-text-secondary mb-6">
+          <Link href="/courses" className="hover:text-text-primary transition-colors">Courses</Link>
           <ChevronRight size={16} />
-          <span className="text-slate-900 font-medium">{course.code}</span>
+          <span className="text-text-primary font-medium">{course.code}</span>
         </div>
 
         {/* Course Header */}
-        <div className="bg-white rounded-lg border border-slate-200 p-6 mb-6">
+        <div className="card p-6 mb-6">
           <div className="flex items-start justify-between">
             <div>
               <div className="flex items-center gap-3 mb-2">
-                <h1 className="text-3xl font-bold text-slate-900">{course.code}</h1>
-                <span className={`px-3 py-1 text-sm font-medium rounded-full ${
+                <h1 className="text-3xl font-bold text-text-primary">{course.code}</h1>
+                <span className={`px-3 py-1 text-sm font-medium rounded-md border ${
                   course.level === 'Elementary'
-                    ? 'bg-green-100 text-green-700'
+                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                     : course.level === 'Intermediate'
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'bg-purple-100 text-purple-700'
+                    ? 'bg-amber-50 text-amber-700 border-amber-200'
+                    : 'bg-orange-50 text-orange-700 border-orange-200'
                 }`}>
                   {course.level}
                 </span>
               </div>
-              <h2 className="text-xl text-slate-700 mb-4">{course.name}</h2>
-              <div className="flex items-center gap-6 text-sm text-slate-600">
+              <h2 className="text-xl text-text-secondary mb-4">{course.name}</h2>
+              <div className="flex items-center gap-6 text-sm text-text-secondary">
                 <div className="flex items-center gap-1">
                   <Building size={16} />
                   {course.school.name}
@@ -184,15 +186,20 @@ export default function CoursePage() {
             </div>
             {course.avgGPA && (
               <div className="text-center">
-                <div className="text-3xl font-bold text-slate-900">{course.avgGPA.toFixed(2)}</div>
-                <div className="text-sm text-slate-600">Avg GPA</div>
+                <div className={`text-3xl font-bold ${
+                  course.avgGPA >= 3.5 ? 'text-grade-excellent' :
+                  course.avgGPA >= 3.0 ? 'text-grade-good' :
+                  course.avgGPA >= 2.5 ? 'text-grade-average' :
+                  course.avgGPA >= 2.0 ? 'text-grade-below' : 'text-grade-poor'
+                }`}>{course.avgGPA.toFixed(2)}</div>
+                <div className="text-sm text-text-secondary">Avg GPA</div>
               </div>
             )}
           </div>
 
-          <div className="mt-6 pt-6 border-t border-slate-100">
-            <h3 className="text-sm font-medium text-slate-900 mb-2">Course Description</h3>
-            <p className="text-slate-600">{course.description || 'No description available.'}</p>
+          <div className="mt-6 pt-6 border-t border-surface-tertiary">
+            <h3 className="text-sm font-medium text-text-primary mb-2">Course Description</h3>
+            <p className="text-text-secondary">{course.description || 'No description available.'}</p>
           </div>
 
           {course.prerequisiteText && (
@@ -209,10 +216,10 @@ export default function CoursePage() {
 
           {breadths && breadths.length > 0 && (
             <div className="mt-4">
-              <h4 className="text-sm font-medium text-slate-900 mb-2">Breadth Requirements</h4>
+              <h4 className="text-sm font-medium text-text-primary mb-2">Breadth Requirements</h4>
               <div className="flex flex-wrap gap-2">
                 {breadths.map((breadth: string) => (
-                  <span key={breadth} className="px-2 py-1 text-xs bg-slate-100 text-slate-700 rounded">
+                  <span key={breadth} className="px-2 py-1 text-xs bg-surface-secondary text-text-secondary rounded border border-surface-tertiary">
                     {breadth}
                   </span>
                 ))}
@@ -223,50 +230,65 @@ export default function CoursePage() {
 
         {/* Grade Distribution */}
         {latestDistribution && (
-          <div className="bg-white rounded-lg border border-slate-200 p-6 mb-6">
-            <h3 className="text-lg font-semibold text-slate-900 mb-4">
+          <div className="card p-6 mb-6">
+            <h3 className="text-lg font-semibold text-text-primary mb-4">
               Grade Distribution ({latestDistribution.term})
             </h3>
             <div className="space-y-3">
-              {gradeData.map(({ grade, count }) => (
-                <div key={grade} className="flex items-center gap-3">
-                  <div className="w-12 text-sm font-medium text-slate-700">{grade}</div>
-                  <div className="flex-1 bg-slate-100 rounded-full h-6 relative overflow-hidden">
-                    <div
-                      className={`absolute left-0 top-0 h-full ${getGradeColor(grade).split(' ')[0]} transition-all duration-500`}
-                      style={{ width: `${(count / maxCount) * 100}%` }}
-                    />
+              {gradeData.map(({ grade, count }) => {
+                // Grade Flow 颜色映射（方案 C）
+                const getBarColor = (g: string) => {
+                  const colors: Record<string, string> = {
+                    'A': 'bg-grade-excellent',
+                    'AB': 'bg-grade-good',
+                    'B': 'bg-grade-average',
+                    'BC': 'bg-grade-below',
+                    'C': 'bg-grade-below',
+                    'D': 'bg-grade-poor',
+                    'F': 'bg-grade-poor'
+                  }
+                  return colors[g] || 'bg-surface-tertiary'
+                }
+                return (
+                  <div key={grade} className="flex items-center gap-3">
+                    <div className="w-12 text-sm font-medium text-text-secondary">{grade}</div>
+                    <div className="flex-1 bg-surface-secondary rounded-full h-6 relative overflow-hidden">
+                      <div
+                        className={`absolute left-0 top-0 h-full ${getBarColor(grade)} transition-all duration-500`}
+                        style={{ width: `${(count / maxCount) * 100}%` }}
+                      />
+                    </div>
+                    <div className="text-sm text-text-secondary w-16 text-right">
+                      {count} ({((count / latestDistribution.totalGraded) * 100).toFixed(1)}%)
+                    </div>
                   </div>
-                  <div className="text-sm text-slate-600 w-16 text-right">
-                    {count} ({((count / latestDistribution.totalGraded) * 100).toFixed(1)}%)
-                  </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
-            <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between text-sm">
-              <span className="text-slate-600">Total Students: {latestDistribution.totalGraded}</span>
-              <span className="font-medium text-slate-900">Average GPA: {latestDistribution.avgGPA.toFixed(2)}</span>
+            <div className="mt-4 pt-4 border-t border-surface-tertiary flex items-center justify-between text-sm">
+              <span className="text-text-secondary">Total Students: {latestDistribution.totalGraded}</span>
+              <span className="font-medium text-text-primary">Average GPA: {latestDistribution.avgGPA.toFixed(2)}</span>
             </div>
           </div>
         )}
 
         {/* Prerequisites Graph */}
         {(course.prerequisites.length > 0 || course.prerequisiteFor.length > 0) && (
-          <div className="bg-white rounded-lg border border-slate-200 p-6 mb-6">
-            <h3 className="text-lg font-semibold text-slate-900 mb-4">Course Dependencies</h3>
+          <div className="card p-6 mb-6">
+            <h3 className="text-lg font-semibold text-text-primary mb-4">Course Dependencies</h3>
             <div className="grid md:grid-cols-2 gap-6">
               {course.prerequisites.length > 0 && (
                 <div>
-                  <h4 className="text-sm font-medium text-slate-700 mb-3">Prerequisites</h4>
+                  <h4 className="text-sm font-medium text-text-secondary mb-3">Prerequisites</h4>
                   <div className="space-y-2">
                     {course.prerequisites.map(prereq => (
                       <Link
                         key={prereq.id}
                         href={`/courses/${prereq.id}`}
-                        className="block p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors"
+                        className="block p-3 bg-surface-secondary rounded-lg hover:bg-hover-bg transition-colors border border-surface-tertiary"
                       >
-                        <div className="font-medium text-slate-900">{prereq.code}</div>
-                        <div className="text-sm text-slate-600">{prereq.name}</div>
+                        <div className="font-medium text-text-primary">{prereq.code}</div>
+                        <div className="text-sm text-text-secondary">{prereq.name}</div>
                       </Link>
                     ))}
                   </div>
@@ -274,16 +296,16 @@ export default function CoursePage() {
               )}
               {course.prerequisiteFor.length > 0 && (
                 <div>
-                  <h4 className="text-sm font-medium text-slate-700 mb-3">Unlocks</h4>
+                  <h4 className="text-sm font-medium text-text-secondary mb-3">Unlocks</h4>
                   <div className="space-y-2">
                     {course.prerequisiteFor.map(next => (
                       <Link
                         key={next.id}
                         href={`/courses/${next.id}`}
-                        className="block p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors"
+                        className="block p-3 bg-surface-secondary rounded-lg hover:bg-hover-bg transition-colors border border-surface-tertiary"
                       >
-                        <div className="font-medium text-slate-900">{next.code}</div>
-                        <div className="text-sm text-slate-600">{next.name}</div>
+                        <div className="font-medium text-text-primary">{next.code}</div>
+                        <div className="text-sm text-text-secondary">{next.name}</div>
                       </Link>
                     ))}
                   </div>
@@ -296,11 +318,11 @@ export default function CoursePage() {
         {/* Reviews Section */}
         <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-slate-900">
+            <h3 className="text-lg font-semibold text-text-primary">
               Student Reviews ({reviewsWithParsedData.length})
             </h3>
             {avgRatings && (
-              <div className="flex items-center gap-4 text-sm">
+              <div className="flex items-center gap-4 text-sm text-text-secondary">
                 <div>Content: {['F', 'D', 'C', 'B', 'A'][Math.round(avgRatings.content) - 1] || 'N/A'}</div>
                 <div>Teaching: {['F', 'D', 'C', 'B', 'A'][Math.round(avgRatings.teaching) - 1] || 'N/A'}</div>
                 <div>Grading: {['F', 'D', 'C', 'B', 'A'][Math.round(avgRatings.grading) - 1] || 'N/A'}</div>
@@ -310,15 +332,15 @@ export default function CoursePage() {
           </div>
 
           {/* Review Submission Form */}
-          <div id="review-form" className="bg-white rounded-lg border border-slate-200 p-6 scroll-mt-24">
+          <div id="review-form" className="card p-6 scroll-mt-24">
             <ReviewForm courseId={course.id} courseName={`${course.code}: ${course.name}`} />
           </div>
 
           {/* Existing Reviews */}
           {reviewsWithParsedData.length === 0 ? (
-            <div className="bg-white rounded-lg border border-slate-200 p-12 text-center">
-              <MessageSquare className="mx-auto h-12 w-12 text-slate-300 mb-4" />
-              <p className="text-slate-600">No reviews yet. Be the first to review this course!</p>
+            <div className="card p-12 text-center">
+              <MessageSquare className="mx-auto h-12 w-12 text-text-tertiary mb-4" />
+              <p className="text-text-secondary">No reviews yet. Be the first to review this course!</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -327,24 +349,24 @@ export default function CoursePage() {
                 const isGated = !course.reviewAccess.hasFullAccess && index > 0
 
                 const reviewCard = (
-                  <div key={review.id} className="bg-white rounded-lg border border-slate-200 p-6">
+                  <div key={review.id} className="card p-6">
                     <div className="flex items-start justify-between mb-4">
                       <div>
                         <div className="flex items-center gap-3 flex-wrap">
-                          <h4 className="font-medium text-slate-900">{review.title || 'Untitled Review'}</h4>
-                          <span className={`px-2 py-1 text-xs font-medium rounded ${getGradeColor(review.gradeReceived)}`}>
+                          <h4 className="font-medium text-text-primary">{review.title || 'Untitled Review'}</h4>
+                          <span className={`px-2 py-1 text-xs font-medium rounded-md ${getGradeColor(review.gradeReceived)}`}>
                             Grade: {review.gradeReceived}
                           </span>
                           {review.authorLevel && (
                             <ContributorBadge contributor={review.authorLevel} />
                           )}
                         </div>
-                        <div className="text-sm text-slate-600 mt-1">
+                        <div className="text-sm text-text-secondary mt-1">
                           {review.term} · {review.instructor?.name || 'Unknown Instructor'}
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <div className="text-sm text-slate-500">
+                        <div className="text-sm text-text-tertiary">
                           {new Date(review.createdAt).toLocaleDateString()}
                         </div>
                         <ReviewActions
@@ -378,26 +400,26 @@ export default function CoursePage() {
                     <div className="space-y-3 mb-4">
                       {review.contentComment && (
                         <div>
-                          <span className="text-sm font-medium text-slate-700">Content:</span>
-                          <p className="text-sm text-slate-600 mt-1">{review.contentComment}</p>
+                          <span className="text-sm font-medium text-text-secondary">Content:</span>
+                          <p className="text-sm text-text-secondary mt-1">{review.contentComment}</p>
                         </div>
                       )}
                       {review.teachingComment && (
                         <div>
-                          <span className="text-sm font-medium text-slate-700">Teaching:</span>
-                          <p className="text-sm text-slate-600 mt-1">{review.teachingComment}</p>
+                          <span className="text-sm font-medium text-text-secondary">Teaching:</span>
+                          <p className="text-sm text-text-secondary mt-1">{review.teachingComment}</p>
                         </div>
                       )}
                       {review.gradingComment && (
                         <div>
-                          <span className="text-sm font-medium text-slate-700">Grading:</span>
-                          <p className="text-sm text-slate-600 mt-1">{review.gradingComment}</p>
+                          <span className="text-sm font-medium text-text-secondary">Grading:</span>
+                          <p className="text-sm text-text-secondary mt-1">{review.gradingComment}</p>
                         </div>
                       )}
                       {review.workloadComment && (
                         <div>
-                          <span className="text-sm font-medium text-slate-700">Workload:</span>
-                          <p className="text-sm text-slate-600 mt-1">{review.workloadComment}</p>
+                          <span className="text-sm font-medium text-text-secondary">Workload:</span>
+                          <p className="text-sm text-text-secondary mt-1">{review.workloadComment}</p>
                         </div>
                       )}
                     </div>
@@ -406,7 +428,7 @@ export default function CoursePage() {
                     {review.assessments && review.assessments.length > 0 && (
                       <div className="flex flex-wrap gap-2 mb-4">
                         {review.assessments.map((assessment: string) => (
-                          <span key={assessment} className="px-2 py-1 text-xs bg-slate-100 text-slate-700 rounded">
+                          <span key={assessment} className="px-2 py-1 text-xs bg-surface-secondary text-text-secondary rounded border border-surface-tertiary">
                             {assessment}
                           </span>
                         ))}
@@ -415,12 +437,12 @@ export default function CoursePage() {
 
                     {/* Resource Link */}
                     {review.resourceLink && (
-                      <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                      <div className="mt-4 p-3 bg-info/10 border border-info/20 rounded-lg">
                         <a
                           href={review.resourceLink}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-sm text-blue-700 hover:text-blue-900"
+                          className="text-sm text-info hover:text-info/80 transition-colors"
                         >
                           📎 Course Resources Available
                         </a>
@@ -428,7 +450,7 @@ export default function CoursePage() {
                     )}
 
                     {/* Vote Button + Report */}
-                    <div className="mb-4 pt-4 border-t border-slate-100 flex items-center justify-between">
+                    <div className="mb-4 pt-4 border-t border-surface-tertiary flex items-center justify-between">
                       <VoteButton
                         reviewId={review.id}
                         initialVoteCount={review.votes?.length || 0}

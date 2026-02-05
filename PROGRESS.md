@@ -1,8 +1,8 @@
 # WiscFlow Development Progress
 
-**Last Updated**: 2026-02-04 04:30 CST  
-**Current Phase**: Phase 2 - COMPLETE ✅  
-**Overall Completion**: ~55%
+**Last Updated**: 2026-02-04 23:15 CST  
+**Current Phase**: Phase 3 - IN PROGRESS 🚧  
+**Overall Completion**: ~58%
 
 ---
 
@@ -11,11 +11,11 @@
 ```
 Phase 1: Infrastructure  ████████████████████ 100% ✅
 Phase 2: Core Features   ████████████████████ 100% ✅
-Phase 3: UX Optimization ░░░░░░░░░░░░░░░░░░░░   0%
+Phase 3: UX Optimization ███░░░░░░░░░░░░░░░░░  15% 🚧
 Phase 4: Advanced Feat.  ░░░░░░░░░░░░░░░░░░░░   0%
 Phase 5: Admin Portal    ░░░░░░░░░░░░░░░░░░░░   0%
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Overall:                 ███████████░░░░░░░░░  55%
+Overall:                 ███████████░░░░░░░░░  58%
 ```
 
 ---
@@ -83,9 +83,40 @@ Overall:                 ███████████░░░░░░░�
 
 ---
 
-## 📦 Phase 3–5: Not Started
+## 🚧 Phase 3: UX Optimization — 15% IN PROGRESS
 
-- **Phase 3**: UX/Visualization (charts, dark mode, mobile, performance)
+### ✅ Completed
+- [x] **配色系统建立**（方案 C - uwcourses 极简 + USTSPACE 柔和）
+  - Tailwind config 重构（`wf-crimson`, `surface`, `text`, `grade` 色系）
+  - 全局样式更新（`.card`, `.btn-*`, `.grade-badge-*` 预设类）
+  - 配色文档完成（[`docs/COLOR_SYSTEM.md`](./docs/COLOR_SYSTEM.md)）
+- [x] **课程列表页重构** (`app/courses/page.tsx`)
+  - 使用新配色系统（纯白背景 + UW 红点缀）
+  - `.card` 类统一卡片样式
+  - GPA 动态配色（5 级渐变：emerald → amber → orange → red）
+  - Level 徽章柔和化（柔和色 + 边框）
+  - 所有交互添加 `transition-colors`
+
+### 🔨 In Progress
+- [ ] 首页重构
+- [ ] 课程详情页配色更新
+- [ ] 教师页面配色更新
+
+### 📋 Planned
+- [ ] **Grade Flow 可视化** - 流式分布条（替换柱状图）
+- [ ] **Instructor 过滤优化** - 课程页内过滤（USTSPACE 模式）
+- [ ] **Semester 选择器** - 时间线式 pill 选择
+- [ ] **搜索增强** - 实时预览卡片
+- [ ] **组件统一** - FilterPanel, UserMenu, ReviewCard 等
+- [ ] **Dark mode 支持**（可选）
+- [ ] **性能优化** - 图片懒加载、代码分割
+
+详细进度见: [`docs/PHASE3_PROGRESS.md`](./docs/PHASE3_PROGRESS.md)
+
+---
+
+## 📦 Phase 4–5: Not Started
+
 - **Phase 4**: Advanced features (AI summaries, community, analytics, notifications)
 - **Phase 5**: Admin portal (moderation, data management)
 

@@ -15,8 +15,8 @@ import { SlidersHorizontal, X } from 'lucide-react'
 export default function CoursesPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-slate-50/50 flex items-center justify-center">
-        <div className="animate-pulse text-slate-400">Loading courses...</div>
+      <div className="min-h-screen bg-surface-primary flex items-center justify-center">
+        <div className="animate-pulse text-text-tertiary">Loading courses...</div>
       </div>
     }>
       <CoursesPageContent />
@@ -70,26 +70,26 @@ function CoursesPageContent() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-slate-50/50">
+    <div className="min-h-screen bg-surface-primary">
       {/* Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
+      <header className="bg-surface-primary border-b border-surface-tertiary sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
               <Link href="/" className="flex items-center gap-2">
                 <Logo size={32} />
-                <span className="text-xl font-bold text-slate-900">WiscFlow</span>
+                <span className="text-xl font-bold text-text-primary">WiscFlow</span>
               </Link>
             </div>
             <div className="flex items-center gap-6">
               <nav className="hidden lg:flex items-center gap-6">
-                <Link href="/courses" className="text-uw-red font-medium">
+                <Link href="/courses" className="text-wf-crimson font-medium">
                   Courses
                 </Link>
-                <Link href="/instructors" className="text-slate-600 hover:text-slate-900">
+                <Link href="/instructors" className="text-text-secondary hover:text-text-primary transition-colors">
                   Instructors
                 </Link>
-                <Link href="/about" className="text-slate-600 hover:text-slate-900">
+                <Link href="/about" className="text-text-secondary hover:text-text-primary transition-colors">
                   About
                 </Link>
               </nav>
@@ -105,26 +105,23 @@ function CoursesPageContent() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Page Title */}
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Browse Courses</h1>
-          <p className="text-slate-600">Explore UW Madison&apos;s course catalog with reviews from fellow students</p>
+          <h1 className="text-3xl font-bold text-text-primary mb-2">Browse Courses</h1>
+          <p className="text-text-secondary">Explore UW Madison&apos;s course catalog with reviews from fellow students</p>
         </div>
 
         {/* Search Bar */}
         <form onSubmit={handleSearch} className="flex gap-3 mb-6">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary" size={20} />
             <input
               type="text"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               placeholder="Search by course code (CS 577, MATH 521) or name..."
-              className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-uw-red/20 focus:border-uw-red"
+              className="w-full pl-10 pr-4 py-2.5 bg-surface-primary border border-surface-tertiary rounded-lg focus:outline-none focus:ring-2 focus:ring-focus-ring focus:border-wf-crimson transition-colors"
             />
           </div>
-          <button
-            type="submit"
-            className="px-6 py-2.5 bg-uw-red text-white rounded-lg hover:bg-uw-dark transition-colors font-medium"
-          >
+          <button type="submit" className="btn-primary">
             Search
           </button>
         </form>
@@ -133,12 +130,12 @@ function CoursesPageContent() {
         <div className="lg:hidden mb-4">
           <button
             onClick={() => setShowMobileFilters(true)}
-            className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+            className="flex items-center gap-2 px-4 py-2.5 bg-surface-primary border border-surface-tertiary rounded-lg text-sm font-medium text-text-primary hover:bg-hover-bg transition-colors"
           >
             <SlidersHorizontal size={16} />
             Filters
             {Object.values(filters).filter(v => v !== undefined && (Array.isArray(v) ? v.length > 0 : true)).length > 0 && (
-              <span className="px-1.5 py-0.5 text-[10px] font-bold bg-uw-red text-white rounded-full">
+              <span className="px-1.5 py-0.5 text-[10px] font-bold bg-wf-crimson text-white rounded-full">
                 {Object.values(filters).filter(v => v !== undefined && (Array.isArray(v) ? v.length > 0 : true)).length}
               </span>
             )}
@@ -149,10 +146,10 @@ function CoursesPageContent() {
         {showMobileFilters && (
           <>
             <div className="fixed inset-0 z-40 bg-black/30 lg:hidden" onClick={() => setShowMobileFilters(false)} />
-            <div className="fixed inset-y-0 left-0 z-50 w-80 bg-slate-50 shadow-xl lg:hidden overflow-y-auto">
-              <div className="flex items-center justify-between p-4 bg-white border-b border-slate-200 sticky top-0">
-                <span className="font-semibold text-slate-900">Filters</span>
-                <button onClick={() => setShowMobileFilters(false)} className="p-1 text-slate-500 hover:text-slate-700">
+            <div className="fixed inset-y-0 left-0 z-50 w-80 bg-surface-secondary shadow-xl lg:hidden overflow-y-auto">
+              <div className="flex items-center justify-between p-4 bg-surface-primary border-b border-surface-tertiary sticky top-0">
+                <span className="font-semibold text-text-primary">Filters</span>
+                <button onClick={() => setShowMobileFilters(false)} className="p-1 text-text-secondary hover:text-text-primary">
                   <X size={20} />
                 </button>
               </div>
@@ -175,9 +172,9 @@ function CoursesPageContent() {
             {/* Results Count */}
             <div className="mb-4">
               {coursesLoading ? (
-                <div className="h-5 w-32 bg-slate-200 animate-pulse rounded" />
+                <div className="h-5 w-32 bg-surface-tertiary animate-pulse rounded" />
               ) : (
-                <p className="text-sm text-slate-600">
+                <p className="text-sm text-text-secondary">
                   Showing {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, totalCourses)} of {totalCourses} courses
                   {searchParams.get('search') && ` for "${searchParams.get('search')}"`}
                 </p>
@@ -188,78 +185,89 @@ function CoursesPageContent() {
             {coursesLoading ? (
               <div className="grid gap-4 md:grid-cols-2">
                 {[...Array(8)].map((_, i) => (
-                  <div key={i} className="bg-white rounded-lg border border-slate-200 p-4 animate-pulse">
-                    <div className="h-5 w-20 bg-slate-200 rounded mb-2" />
-                    <div className="h-4 w-full bg-slate-200 rounded mb-3" />
-                    <div className="h-4 w-24 bg-slate-200 rounded" />
+                  <div key={i} className="card p-5 animate-pulse">
+                    <div className="h-5 w-20 bg-surface-tertiary rounded mb-2" />
+                    <div className="h-4 w-full bg-surface-tertiary rounded mb-3" />
+                    <div className="h-4 w-24 bg-surface-tertiary rounded" />
                   </div>
                 ))}
               </div>
             ) : sortedCourses.length > 0 ? (
               <div className="grid gap-4 md:grid-cols-2">
-                {sortedCourses.map(course => (
-                  <Link
-                    key={course.id}
-                    href={`/courses/${course.id}`}
-                    className="bg-white rounded-lg border border-slate-200 p-4 hover:shadow-md transition-shadow group"
-                  >
-                    <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <h3 className="font-semibold text-slate-900 group-hover:text-uw-red transition-colors">
-                          {course.code}
-                        </h3>
-                        <p className="text-sm text-slate-600 mt-1 line-clamp-2">{course.name}</p>
-                      </div>
-                      <div className="text-sm text-slate-500 flex-shrink-0 ml-2">
-                        {course.credits} cr
-                      </div>
-                    </div>
+                {sortedCourses.map(course => {
+                  // Calculate GPA color
+                  const getGPAColor = (gpa: number) => {
+                    if (gpa >= 3.5) return 'text-grade-excellent'
+                    if (gpa >= 3.0) return 'text-grade-good'
+                    if (gpa >= 2.5) return 'text-grade-average'
+                    if (gpa >= 2.0) return 'text-grade-below'
+                    return 'text-grade-poor'
+                  }
 
-                    <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-100">
-                      <div className="text-xs text-slate-500 truncate max-w-[60%]">
-                        {course.school.name}
+                  return (
+                    <Link
+                      key={course.id}
+                      href={`/courses/${course.id}`}
+                      className="card p-5 group"
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-text-primary group-hover:text-wf-crimson transition-colors">
+                            {course.code}
+                          </h3>
+                          <p className="text-sm text-text-secondary mt-1 line-clamp-2">{course.name}</p>
+                        </div>
+                        <div className="text-sm text-text-tertiary flex-shrink-0 ml-3 font-medium">
+                          {course.credits} cr
+                        </div>
                       </div>
-                      <div className="flex items-center gap-3 text-sm">
-                        {course._count.reviews > 0 && (
-                          <div className="flex items-center gap-1 text-slate-600">
-                            <MessageSquare size={14} />
-                            <span>{course._count.reviews}</span>
-                          </div>
-                        )}
-                        {course.avgGPA && (
-                          <div className="flex items-center gap-1 text-slate-600">
-                            <Star size={14} />
-                            <span>{course.avgGPA.toFixed(2)}</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
 
-                    <div className="mt-3">
-                      <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                        course.level === 'Elementary'
-                          ? 'bg-green-100 text-green-700'
-                          : course.level === 'Intermediate'
-                          ? 'bg-blue-100 text-blue-700'
-                          : 'bg-purple-100 text-purple-700'
-                      }`}>
-                        {course.level}
-                      </span>
-                    </div>
-                  </Link>
-                ))}
+                      <div className="flex items-center justify-between mt-4 pt-3 border-t border-surface-tertiary">
+                        <div className="text-xs text-text-tertiary truncate max-w-[60%]">
+                          {course.school.name}
+                        </div>
+                        <div className="flex items-center gap-3 text-sm">
+                          {course._count.reviews > 0 && (
+                            <div className="flex items-center gap-1 text-text-secondary">
+                              <MessageSquare size={14} />
+                              <span className="font-medium">{course._count.reviews}</span>
+                            </div>
+                          )}
+                          {course.avgGPA && (
+                            <div className={`flex items-center gap-1 font-semibold ${getGPAColor(course.avgGPA)}`}>
+                              <Star size={14} />
+                              <span>{course.avgGPA.toFixed(2)}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="mt-3">
+                        <span className={`inline-flex px-2.5 py-1 text-xs font-medium rounded-md border ${
+                          course.level === 'Elementary'
+                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                            : course.level === 'Intermediate'
+                            ? 'bg-amber-50 text-amber-700 border-amber-200'
+                            : 'bg-orange-50 text-orange-700 border-orange-200'
+                        }`}>
+                          {course.level}
+                        </span>
+                      </div>
+                    </Link>
+                  )
+                })}
               </div>
             ) : (
               <div className="text-center py-12">
-                <BookOpen className="mx-auto h-12 w-12 text-slate-300 mb-4" />
-                <p className="text-slate-600">No courses found</p>
+                <BookOpen className="mx-auto h-12 w-12 text-text-tertiary mb-4" />
+                <p className="text-text-secondary">No courses found</p>
                 <button
                   onClick={() => {
                     setFilters({})
                     setPage(0)
                     router.push('/courses')
                   }}
-                  className="text-uw-red hover:text-uw-dark mt-2 inline-block"
+                  className="text-wf-crimson hover:text-wf-crimson-dark font-medium mt-2 inline-block transition-colors"
                 >
                   Clear filters and view all courses
                 </button>
@@ -272,7 +280,7 @@ function CoursesPageContent() {
                 <button
                   onClick={() => setPage(Math.max(0, page - 1))}
                   disabled={page === 0}
-                  className="px-4 py-2 text-sm border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="px-4 py-2 text-sm font-medium border border-surface-tertiary rounded-lg hover:bg-hover-bg disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
                   ← Previous
                 </button>
@@ -292,10 +300,10 @@ function CoursesPageContent() {
                     <button
                       key={pageNum}
                       onClick={() => setPage(pageNum)}
-                      className={`w-10 h-10 text-sm rounded-lg ${
+                      className={`w-10 h-10 text-sm font-medium rounded-lg transition-colors ${
                         page === pageNum
-                          ? 'bg-uw-red text-white'
-                          : 'border border-slate-200 hover:bg-slate-50'
+                          ? 'bg-wf-crimson text-white shadow-sm'
+                          : 'border border-surface-tertiary hover:bg-hover-bg'
                       }`}
                     >
                       {pageNum + 1}
@@ -306,7 +314,7 @@ function CoursesPageContent() {
                 <button
                   onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
                   disabled={page >= totalPages - 1}
-                  className="px-4 py-2 text-sm border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="px-4 py-2 text-sm font-medium border border-surface-tertiary rounded-lg hover:bg-hover-bg disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
                   Next →
                 </button>

@@ -14,6 +14,11 @@ const config: Config = {
         'wf-crimson-dark': '#9B0000',  // Hover state
         'wf-crimson-light': '#D93036', // Light accent
         
+        // === 旧配色别名（向后兼容，逐步迁移）===
+        'uw-red': '#C5050C',          // → 使用 wf-crimson
+        'uw-dark': '#9B0000',         // → 使用 wf-crimson-dark
+        'uw-light': '#D93036',        // → 使用 wf-crimson-light
+        
         // === 表面色 ===
         'surface': {
           primary: '#FFFFFF',

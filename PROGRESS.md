@@ -1,8 +1,8 @@
 # WiscFlow Development Progress
 
-**Last Updated**: 2026-02-04 23:15 CST  
+**Last Updated**: 2026-02-05 01:30 CST  
 **Current Phase**: Phase 3 - IN PROGRESS 🚧  
-**Overall Completion**: ~58%
+**Overall Completion**: ~65%
 
 ---
 
@@ -11,11 +11,11 @@
 ```
 Phase 1: Infrastructure  ████████████████████ 100% ✅
 Phase 2: Core Features   ████████████████████ 100% ✅
-Phase 3: UX Optimization ███░░░░░░░░░░░░░░░░░  15% 🚧
+Phase 3: UX Optimization ████████████░░░░░░░░  60% 🚧
 Phase 4: Advanced Feat.  ░░░░░░░░░░░░░░░░░░░░   0%
 Phase 5: Admin Portal    ░░░░░░░░░░░░░░░░░░░░   0%
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Overall:                 ███████████░░░░░░░░░  58%
+Overall:                 █████████████░░░░░░░  65%
 ```
 
 ---
@@ -83,7 +83,7 @@ Overall:                 ███████████░░░░░░░�
 
 ---
 
-## 🚧 Phase 3: UX Optimization — 15% IN PROGRESS
+## 🚧 Phase 3: UX Optimization — 60% IN PROGRESS
 
 ### ✅ Completed
 - [x] **配色系统建立**（方案 C - uwcourses 极简 + USTSPACE 柔和）
@@ -96,11 +96,30 @@ Overall:                 ███████████░░░░░░░�
   - GPA 动态配色（5 级渐变：emerald → amber → orange → red）
   - Level 徽章柔和化（柔和色 + 边框）
   - 所有交互添加 `transition-colors`
+- [x] **课程详情页三栏布局重构** (`app/courses/[id]/page.tsx`)
+  - 三栏布局（左侧导航 + 中间内容 + 右侧概览）
+  - **Term/Instructor 页内过滤器**（实时筛选 reviews）
+  - 右侧固定评分圆圈（4维评分可视化）
+  - **Grade Flow** 成绩分布条形图
+  - Quick Stats（Credits + Level）
+  - `CoursePageLayout` 组件抽取
+- [x] **首页重构** (`app/page.tsx`)
+  - Hero Section（搜索框 + 品牌展示 + Popular 快捷链接）
+  - Stats Section（Courses/Reviews/Instructors/Schools 统计）
+  - Most Reviewed Courses（热门课程卡片）
+  - How It Works（3步使用流程）
+  - CTA Section + Footer
+- [x] **Instructor Teaching Portfolio 页面** (`app/instructors/[id]/page.tsx`)
+  - **雷达图**（4维评分可视化）
+  - **教学风格标签**（AI 提取：Clear, Organized, Light Workload 等）
+  - **Teaching Timeline**（教学历史时间线）
+  - Stats Row（Avg Rating / Reviews / Courses / Since）
+  - Courses Taught 列表（带 GPA）
+  - Student Reviews 紧凑卡片
 
 ### 🔨 In Progress
-- [ ] 首页重构
-- [ ] 课程详情页配色更新
-- [ ] 教师页面配色更新
+- [ ] 左侧栏同系课程数据优化
+- [ ] Dark mode 支持（可选）
 
 ### 📋 Planned
 - [ ] **Grade Flow 可视化** - 流式分布条（替换柱状图）

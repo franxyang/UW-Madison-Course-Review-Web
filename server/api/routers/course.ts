@@ -306,11 +306,19 @@ export const courseRouter = router({
               createdAt: 'desc',
             },
           },
-          instructors: true,
-          gradeDistributions: {
-            orderBy: {
-              term: 'desc',
+          instructors: {
+            include: {
+              instructor: true,
             },
+          },
+          gradeDistributions: {
+            include: {
+              instructor: true,  // Direct relation now (per-instructor data)
+            },
+            orderBy: [
+              { term: 'desc' },
+              { avgGPA: 'desc' },
+            ],
           },
           prerequisites: {
             select: {
@@ -393,6 +401,35 @@ export const courseRouter = router({
           totalReviews: course.reviews.length,
         },
       }
+    }),
+
+  // Get courses by department code prefix (for sidebar)
+  sameDepartment: publicProcedure
+    .input(
+      z.object({
+        codePrefix: z.string().min(1),
+        excludeId: z.string().optional(),
+        limit: z.number().min(1).max(20).default(12),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const courses = await ctx.prisma.course.findMany({
+        where: {
+          code: { startsWith: input.codePrefix },
+          ...(input.excludeId ? { id: { not: input.excludeId } } : {}),
+        },
+        select: {
+          id: true,
+          code: true,
+          name: true,
+          avgGPA: true,
+          credits: true,
+          level: true,
+        },
+        orderBy: { code: 'asc' },
+        take: input.limit,
+      })
+      return courses
     }),
 
   // Get all schools (cached for 24h)

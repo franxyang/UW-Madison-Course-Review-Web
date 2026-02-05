@@ -36,3 +36,6 @@ dist-ssr
 *.db-journal
 prisma/dev.db
 prisma/dev.db-journal
+
+# Data pipeline output (downloaded from UW Courses API)
+data-pipeline/output/

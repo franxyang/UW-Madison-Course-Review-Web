@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,22 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum UserRole {
-  STUDENT
-  ADMIN
-}
-
-enum Grade {
-  A
-  AB
-  B
-  BC
-  C
-  D
-  F
-}
-
-// NextAuth.js Models
 model Account {
   id                String  @id @default(cuid())
   userId            String
@@ -39,8 +20,7 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -61,112 +41,75 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-// User: Must be authenticated via wisc.edu email
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
+  id            String                 @id @default(cuid())
+  email         String                 @unique
   emailVerified DateTime?
   name          String?
   image         String?
-  role          UserRole  @default(STUDENT)
-
-  // Contributor level system
-  level         Int       @default(0)
-  xp            Int       @default(0)
-  title         String?   // Custom title override (admin-granted)
-
-  // NextAuth relations
+  role          UserRole               @default(STUDENT)
+  createdAt     DateTime               @default(now())
+  level         Int                    @default(0)
+  title         String?
+  xp            Int                    @default(0)
   accounts      Account[]
-  sessions      Session[]
-
-  // Community
-  reviews       Review[]
   comments      Comment[]
-  votes         Vote[]
-
-  // Personalization
+  reports       Report[]               @relation("ReportedBy")
+  reviews       Review[]
   savedCourses  SavedCourse[]
+  sessions      Session[]
   transcript    StudentCourseHistory[]
-
-  // Reports
-  reports       Report[]  @relation("ReportedBy")
-
-  createdAt     DateTime  @default(now())
+  votes         Vote[]
 }
 
-// School: Represents both Colleges and Schools in UW-Madison's hierarchy
-// UW-Madison structure: College > School > Department
-// Some entities are both (e.g., "Letters & Science" is a College containing Schools)
 model School {
   id          String       @id @default(cuid())
   name        String       @unique
-  type        String       @default("school") // "college", "school", "institute", "division"
-  
-  // Hierarchy: a School can have a parent College
+  type        String       @default("school")
   parentId    String?
-  parent      School?      @relation("SchoolHierarchy", fields: [parentId], references: [id])
-  children    School[]     @relation("SchoolHierarchy")
-  
   courses     Course[]
   departments Department[]
+  parent      School?      @relation("SchoolHierarchy", fields: [parentId], references: [id])
+  children    School[]     @relation("SchoolHierarchy")
 
   @@index([parentId])
 }
 
-// Department: e.g., "Computer Sciences", "Mathematics"
 model Department {
-  id        String   @id @default(cuid())
-  code      String   @unique // e.g. "COMP SCI", "MATH"
-  name      String   // e.g. "Computer Sciences", "Mathematics"
-  
-  // Relations
-  schoolId  String
-  school    School   @relation(fields: [schoolId], references: [id])
-  courses   CourseDepartment[]
-  
+  id       String             @id @default(cuid())
+  code     String             @unique
+  name     String
+  schoolId String
+  courses  CourseDepartment[]
+  school   School             @relation(fields: [schoolId], references: [id])
+
   @@index([schoolId])
 }
 
-// Course: The static catalog data
 model Course {
-  id            String   @id @default(cuid())
-  code          String   @unique // e.g. "CS 577"
-  name          String
-  description   String   @db.Text  
-  credits       Int
-
-  // Relations
-  schoolId      String
-  school        School   @relation(fields: [schoolId], references: [id])
-
-  // Prereq Logic for Visualization
-  prerequisiteText String? @db.Text // Raw text from guide.wisc.edu
-  prerequisites    Course[] @relation("CoursePrereqs")
-  prerequisiteFor  Course[] @relation("CoursePrereqs")
-
-  // Attributes for Filtering
-  breadths      String? // JSON array: ["Physical Science", etc.]
-  genEds        String? // JSON array: ["Comm A", etc.]
-  level         String   // "Elementary", "Intermediate", "Advanced"
-
-  reviews       Review[]
-  instructors   CourseInstructor[]
-  savedBy       SavedCourse[]
-  departments   CourseDepartment[]
-
-  // Full-text search vector (managed by PostgreSQL trigger, not by Prisma)
-  searchVector  Unsupported("tsvector")?
-
-  // Statistics (updated via cron/trigger)
-  avgGPA        Float?   // Aggregate from GradeDistributions
-  avgRating     Float?   // Aggregate from Reviews
-
-  // Historical Data
+  id                 String                   @id @default(cuid())
+  code               String                   @unique
+  name               String
+  description        String
+  credits            Int
+  schoolId           String
+  prerequisiteText   String?
+  breadths           String?
+  genEds             String?
+  level              String
+  avgGPA             Float?
+  avgRating          Float?
+  lastOffered        String?
+  updatedAt          DateTime                 @updatedAt
+  searchVector       Unsupported("tsvector")?
+  school             School                   @relation(fields: [schoolId], references: [id])
+  departments        CourseDepartment[]
+  instructors        CourseInstructor[]
   gradeDistributions GradeDistribution[]
-
-  // Metadata
-  lastOffered   String?
-  updatedAt     DateTime @updatedAt
+  reviews            Review[]
+  savedBy            SavedCourse[]
+  prerequisites      Course[]                 @relation("CoursePrereqs")
+  prerequisiteFor    Course[]                 @relation("CoursePrereqs")
 
   @@index([code])
   @@index([schoolId])
@@ -174,78 +117,63 @@ model Course {
   @@index([searchVector], type: Gin)
 }
 
-// Many-to-many relationship: Course <-> Department
 model CourseDepartment {
   courseId     String
-  course       Course     @relation(fields: [courseId], references: [id])
   departmentId String
+  course       Course     @relation(fields: [courseId], references: [id])
   department   Department @relation(fields: [departmentId], references: [id])
 
   @@id([courseId, departmentId])
 }
 
-// Grade Distribution: Official historical data scraped from Madgrades/Registrar
 model GradeDistribution {
-  id        String   @id @default(cuid())
-  courseId  String
-  course    Course   @relation(fields: [courseId], references: [id])
-  term      String   // e.g. "2023-Fall"
+  id           String      @id @default(cuid())
+  courseId     String
+  term         String
+  aCount       Int         @default(0)
+  abCount      Int         @default(0)
+  bCount       Int         @default(0)
+  bcCount      Int         @default(0)
+  cCount       Int         @default(0)
+  dCount       Int         @default(0)
+  fCount       Int         @default(0)
+  totalGraded  Int
+  avgGPA       Float
+  instructorId String?
+  course       Course      @relation(fields: [courseId], references: [id])
+  instructor   Instructor? @relation(fields: [instructorId], references: [id])
 
-  // Counts
-  aCount    Int      @default(0)
-  abCount   Int      @default(0)
-  bCount    Int      @default(0)
-  bcCount   Int      @default(0)
-  cCount    Int      @default(0)
-  dCount    Int      @default(0)
-  fCount    Int      @default(0)
-
-  totalGraded Int
-  avgGPA      Float
-
-  @@unique([courseId, term])
+  @@unique([courseId, term, instructorId])
+  @@index([courseId])
+  @@index([instructorId])
 }
 
-// Review: User generated content (NO SEED DATA ALLOWED)
 model Review {
-  id            String   @id @default(cuid())
-
-  // Core Metadata
-  term          String   // e.g., "Fall 2024"
-  title         String?  // Short review title
-  gradeReceived Grade    // Enum: A, AB, B, BC...
-
-  // MANDATORY Grading Dimensions (Grade Scale)
-  contentRating  String   // Stored as grade letter
-  teachingRating String
-  gradingRating  String
-  workloadRating String
-
-  // Specific Text Comments per Dimension
-  contentComment  String?  @db.Text
-  teachingComment String?  @db.Text
-  gradingComment  String?  @db.Text
-  workloadComment String?  @db.Text
-
-  // Metadata
-  assessments   String? // JSON array: ["Midterm", "Final", "Essay"]
-  tags          String?
-
-  // Resources (Optional)
-  resourceLink  String?  // Optional URL to Google Drive/Box for course materials
-
-  // Relations
-  instructorId  String
-  instructor    Instructor @relation(fields: [instructorId], references: [id])
-  courseId      String
-  course        Course   @relation(fields: [courseId], references: [id])
-  authorId      String
-  author        User     @relation(fields: [authorId], references: [id])
-
-  votes         Vote[]
-  comments      Comment[]
-  reports       Report[]
-  createdAt     DateTime @default(now())
+  id              String     @id @default(cuid())
+  term            String
+  title           String?
+  gradeReceived   Grade
+  contentRating   String
+  teachingRating  String
+  gradingRating   String
+  workloadRating  String
+  contentComment  String?
+  teachingComment String?
+  gradingComment  String?
+  workloadComment String?
+  assessments     String?
+  tags            String?
+  resourceLink    String?
+  instructorId    String
+  courseId        String
+  authorId        String
+  createdAt       DateTime   @default(now())
+  comments        Comment[]
+  reports         Report[]
+  author          User       @relation(fields: [authorId], references: [id])
+  course          Course     @relation(fields: [courseId], references: [id])
+  instructor      Instructor @relation(fields: [instructorId], references: [id])
+  votes           Vote[]
 
   @@index([courseId])
   @@index([authorId])
@@ -254,41 +182,38 @@ model Review {
 
 model Comment {
   id        String   @id @default(cuid())
-  text      String   @db.Text  
-
-  // Relations
+  text      String
   authorId  String
-  author    User     @relation(fields: [authorId], references: [id])
   reviewId  String
-  review    Review   @relation(fields: [reviewId], references: [id])
-
   createdAt DateTime @default(now())
+  author    User     @relation(fields: [authorId], references: [id])
+  review    Review   @relation(fields: [reviewId], references: [id])
 }
 
 model Vote {
   id        String   @id @default(cuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id])
   reviewId  String
-  review    Review   @relation(fields: [reviewId], references: [id])
-
   createdAt DateTime @default(now())
+  review    Review   @relation(fields: [reviewId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
 
   @@unique([userId, reviewId])
 }
 
 model Instructor {
-  id        String   @id @default(cuid())
-  name      String   @unique
-  aliases   String? // JSON array: Alternative names
-  courses   CourseInstructor[]
-  reviews   Review[]
+  id                 String              @id @default(cuid())
+  name               String              @unique
+  aliases            String?
+  courses            CourseInstructor[]
+  gradeDistributions GradeDistribution[]
+  reviews            Review[]
 }
 
 model CourseInstructor {
   courseId     String
-  course       Course     @relation(fields: [courseId], references: [id])
   instructorId String
+  course       Course     @relation(fields: [courseId], references: [id])
   instructor   Instructor @relation(fields: [instructorId], references: [id])
 
   @@id([courseId, instructorId])
@@ -297,42 +222,51 @@ model CourseInstructor {
 model SavedCourse {
   id        String   @id @default(cuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id])
   courseId  String
-  course    Course   @relation(fields: [courseId], references: [id])
-
   createdAt DateTime @default(now())
+  course    Course   @relation(fields: [courseId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
 
   @@unique([userId, courseId])
 }
 
-// Report: Users can report inappropriate reviews
 model Report {
-  id        String   @id @default(cuid())
-  reason    String   // e.g. "spam", "offensive", "irrelevant", "other"
-  details   String?  @db.Text // Optional additional details
-  status    String   @default("pending") // "pending", "reviewed", "dismissed", "actioned"
-
-  // Relations
+  id         String   @id @default(cuid())
+  reason     String
+  details    String?
+  status     String   @default("pending")
   reporterId String
-  reporter   User     @relation("ReportedBy", fields: [reporterId], references: [id])
   reviewId   String
+  createdAt  DateTime @default(now())
+  reporter   User     @relation("ReportedBy", fields: [reporterId], references: [id])
   review     Review   @relation(fields: [reviewId], references: [id])
 
-  createdAt  DateTime @default(now())
-
-  @@unique([reporterId, reviewId]) // One report per user per review
+  @@unique([reporterId, reviewId])
   @@index([status])
   @@index([reviewId])
 }
 
-// Transcript: Encrypted/Private user history for GPA Prediction
 model StudentCourseHistory {
-  id          String   @id @default(cuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id])
-  courseCode  String   // Store code string to survive catalog changes
-  term        String
-  grade       Grade
-  credits     Int
+  id         String @id @default(cuid())
+  userId     String
+  courseCode String
+  term       String
+  grade      Grade
+  credits    Int
+  user       User   @relation(fields: [userId], references: [id])
+}
+
+enum UserRole {
+  STUDENT
+  ADMIN
+}
+
+enum Grade {
+  A
+  AB
+  B
+  BC
+  C
+  D
+  F
 }

@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Instructor Page 方案对比</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f5f5f5;
+      padding: 20px;
+    }
+    h1 { text-align: center; margin-bottom: 30px; color: #333; font-size: 24px; }
+    .container { display: flex; gap: 40px; justify-content: center; flex-wrap: wrap; }
+    .plan { 
+      background: white; 
+      border-radius: 12px; 
+      padding: 20px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+      width: 520px;
+    }
+    .plan-title { 
+      font-size: 18px; 
+      font-weight: 600; 
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #c5050c;
+      color: #c5050c;
+    }
+    .plan-desc {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 15px;
+      line-height: 1.5;
+    }
+    .mockup {
+      background: #f9f9f9;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .header {
+      background: white;
+      padding: 8px 12px;
+      border-bottom: 1px solid #e0e0e0;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .logo { color: #c5050c; font-weight: 700; font-size: 14px; }
+    .nav { display: flex; gap: 12px; font-size: 11px; color: #666; }
+    .nav span.active { color: #c5050c; }
+    .layout { display: flex; min-height: 320px; }
+    .sidebar-left {
+      width: 100px;
+      background: white;
+      border-right: 1px solid #e0e0e0;
+      padding: 10px;
+      font-size: 10px;
+    }
+    .sidebar-left .search {
+      background: #f5f5f5;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 4px 6px;
+      font-size: 9px;
+      color: #999;
+      margin-bottom: 10px;
+    }
+    .sidebar-left .section-title {
+      font-size: 9px;
+      color: #999;
+      margin: 8px 0 4px;
+      text-transform: uppercase;
+    }
+    .sidebar-left .course-link {
+      font-size: 9px;
+      color: #333;
+      padding: 3px 0;
+      cursor: pointer;
+    }
+    .main-content {
+      flex: 1;
+      padding: 12px;
+      background: #fafafa;
+    }
+    .course-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+    .course-code { font-size: 16px; font-weight: 700; color: #333; }
+    .course-name { font-size: 11px; color: #666; margin-top: 2px; }
+    .course-gpa { font-size: 20px; font-weight: 700; color: #22c55e; }
+    .course-gpa-label { font-size: 9px; color: #999; }
+    .filters { display: flex; gap: 6px; margin-bottom: 12px; }
+    .filter-btn {
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 9px;
+      color: #666;
+    }
+    .review-card {
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      padding: 10px;
+      margin-bottom: 8px;
+    }
+    .review-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .review-title { font-size: 11px; font-weight: 600; }
+    .review-meta { font-size: 9px; color: #999; }
+    .review-ratings { display: flex; gap: 8px; margin-bottom: 6px; }
+    .rating-item { font-size: 9px; }
+    .rating-label { color: #999; }
+    .rating-value { font-weight: 600; color: #22c55e; margin-left: 2px; }
+    .review-text { font-size: 9px; color: #666; line-height: 1.4; }
+    .sidebar-right {
+      width: 130px;
+      background: white;
+      border-left: 1px solid #e0e0e0;
+      padding: 12px;
+    }
+    .review-count { text-align: center; margin-bottom: 12px; }
+    .review-count-num { font-size: 24px; font-weight: 700; color: #333; }
+    .review-count-label { font-size: 10px; color: #999; }
+    .rating-circles {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .rating-circle { text-align: center; }
+    .rating-circle-grade {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 4px;
+      font-size: 12px;
+      font-weight: 700;
+      color: white;
+    }
+    .rating-circle-label { font-size: 8px; color: #999; }
+    .write-btn {
+      background: #c5050c;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 8px;
+      width: 100%;
+      font-size: 10px;
+      font-weight: 600;
+    }
+    .mini-profile {
+      position: absolute;
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      width: 200px;
+      z-index: 10;
+    }
+    .mini-profile-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .mini-profile-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #c5050c;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+    }
+    .mini-profile-name { font-size: 12px; font-weight: 600; }
+    .mini-profile-dept { font-size: 10px; color: #999; }
+    .mini-profile-stats {
+      display: flex;
+      justify-content: space-around;
+      padding: 8px 0;
+      border-top: 1px solid #eee;
+      border-bottom: 1px solid #eee;
+      margin-bottom: 8px;
+    }
+    .mini-stat { text-align: center; }
+    .mini-stat-num { font-size: 14px; font-weight: 700; color: #333; }
+    .mini-stat-label { font-size: 8px; color: #999; }
+    .mini-profile-courses { font-size: 9px; color: #666; }
+    .mini-profile-courses strong { color: #333; }
+    .instructor-link {
+      color: #c5050c;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+    .pros { color: #22c55e; margin-right: 15px; }
+    .cons { color: #ef4444; }
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 9px;
+      margin-right: 4px;
+    }
+  </style>
+</head>
+<body>
+  <h1>📐 Instructor Page 方案对比</h1>
+  
+  <div class="container">
+    <!-- 方案 A -->
+    <div class="plan">
+      <div class="plan-title">方案 A：取消独立页面 + Mini-Profile 弹窗</div>
+      <div class="plan-desc">
+        <span class="pros">✓ 不跳转，体验流畅</span>
+        <span class="pros">✓ 维护成本低</span>
+        <span class="cons">✗ 信息较简略</span>
+      </div>
+      <div class="mockup">
+        <div class="header">
+          <span class="logo">🔴 WiscFlow</span>
+          <div class="nav">
+            <span class="active">Courses</span>
+            <span>About</span>
+          </div>
+        </div>
+        <div class="layout">
+          <div class="sidebar-left">
+            <div class="search">🔍 Search...</div>
+            <div class="section-title">Related</div>
+            <div class="course-link">CS 400</div>
+            <div class="course-link">CS 540</div>
+            <div class="course-link">CS 559</div>
+            <div class="section-title">Same Dept</div>
+            <div class="course-link">CS 200</div>
+            <div class="course-link">CS 300</div>
+          </div>
+          <div class="main-content" style="position: relative;">
+            <div class="course-header">
+              <div>
+                <div class="course-code">COMP SCI 577</div>
+                <div class="course-name">Introduction to Algorithms</div>
+              </div>
+              <div style="text-align: right;">
+                <div class="course-gpa">3.42</div>
+                <div class="course-gpa-label">Avg GPA</div>
+              </div>
+            </div>
+            <div class="filters">
+              <div class="filter-btn">All Terms ▼</div>
+              <div class="filter-btn">All Instructors ▼</div>
+              <div class="filter-btn">Sort: Recent ▼</div>
+            </div>
+            <div class="review-card">
+              <div class="review-header">
+                <span class="review-title">Great course!</span>
+                <span class="review-meta">2024-Fall</span>
+              </div>
+              <div class="review-meta" style="margin-bottom: 6px;">
+                Instructor: <span class="instructor-link">John Smith</span> 👆点击弹出
+              </div>
+              <div class="review-ratings">
+                <div class="rating-item"><span class="rating-label">Content</span><span class="rating-value">A</span></div>
+                <div class="rating-item"><span class="rating-label">Teaching</span><span class="rating-value">A</span></div>
+                <div class="rating-item"><span class="rating-label">Grading</span><span class="rating-value">B+</span></div>
+              </div>
+              <div class="review-text">Professor Smith explains algorithms very clearly...</div>
+            </div>
+            <div class="review-card" style="opacity: 0.5;">
+              <div class="review-header">
+                <span class="review-title">Challenging but rewarding</span>
+                <span class="review-meta">2024-Spring</span>
+              </div>
+            </div>
+            
+            <!-- Mini Profile 弹窗 -->
+            <div class="mini-profile" style="top: 80px; left: 200px;">
+              <div class="mini-profile-header">
+                <div class="mini-profile-avatar">JS</div>
+                <div>
+                  <div class="mini-profile-name">John Smith</div>
+                  <div class="mini-profile-dept">Computer Sciences</div>
+                </div>
+              </div>
+              <div class="mini-profile-stats">
+                <div class="mini-stat">
+                  <div class="mini-stat-num" style="color: #22c55e;">A-</div>
+                  <div class="mini-stat-label">Avg Rating</div>
+                </div>
+                <div class="mini-stat">
+                  <div class="mini-stat-num">156</div>
+                  <div class="mini-stat-label">Reviews</div>
+                </div>
+                <div class="mini-stat">
+                  <div class="mini-stat-num">8</div>
+                  <div class="mini-stat-label">Courses</div>
+                </div>
+              </div>
+              <div class="mini-profile-courses">
+                <strong>Teaches:</strong> CS 577, CS 400, CS 540, CS 300...
+              </div>
+            </div>
+          </div>
+          <div class="sidebar-right">
+            <div class="review-count">
+              <div class="review-count-num">89</div>
+              <div class="review-count-label">Reviews</div>
+            </div>
+            <div class="rating-circles">
+              <div class="rating-circle">
+                <div class="rating-circle-grade" style="background: #22c55e;">B+</div>
+                <div class="rating-circle-label">Content</div>
+              </div>
+              <div class="rating-circle">
+                <div class="rating-circle-grade" style="background: #22c55e;">A-</div>
+                <div class="rating-circle-label">Teaching</div>
+              </div>
+              <div class="rating-circle">
+                <div class="rating-circle-grade" style="background: #eab308;">B</div>
+                <div class="rating-circle-label">Grading</div>
+              </div>
+              <div class="rating-circle">
+                <div class="rating-circle-grade" style="background: #22c55e;">A-</div>
+                <div class="rating-circle-label">Workload</div>
+              </div>
+            </div>
+            <button class="write-btn">✏️ Write Review</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 方案 B -->
+    <div class="plan">
+      <div class="plan-title">方案 B：创新 Teaching Portfolio 页面</div>
+      <div class="plan-desc">
+        <span class="pros">✓ 信息丰富，差异化</span>
+        <span class="pros">✓ 雷达图+时间线独特</span>
+        <span class="cons">✗ 需跳转</span>
+      </div>
+      <div class="mockup">
+        <div class="header">
+          <span class="logo">🔴 WiscFlow</span>
+          <div class="nav">
+            <span>Courses</span>
+            <span class="active">Instructor</span>
+            <span>About</span>
+          </div>
+        </div>
+        <div style="padding: 15px; background: #fafafa; min-height: 320px;">
+          <!-- Instructor Header -->
+          <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+            <div style="width: 60px; height: 60px; border-radius: 50%; background: #c5050c; color: white; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700;">JS</div>
+            <div style="flex: 1;">
+              <div style="font-size: 18px; font-weight: 700;">John Smith</div>
+              <div style="font-size: 11px; color: #666;">Computer Sciences Department</div>
+              <div style="display: flex; gap: 6px; margin-top: 6px;">
+                <span class="tag" style="background: #dcfce7; color: #16a34a;">🎯 Clear</span>
+                <span class="tag" style="background: #dbeafe; color: #2563eb;">📚 Organized</span>
+                <span class="tag" style="background: #fef3c7; color: #d97706;">💡 Engaging</span>
+              </div>
+            </div>
+            <!-- Radar Chart 示意 -->
+            <div style="width: 100px; height: 100px;">
+              <svg viewBox="0 0 100 100" style="width: 100%; height: 100%;">
+                <polygon points="50,10 90,35 80,85 20,85 10,35" fill="none" stroke="#e0e0e0" stroke-width="1"/>
+                <polygon points="50,20 78,38 72,75 28,75 22,38" fill="rgba(197,5,12,0.15)" stroke="#c5050c" stroke-width="2"/>
+                <circle cx="50" cy="20" r="3" fill="#c5050c"/>
+                <circle cx="78" cy="38" r="3" fill="#c5050c"/>
+                <circle cx="72" cy="75" r="3" fill="#c5050c"/>
+                <circle cx="28" cy="75" r="3" fill="#c5050c"/>
+                <text x="50" y="6" font-size="7" text-anchor="middle" fill="#666">Content</text>
+                <text x="97" y="38" font-size="7" text-anchor="start" fill="#666">Teaching</text>
+                <text x="78" y="92" font-size="7" text-anchor="middle" fill="#666">Grading</text>
+                <text x="22" y="92" font-size="7" text-anchor="middle" fill="#666">Workload</text>
+              </svg>
+            </div>
+          </div>
+          
+          <!-- Stats Row -->
+          <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <div style="flex: 1; background: white; border-radius: 8px; padding: 10px; text-align: center; border: 1px solid #e0e0e0;">
+              <div style="font-size: 20px; font-weight: 700; color: #22c55e;">A-</div>
+              <div style="font-size: 9px; color: #999;">Avg Rating</div>
+            </div>
+            <div style="flex: 1; background: white; border-radius: 8px; padding: 10px; text-align: center; border: 1px solid #e0e0e0;">
+              <div style="font-size: 20px; font-weight: 700; color: #333;">156</div>
+              <div style="font-size: 9px; color: #999;">Total Reviews</div>
+            </div>
+            <div style="flex: 1; background: white; border-radius: 8px; padding: 10px; text-align: center; border: 1px solid #e0e0e0;">
+              <div style="font-size: 20px; font-weight: 700; color: #333;">8</div>
+              <div style="font-size: 9px; color: #999;">Courses</div>
+            </div>
+            <div style="flex: 1; background: white; border-radius: 8px; padding: 10px; text-align: center; border: 1px solid #e0e0e0;">
+              <div style="font-size: 20px; font-weight: 700; color: #333;">2015</div>
+              <div style="font-size: 9px; color: #999;">Since</div>
+            </div>
+          </div>
+          
+          <!-- Teaching Timeline -->
+          <div style="background: white; border-radius: 8px; padding: 12px; margin-bottom: 12px; border: 1px solid #e0e0e0;">
+            <div style="font-size: 11px; font-weight: 600; margin-bottom: 8px;">📈 Teaching Timeline</div>
+            <div style="display: flex; align-items: center; gap: 5px; font-size: 9px;">
+              <span style="color: #999;">2020</span>
+              <div style="flex: 1; height: 4px; background: linear-gradient(to right, #c5050c, #22c55e); border-radius: 2px; position: relative;">
+                <div style="position: absolute; left: 10%; top: -4px; width: 12px; height: 12px; background: white; border: 2px solid #c5050c; border-radius: 50%;"></div>
+                <div style="position: absolute; left: 35%; top: -4px; width: 12px; height: 12px; background: white; border: 2px solid #c5050c; border-radius: 50%;"></div>
+                <div style="position: absolute; left: 60%; top: -4px; width: 12px; height: 12px; background: white; border: 2px solid #c5050c; border-radius: 50%;"></div>
+                <div style="position: absolute; left: 85%; top: -4px; width: 12px; height: 12px; background: white; border: 2px solid #22c55e; border-radius: 50%;"></div>
+              </div>
+              <span style="color: #999;">2024</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 8px; color: #666; margin-top: 6px; padding: 0 20px;">
+              <span>CS 577</span>
+              <span>CS 400</span>
+              <span>CS 540</span>
+              <span>CS 300</span>
+            </div>
+          </div>
+          
+          <!-- Courses Grid -->
+          <div style="font-size: 11px; font-weight: 600; margin-bottom: 8px;">📚 Courses Taught</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <div style="background: white; border-radius: 6px; padding: 10px; border: 1px solid #e0e0e0;">
+              <div style="font-size: 12px; font-weight: 600;">CS 577</div>
+              <div style="font-size: 10px; color: #666;">Introduction to Algorithms</div>
+              <div style="font-size: 10px; margin-top: 4px;"><span style="color: #22c55e; font-weight: 600;">A-</span> · 45 reviews</div>
+            </div>
+            <div style="background: white; border-radius: 6px; padding: 10px; border: 1px solid #e0e0e0;">
+              <div style="font-size: 12px; font-weight: 600;">CS 400</div>
+              <div style="font-size: 10px; color: #666;">Data Structures</div>
+              <div style="font-size: 10px; margin-top: 4px;"><span style="color: #22c55e; font-weight: 600;">A</span> · 62 reviews</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div style="text-align: center; margin-top: 30px; color: #666; font-size: 14px;">
+    <strong>你倾向哪个方案？</strong><br>
+    A = 简洁流畅 | B = 丰富独特
+  </div>
+</body>
+</html>

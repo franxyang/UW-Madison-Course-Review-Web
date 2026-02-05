@@ -1,7 +1,7 @@
 # Phase 3: UX Optimization - Progress Tracker
 
 **开始日期**: 2026-02-04  
-**当前状态**: 进行中 (配色改造完成)
+**当前状态**: 进行中 (~35% - 课程详情页三栏布局完成)
 
 ---
 
@@ -158,16 +158,82 @@
 
 - [x] 配色系统建立（方案 C）
 - [x] 课程列表页重构 ✅
-- [ ] 所有核心页面配色统一
+- [x] **课程详情页三栏布局重构** ✅ (2026-02-05)
+- [ ] 首页重构
+- [ ] 教师页面配色更新
 - [ ] Grade Flow 可视化
 - [ ] Instructor 过滤优化
 - [ ] Dark mode 支持（可选）
 
 ---
 
-**完成度**: Phase 3 约 **15%**  
-**下次更新**: 完成首页或课程详情页改造后
+## ✅ **课程详情页三栏布局** (2026-02-05 完成)
+
+### **布局结构**
+- **左栏** (固定 240px): 导航目录 + 同系课程推荐（待数据）
+- **中栏** (flex-1): 课程信息 + 评价内容
+- **右栏** (固定 280px): 课程概览卡片
+
+### **右侧概览卡片功能**
+- ✅ 评分圆圈（Overall GPA 动态配色）
+- ✅ Grade Flow 流式分布条（A→F 柔和渐变）
+- ✅ 课程基本信息（Credits、Level、Breadth）
+- ✅ Quick Actions（Write Review、Save Course）
+
+### **页内过滤器**
+- ✅ Term 选择器（页内过滤，pill 样式）
+- ✅ Instructor 选择器（下拉过滤）
+- ✅ URL state 同步（term/instructor 参数）
+
+### **新增组件**
+- `CoursePageLayout.tsx` - 三栏布局容器
+- `CourseOverviewCard.tsx` - 右侧概览卡片
+- `GradeFlowBar.tsx` - Grade Flow 可视化
+- `TermFilter.tsx` - Term pill 选择器
+- `InstructorFilter.tsx` - Instructor 下拉
+
+---
+
+## ✅ **Per-Instructor GPA 过滤系统** (2026-02-05 完成)
+
+### **数据结构升级**
+- **之前**: `GradeDistribution` 是 term 级别汇总，通过 `GradeDistributionInstructor` 多对多表关联 instructors
+- **现在**: `GradeDistribution` 是 **per-instructor** 级别，每个 instructor 在每个 term 有独立 GPA 记录
+
+### **Schema 变更**
+```prisma
+model GradeDistribution {
+  // ...
+  instructorId String?  // 新增：直接关联 instructor
+  instructor   Instructor? @relation(...)
+  @@unique([courseId, term, instructorId])  // 新的唯一约束
+}
+```
+
+### **4 种 GPA 过滤**
+| 过滤类型 | 说明 |
+|----------|------|
+| **Overall avg** | 所有教师所有学期平均 |
+| **Term avg** | 该学期所有教师平均 |
+| **Instructor avg** | 该教师所有学期平均 |
+| **Term + Instructor** | 该教师在该学期的精确 GPA ✨ |
+
+### **过滤器联动**
+- 选择 Term → Instructor 下拉只显示该学期的教师
+- 选择 Instructor → Term 下拉只显示该教师教过的学期
+- 切换后不匹配 → 自动重置另一个过滤器
+
+### **数据统计**
+- 247,234 条 per-instructor 成绩分布记录
+- 7,643 门课程有 GPA 数据
+- 20,607 位教师
+- 60,354 个课程-讲师关联
+
+---
+
+**完成度**: Phase 3 约 **45%**  
+**下次更新**: 首页重构或教师页面改造
 
 **改造者**: dev-agent  
 **批准者**: Franx  
-**最后更新**: 2026-02-04 23:15 CST
+**最后更新**: 2026-02-05 14:51 CST

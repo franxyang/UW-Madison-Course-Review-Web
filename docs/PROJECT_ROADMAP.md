@@ -1,8 +1,8 @@
 # WiscFlow Project Roadmap
 
-**Last Updated**: 2026-02-04 02:45 CST  
-**Current Phase**: Phase 2 - Core Feature Enhancement  
-**Next Step**: User Incentive System (frosted glass + contributor levels)
+**Last Updated**: 2026-02-05 14:51 CST  
+**Current Phase**: Phase 3 - UX Optimization (45%)  
+**Next Step**: 首页重构 + 教师页面 Teaching Portfolio 风格
 
 ## 🎯 Project Vision
 
@@ -92,7 +92,7 @@ A modern course review platform designed for UW-Madison students to make informe
 
 ## 🚧 Current Progress (2026-02-04)
 
-### ✅ Phase 1 — COMPLETE
+### ✅ Phase 1 — COMPLETE (100%)
 - ✅ PostgreSQL Migration (SQLite → Neon)
 - ✅ tRPC Integration (all Server Actions migrated)
 - ✅ Full-text Search (tsvector + GIN index)
@@ -105,13 +105,27 @@ A modern course review platform designed for UW-Madison students to make informe
 - ✅ Cross-listed Courses (1,368 groups)
 - ✅ Department Filter Fix + Pagination (30/page)
 
-### 🔄 Phase 2 — In Progress
-- [ ] **User Incentive System** (review-gated access + contributor levels) 🔥
-- [ ] Advanced search (instructor, semester, GPA range)
-- [ ] Review management (edit, delete, report)
-- [ ] Instructor pages
-- [ ] User dashboard
-- [ ] Mobile responsiveness
+### ✅ Phase 2 — COMPLETE (100%)
+- ✅ **User Incentive System** (review-gated access + contributor levels)
+- ✅ Advanced search (instructor, GPA range filters)
+- ✅ Review management (edit, delete, report)
+- ✅ Instructor pages (/instructors, /instructors/[id])
+- ✅ User dashboard (reviews, upvotes, level progress)
+- ✅ Mobile responsiveness (hamburger nav, slide-over filters)
+
+### 🔄 Phase 3 — In Progress (35%)
+- ✅ 配色系统建立（方案 C - uwcourses 极简 + USTSPACE 柔和）
+- ✅ 课程列表页重构（新配色 + GPA动态配色 + Level徽章柔和化）
+- ✅ **课程详情页三栏布局重构** (2026-02-05)
+  - 三栏布局（左导航 + 中内容 + 右概览）
+  - Term/Instructor 页内过滤器
+  - 右侧评分圆圈 + Grade Flow
+  - `CoursePageLayout` 组件
+- [ ] **首页重构** 🔥
+- [ ] **教师页面 Teaching Portfolio 风格**（雷达图 + 时间线）
+- [ ] 左侧栏同系课程数据
+- [ ] 搜索增强（实时预览卡片）
+- [ ] Dark mode 支持（可选）
 
 ---
 

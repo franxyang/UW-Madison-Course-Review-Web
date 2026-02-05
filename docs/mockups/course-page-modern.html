@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Course Page 现代布局方案</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f5f5f5;
+      padding: 20px;
+    }
+    h1 { text-align: center; margin-bottom: 10px; color: #333; font-size: 24px; }
+    .subtitle { text-align: center; color: #666; font-size: 14px; margin-bottom: 30px; }
+    .plans { display: flex; flex-direction: column; gap: 40px; max-width: 1100px; margin: 0 auto; }
+    .plan { 
+      background: white; 
+      border-radius: 16px; 
+      padding: 24px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+    .plan-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+    .plan-title { 
+      font-size: 20px; 
+      font-weight: 700; 
+      color: #333;
+    }
+    .plan-badge {
+      background: #c5050c;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .plan-desc {
+      font-size: 13px;
+      color: #666;
+      margin-top: 6px;
+      line-height: 1.5;
+    }
+    .tags { display: flex; gap: 8px; margin-top: 10px; }
+    .tag {
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+    }
+    .tag-pro { background: #dcfce7; color: #16a34a; }
+    .tag-con { background: #fee2e2; color: #dc2626; }
+    .tag-ref { background: #dbeafe; color: #2563eb; }
+    .mockup {
+      background: #fafafa;
+      border: 1px solid #e5e5e5;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .browser-bar {
+      background: #f0f0f0;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .browser-dots {
+      display: flex;
+      gap: 6px;
+    }
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    .dot-red { background: #ff5f57; }
+    .dot-yellow { background: #ffbd2e; }
+    .dot-green { background: #28c940; }
+    .browser-url {
+      flex: 1;
+      background: white;
+      border-radius: 4px;
+      padding: 4px 10px;
+      font-size: 11px;
+      color: #666;
+    }
+    
+    /* 通用元素 */
+    .nav-bar {
+      background: white;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #eee;
+    }
+    .logo { color: #c5050c; font-weight: 700; font-size: 16px; }
+    .nav-links { display: flex; gap: 20px; font-size: 13px; color: #666; }
+    .nav-links span.active { color: #c5050c; font-weight: 500; }
+    
+    /* ========== 方案1: Bento Grid ========== */
+    .bento-layout {
+      padding: 20px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 300px;
+      grid-template-rows: auto auto 1fr;
+      gap: 16px;
+      min-height: 400px;
+    }
+    .bento-card {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .bento-hero {
+      grid-column: 1 / 3;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .bento-gpa {
+      grid-row: 1 / 3;
+      grid-column: 3;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .bento-gpa-num {
+      font-size: 48px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .bento-filters {
+      grid-column: 1 / 2;
+    }
+    .bento-stats {
+      grid-column: 2 / 3;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .bento-reviews {
+      grid-column: 1 / 3;
+    }
+    .bento-grade-flow {
+      grid-column: 3;
+    }
+    
+    /* ========== 方案2: Hero + Cards ========== */
+    .hero-layout {
+      min-height: 450px;
+    }
+    .hero-section {
+      background: linear-gradient(135deg, #c5050c 0%, #a00408 100%);
+      color: white;
+      padding: 30px;
+      position: relative;
+    }
+    .hero-content {
+      max-width: 600px;
+    }
+    .hero-code {
+      font-size: 32px;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+    .hero-name {
+      font-size: 16px;
+      opacity: 0.9;
+      margin-bottom: 16px;
+    }
+    .hero-meta {
+      display: flex;
+      gap: 20px;
+      font-size: 13px;
+      opacity: 0.85;
+    }
+    .hero-gpa-box {
+      position: absolute;
+      right: 30px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: white;
+      border-radius: 16px;
+      padding: 20px 30px;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
+    .hero-gpa-num {
+      font-size: 36px;
+      font-weight: 800;
+      color: #22c55e;
+    }
+    .hero-gpa-label {
+      font-size: 12px;
+      color: #666;
+    }
+    .cards-section {
+      padding: 20px;
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .card-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    /* ========== 方案3: 单栏 + Floating Panel ========== */
+    .single-layout {
+      min-height: 450px;
+      position: relative;
+    }
+    .single-main {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 30px 20px;
+    }
+    .single-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .single-code {
+      font-size: 28px;
+      font-weight: 800;
+      color: #333;
+    }
+    .single-name {
+      font-size: 16px;
+      color: #666;
+      margin-top: 4px;
+    }
+    .single-badges {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .single-badge {
+      background: #f5f5f5;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      color: #333;
+    }
+    .single-badge strong {
+      color: #22c55e;
+    }
+    .floating-panel {
+      position: absolute;
+      right: 20px;
+      top: 80px;
+      width: 280px;
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    .floating-sticky-note {
+      font-size: 10px;
+      color: #999;
+      text-align: center;
+      margin-top: 8px;
+    }
+    
+    /* 通用小组件 */
+    .filter-pills {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .pill {
+      background: #f5f5f5;
+      border: 1px solid #e5e5e5;
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 12px;
+      color: #666;
+    }
+    .pill.active {
+      background: #c5050c;
+      border-color: #c5050c;
+      color: white;
+    }
+    .stat-box {
+      background: #f9f9f9;
+      border-radius: 10px;
+      padding: 12px;
+      text-align: center;
+    }
+    .stat-num {
+      font-size: 24px;
+      font-weight: 700;
+      color: #333;
+    }
+    .stat-label {
+      font-size: 10px;
+      color: #999;
+      margin-top: 2px;
+    }
+    .mini-review {
+      border-bottom: 1px solid #f0f0f0;
+      padding: 12px 0;
+    }
+    .mini-review:last-child {
+      border-bottom: none;
+    }
+    .mini-review-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .mini-review-title {
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .mini-review-meta {
+      font-size: 11px;
+      color: #999;
+    }
+    .mini-review-text {
+      font-size: 12px;
+      color: #666;
+      line-height: 1.5;
+    }
+    .grade-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 6px 0;
+    }
+    .grade-label {
+      width: 24px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #666;
+    }
+    .grade-track {
+      flex: 1;
+      height: 8px;
+      background: #f0f0f0;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .grade-fill {
+      height: 100%;
+      border-radius: 4px;
+    }
+    .grade-pct {
+      width: 36px;
+      font-size: 10px;
+      color: #999;
+      text-align: right;
+    }
+    .rating-circles-row {
+      display: flex;
+      justify-content: space-around;
+      margin: 16px 0;
+    }
+    .rating-circle {
+      text-align: center;
+    }
+    .rating-circle-grade {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      color: white;
+      margin: 0 auto 6px;
+    }
+    .rating-circle-label {
+      font-size: 10px;
+      color: #999;
+    }
+    .write-btn {
+      background: #c5050c;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 12px;
+      width: 100%;
+      font-size: 13px;
+      font-weight: 600;
+      margin-top: 12px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎨 Course Page 现代布局方案</h1>
+  <p class="subtitle">超越 USTSPACE 的三栏设计，探索更现代的视觉语言</p>
+  
+  <div class="plans">
+    
+    <!-- 方案1: Bento Grid -->
+    <div class="plan">
+      <div class="plan-header">
+        <div>
+          <div class="plan-title">方案 1：Bento Grid 布局</div>
+          <div class="plan-desc">Apple 风格的不规则网格，信息密度高但不拥挤</div>
+          <div class="tags">
+            <span class="tag tag-pro">✓ 2024设计趋势</span>
+            <span class="tag tag-pro">✓ 信息层次清晰</span>
+            <span class="tag tag-ref">📱 Apple / Linear</span>
+          </div>
+        </div>
+        <span class="plan-badge">推荐</span>
+      </div>
+      <div class="mockup">
+        <div class="browser-bar">
+          <div class="browser-dots">
+            <div class="dot dot-red"></div>
+            <div class="dot dot-yellow"></div>
+            <div class="dot dot-green"></div>
+          </div>
+          <div class="browser-url">wiscflow.com/courses/comp-sci-577</div>
+        </div>
+        <div class="nav-bar">
+          <span class="logo">🔴 WiscFlow</span>
+          <div class="nav-links">
+            <span class="active">Courses</span>
+            <span>Instructors</span>
+            <span>About</span>
+          </div>
+        </div>
+        <div class="bento-layout" style="background: #f5f5f5;">
+          <!-- Hero Card -->
+          <div class="bento-card bento-hero">
+            <div>
+              <div style="font-size: 11px; color: #c5050c; font-weight: 600; margin-bottom: 4px;">COMP SCI 577</div>
+              <div style="font-size: 22px; font-weight: 700; color: #333;">Introduction to Algorithms</div>
+              <div style="font-size: 13px; color: #666; margin-top: 8px;">Basic paradigms for algorithm design, analysis of time and space. Sorting, searching, optimization...</div>
+              <div style="display: flex; gap: 16px; margin-top: 12px; font-size: 12px; color: #999;">
+                <span>📚 3 credits</span>
+                <span>🏫 Letters & Science</span>
+                <span>📊 Advanced</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- GPA Card -->
+          <div class="bento-card bento-gpa">
+            <div class="bento-gpa-num">3.42</div>
+            <div style="font-size: 12px; color: #999;">Average GPA</div>
+            <div style="font-size: 11px; color: #666; margin-top: 8px;">Based on 1,247 grades</div>
+          </div>
+          
+          <!-- Filters -->
+          <div class="bento-card bento-filters">
+            <div class="card-title">🔍 Filter Reviews</div>
+            <div class="filter-pills">
+              <span class="pill active">All Terms</span>
+              <span class="pill">2024-Fall</span>
+              <span class="pill">2024-Spring</span>
+            </div>
+            <div class="filter-pills" style="margin-top: 8px;">
+              <span class="pill active">All Instructors</span>
+              <span class="pill">J. Smith</span>
+            </div>
+          </div>
+          
+          <!-- Stats -->
+          <div class="bento-card bento-stats">
+            <div class="stat-box">
+              <div class="stat-num" style="color: #22c55e;">A-</div>
+              <div class="stat-label">Content</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-num" style="color: #22c55e;">A</div>
+              <div class="stat-label">Teaching</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-num" style="color: #eab308;">B+</div>
+              <div class="stat-label">Grading</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-num" style="color: #22c55e;">A-</div>
+              <div class="stat-label">Workload</div>
+            </div>
+          </div>
+          
+          <!-- Reviews -->
+          <div class="bento-card bento-reviews">
+            <div class="card-title">💬 Student Reviews <span style="color: #999; font-weight: 400;">(89)</span></div>
+            <div class="mini-review">
+              <div class="mini-review-header">
+                <span class="mini-review-title">Great course for CS majors!</span>
+                <span class="mini-review-meta">2024-Fall · J. Smith</span>
+              </div>
+              <div class="mini-review-text">Professor Smith explains complex algorithms in a very approachable way. The problem sets are challenging but fair...</div>
+            </div>
+            <div class="mini-review">
+              <div class="mini-review-header">
+                <span class="mini-review-title">Challenging but rewarding</span>
+                <span class="mini-review-meta">2024-Spring · M. Chen</span>
+              </div>
+              <div class="mini-review-text">Be prepared to spend a lot of time on homework. The exams are tough but curve is generous...</div>
+            </div>
+          </div>
+          
+          <!-- Grade Flow -->
+          <div class="bento-card bento-grade-flow">
+            <div class="card-title">📊 Grade Flow</div>
+            <div class="grade-bar">
+              <span class="grade-label">A</span>
+              <div class="grade-track"><div class="grade-fill" style="width: 35%; background: #22c55e;"></div></div>
+              <span class="grade-pct">35%</span>
+            </div>
+            <div class="grade-bar">
+              <span class="grade-label">AB</span>
+              <div class="grade-track"><div class="grade-fill" style="width: 25%; background: #4ade80;"></div></div>
+              <span class="grade-pct">25%</span>
+            </div>
+            <div class="grade-bar">
+              <span class="grade-label">B</span>
+              <div class="grade-track"><div class="grade-fill" style="width: 20%; background: #facc15;"></div></div>
+              <span class="grade-pct">20%</span>
+            </div>
+            <div class="grade-bar">
+              <span class="grade-label">BC</span>
+              <div class="grade-track"><div class="grade-fill" style="width: 12%; background: #fb923c;"></div></div>
+              <span class="grade-pct">12%</span>
+            </div>
+            <div class="grade-bar">
+              <span class="grade-label">C</span>
+              <div class="grade-track"><div class="grade-fill" style="width: 6%; background: #f87171;"></div></div>
+              <span class="grade-pct">6%</span>
+            </div>
+            <button class="write-btn">✏️ Write a Review</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 方案2: Hero Banner -->
+    <div class="plan">
+      <div class="plan-header">
+        <div>
+          <div class="plan-title">方案 2：Hero Banner + 卡片流</div>
+          <div class="plan-desc">醒目的顶部 Banner，品牌感强，内容向下流动</div>
+          <div class="tags">
+            <span class="tag tag-pro">✓ 视觉冲击力强</span>
+            <span class="tag tag-pro">✓ 品牌识别度高</span>
+            <span class="tag tag-ref">📱 Spotify / Notion</span>
+          </div>
+        </div>
+      </div>
+      <div class="mockup">
+        <div class="browser-bar">
+          <div class="browser-dots">
+            <div class="dot dot-red"></div>
+            <div class="dot dot-yellow"></div>
+            <div class="dot dot-green"></div>
+          </div>
+          <div class="browser-url">wiscflow.com/courses/comp-sci-577</div>
+        </div>
+        <div class="hero-layout">
+          <div class="hero-section">
+            <div class="hero-content">
+              <div class="hero-code">COMP SCI 577</div>
+              <div class="hero-name">Introduction to Algorithms</div>
+              <div class="hero-meta">
+                <span>📚 3 credits</span>
+                <span>🏫 Letters & Science</span>
+                <span>📊 89 reviews</span>
+              </div>
+            </div>
+            <div class="hero-gpa-box">
+              <div class="hero-gpa-num">3.42</div>
+              <div class="hero-gpa-label">Average GPA</div>
+            </div>
+          </div>
+          <div class="cards-section" style="background: #f5f5f5;">
+            <div>
+              <div class="card" style="margin-bottom: 16px;">
+                <div class="card-title">🔍 Filter</div>
+                <div class="filter-pills">
+                  <span class="pill active">All</span>
+                  <span class="pill">2024-Fall</span>
+                  <span class="pill">J. Smith</span>
+                  <span class="pill">A-rated</span>
+                </div>
+              </div>
+              <div class="card">
+                <div class="card-title">💬 Reviews</div>
+                <div class="mini-review">
+                  <div class="mini-review-header">
+                    <span class="mini-review-title">Great course!</span>
+                    <span class="mini-review-meta">2024-Fall</span>
+                  </div>
+                  <div class="mini-review-text">Professor explains algorithms very clearly...</div>
+                </div>
+                <div class="mini-review">
+                  <div class="mini-review-header">
+                    <span class="mini-review-title">Challenging</span>
+                    <span class="mini-review-meta">2024-Spring</span>
+                  </div>
+                  <div class="mini-review-text">Prepare for intense homework...</div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <div class="card" style="margin-bottom: 16px;">
+                <div class="card-title">⭐ Ratings</div>
+                <div class="rating-circles-row">
+                  <div class="rating-circle">
+                    <div class="rating-circle-grade" style="background: #22c55e;">A-</div>
+                    <div class="rating-circle-label">Content</div>
+                  </div>
+                  <div class="rating-circle">
+                    <div class="rating-circle-grade" style="background: #22c55e;">A</div>
+                    <div class="rating-circle-label">Teaching</div>
+                  </div>
+                </div>
+                <div class="rating-circles-row">
+                  <div class="rating-circle">
+                    <div class="rating-circle-grade" style="background: #eab308;">B+</div>
+                    <div class="rating-circle-label">Grading</div>
+                  </div>
+                  <div class="rating-circle">
+                    <div class="rating-circle-grade" style="background: #22c55e;">A-</div>
+                    <div class="rating-circle-label">Workload</div>
+                  </div>
+                </div>
+              </div>
+              <div class="card">
+                <div class="card-title">📊 Grade Flow</div>
+                <div class="grade-bar">
+                  <span class="grade-label">A</span>
+                  <div class="grade-track"><div class="grade-fill" style="width: 35%; background: #22c55e;"></div></div>
+                  <span class="grade-pct">35%</span>
+                </div>
+                <div class="grade-bar">
+                  <span class="grade-label">AB</span>
+                  <div class="grade-track"><div class="grade-fill" style="width: 25%; background: #4ade80;"></div></div>
+                  <span class="grade-pct">25%</span>
+                </div>
+                <div class="grade-bar">
+                  <span class="grade-label">B</span>
+                  <div class="grade-track"><div class="grade-fill" style="width: 20%; background: #facc15;"></div></div>
+                  <span class="grade-pct">20%</span>
+                </div>
+                <button class="write-btn">✏️ Write Review</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 方案3: 单栏 + Floating -->
+    <div class="plan">
+      <div class="plan-header">
+        <div>
+          <div class="plan-title">方案 3：单栏阅读 + 悬浮面板</div>
+          <div class="plan-desc">内容居中，阅读体验最佳，关键信息悬浮固定</div>
+          <div class="tags">
+            <span class="tag tag-pro">✓ 阅读体验极佳</span>
+            <span class="tag tag-pro">✓ 移动端友好</span>
+            <span class="tag tag-ref">📱 Medium / Substack</span>
+          </div>
+        </div>
+      </div>
+      <div class="mockup">
+        <div class="browser-bar">
+          <div class="browser-dots">
+            <div class="dot dot-red"></div>
+            <div class="dot dot-yellow"></div>
+            <div class="dot dot-green"></div>
+          </div>
+          <div class="browser-url">wiscflow.com/courses/comp-sci-577</div>
+        </div>
+        <div class="nav-bar">
+          <span class="logo">🔴 WiscFlow</span>
+          <div class="nav-links">
+            <span class="active">Courses</span>
+            <span>Instructors</span>
+            <span>About</span>
+          </div>
+        </div>
+        <div class="single-layout" style="background: #fafafa;">
+          <div class="single-main">
+            <div class="single-header">
+              <div class="single-code">COMP SCI 577</div>
+              <div class="single-name">Introduction to Algorithms</div>
+              <div class="single-badges">
+                <span class="single-badge"><strong>3.42</strong> GPA</span>
+                <span class="single-badge"><strong>89</strong> Reviews</span>
+                <span class="single-badge">3 credits</span>
+              </div>
+            </div>
+            
+            <div class="card" style="margin-bottom: 16px;">
+              <div style="font-size: 13px; color: #666; line-height: 1.6;">
+                Basic paradigms for the design and analysis of efficient algorithms: greed, divide-and-conquer, dynamic programming, reductions...
+              </div>
+            </div>
+            
+            <div class="filter-pills" style="margin-bottom: 16px;">
+              <span class="pill active">All Terms</span>
+              <span class="pill">2024-Fall</span>
+              <span class="pill">J. Smith</span>
+            </div>
+            
+            <div class="card">
+              <div class="mini-review">
+                <div class="mini-review-header">
+                  <span class="mini-review-title">Great course for CS majors!</span>
+                  <span class="mini-review-meta">2024-Fall · J. Smith · Grade: A</span>
+                </div>
+                <div class="mini-review-text">Professor Smith explains complex algorithms in a very approachable way. The problem sets are challenging but fair. Highly recommended if you're interested in theoretical CS.</div>
+              </div>
+              <div class="mini-review">
+                <div class="mini-review-header">
+                  <span class="mini-review-title">Challenging but rewarding</span>
+                  <span class="mini-review-meta">2024-Spring · M. Chen · Grade: AB</span>
+                </div>
+                <div class="mini-review-text">Be prepared to spend a lot of time on homework. The exams are tough but the curve is generous. Great preparation for interviews.</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Floating Panel -->
+          <div class="floating-panel">
+            <div class="rating-circles-row" style="margin: 0;">
+              <div class="rating-circle">
+                <div class="rating-circle-grade" style="background: #22c55e; width: 36px; height: 36px; font-size: 12px;">A-</div>
+                <div class="rating-circle-label">Content</div>
+              </div>
+              <div class="rating-circle">
+                <div class="rating-circle-grade" style="background: #22c55e; width: 36px; height: 36px; font-size: 12px;">A</div>
+                <div class="rating-circle-label">Teaching</div>
+              </div>
+              <div class="rating-circle">
+                <div class="rating-circle-grade" style="background: #eab308; width: 36px; height: 36px; font-size: 12px;">B+</div>
+                <div class="rating-circle-label">Grading</div>
+              </div>
+              <div class="rating-circle">
+                <div class="rating-circle-grade" style="background: #22c55e; width: 36px; height: 36px; font-size: 12px;">A-</div>
+                <div class="rating-circle-label">Workload</div>
+              </div>
+            </div>
+            <hr style="border: none; border-top: 1px solid #eee; margin: 16px 0;">
+            <div class="grade-bar">
+              <span class="grade-label">A</span>
+              <div class="grade-track"><div class="grade-fill" style="width: 35%; background: #22c55e;"></div></div>
+              <span class="grade-pct">35%</span>
+            </div>
+            <div class="grade-bar">
+              <span class="grade-label">AB</span>
+              <div class="grade-track"><div class="grade-fill" style="width: 25%; background: #4ade80;"></div></div>
+              <span class="grade-pct">25%</span>
+            </div>
+            <div class="grade-bar">
+              <span class="grade-label">B</span>
+              <div class="grade-track"><div class="grade-fill" style="width: 20%; background: #facc15;"></div></div>
+              <span class="grade-pct">20%</span>
+            </div>
+            <button class="write-btn">✏️ Write Review</button>
+            <div class="floating-sticky-note">滚动时固定</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+  
+  <div style="text-align: center; margin-top: 40px; padding: 20px; color: #666;">
+    <strong style="font-size: 16px;">你喜欢哪个布局？</strong><br>
+    <span style="font-size: 14px;">1 = Bento Grid（推荐） | 2 = Hero Banner | 3 = 单栏悬浮</span>
+  </div>
+</body>
+</html>

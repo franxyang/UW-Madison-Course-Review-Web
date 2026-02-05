@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.5.0-dev] - 2026-02-04
+
+### Added — Phase 3: UX Optimization (In Progress)
+
+#### Color System Overhaul
+- **配色方案确定（方案 C）**: uwcourses 极简 + USTSPACE 柔和
+- **Tailwind Config 重构**: `wf-crimson`, `surface`, `text`, `grade` 色系
+- **全局样式更新**: `.card`, `.btn-*`, `.grade-badge-*` 预设类
+- **配色文档**: `docs/COLOR_SYSTEM.md`
+
+#### Course List Page Redesign
+- Pure white background + UW crimson accents
+- Dynamic GPA coloring (5-level gradient: emerald → amber → orange → red)
+- Softened level badges (pastel backgrounds + borders)
+- Unified `.card` component styling
+- `transition-colors` on all interactions
+
+---
+
 ## [0.4.0-dev] - 2026-02-04
 
 ### Added — Phase 2: Core Features
@@ -420,4 +439,4 @@ BREAKING CHANGE: SQLite no longer supported
 
 **Maintainer**: Franx (franxyixx)  
 **AI Assistant**: Claude (Clawdbot)  
-**Last Updated**: 2026-02-03 23:27 CST
+**Last Updated**: 2026-02-04 23:55 CST

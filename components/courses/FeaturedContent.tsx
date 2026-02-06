@@ -29,7 +29,7 @@ function getRatingColor(rating: string) {
 }
 
 export function FeaturedContent() {
-  const { data, isLoading } = trpc.course.getFeatured.useQuery()
+  const { data, isLoading, error } = trpc.course.getFeatured.useQuery()
 
   if (isLoading) {
     return (
@@ -50,7 +50,18 @@ export function FeaturedContent() {
     )
   }
 
+  if (error) {
+    return (
+      <div className="text-center py-12 text-text-secondary">
+        <p>Failed to load featured courses</p>
+        <p className="text-xs text-text-tertiary mt-1">{error.message}</p>
+      </div>
+    )
+  }
+
   if (!data) return null
+  
+  const { mostReviewed, recentReviews } = data
 
   return (
     <div className="space-y-6">
@@ -60,7 +71,11 @@ export function FeaturedContent() {
           <TrendingUp size={18} className="text-wf-crimson" />
           Most Reviewed Courses
         </h2>
-        <CourseCardGrid courses={data.mostReviewed} />
+        {mostReviewed.length > 0 ? (
+          <CourseCardGrid courses={mostReviewed} />
+        ) : (
+          <p className="text-sm text-text-tertiary">No reviewed courses yet</p>
+        )}
       </div>
 
       {/* Recent Reviews */}
@@ -69,8 +84,9 @@ export function FeaturedContent() {
           <Clock size={18} className="text-text-tertiary" />
           Recent Reviews
         </h2>
+        {recentReviews.length > 0 ? (
         <div className="space-y-2">
-          {data.recentReviews.map(review => (
+          {recentReviews.map(review => (
             <Link
               key={review.id}
               href={`/courses/${review.course.id}`}
@@ -99,6 +115,9 @@ export function FeaturedContent() {
             </Link>
           ))}
         </div>
+        ) : (
+          <p className="text-sm text-text-tertiary">No reviews yet</p>
+        )}
       </div>
 
       {/* Browse by Level */}

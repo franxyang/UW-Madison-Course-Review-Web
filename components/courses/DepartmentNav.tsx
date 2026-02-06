@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { ChevronDown, ChevronRight } from 'lucide-react'
 import { trpc } from '@/lib/trpc/client'
 
@@ -9,152 +9,170 @@ interface DepartmentNavProps {
   onSelectDept: (deptCode: string | null) => void
 }
 
-// Group schools into categories
-const SCHOOL_GROUPS: Record<string, { emoji: string; schools: string[] }> = {
-  'Letters & Science': {
-    emoji: '📚',
-    schools: ['Letters and Science, College of']
-  },
-  'CDIS': {
-    emoji: '💻',
-    schools: ['Computer, Data and Information Sciences']
-  },
-  'Engineering': {
-    emoji: '⚙️',
-    schools: ['Engineering, College of']
-  },
-  'Business': {
-    emoji: '📊',
-    schools: ['Business, Wisconsin School of']
-  },
-  'Education': {
-    emoji: '🎓',
-    schools: ['Education, School of']
-  },
-  'Other': {
-    emoji: '🏛️',
-    schools: [] // Catch-all for unlisted schools
-  }
+// Map actual school names to display groups
+const SCHOOL_TO_GROUP: Record<string, { group: string; emoji: string; priority: number }> = {
+  'Letters & Science, College of': { group: 'Letters & Science', emoji: '📚', priority: 1 },
+  'Computer, Data & Information Sciences, School of': { group: 'CDIS', emoji: '💻', priority: 2 },
+  'Information School': { group: 'CDIS', emoji: '💻', priority: 2 },
+  'Engineering, College of': { group: 'Engineering', emoji: '⚙️', priority: 3 },
+  'Business, Wisconsin School of': { group: 'Business', emoji: '📊', priority: 4 },
+  'Education, School of': { group: 'Education', emoji: '🎓', priority: 5 },
+  'Medicine & Public Health, School of': { group: 'Health Sciences', emoji: '🏥', priority: 6 },
+  'Nursing, School of': { group: 'Health Sciences', emoji: '🏥', priority: 6 },
+  'Pharmacy, School of': { group: 'Health Sciences', emoji: '🏥', priority: 6 },
+  'Public Health, School of': { group: 'Health Sciences', emoji: '🏥', priority: 6 },
+  'Agricultural & Life Sciences, College of': { group: 'Ag & Life Sciences', emoji: '🌱', priority: 7 },
+  'Law School': { group: 'Professional', emoji: '⚖️', priority: 8 },
+  'Music, School of': { group: 'Arts', emoji: '🎵', priority: 9 },
+  'Journalism & Mass Communication, School of': { group: 'Communication', emoji: '📰', priority: 10 },
 }
 
-// Featured departments to show first
-const FEATURED_DEPTS = [
+// Featured departments to highlight
+const FEATURED_DEPTS = new Set([
   'COMP SCI', 'MATH', 'STAT', 'ECON', 'PSYCH', 'CHEM', 'PHYSICS', 'BIOLOGY',
-  'E C E', 'M E', 'INFO SYS', 'ACCT I S'
-]
+  'E C E', 'M E', 'INFO SYS', 'ACCT I S', 'ENGLISH', 'HISTORY', 'POLI SCI',
+  'BIOCHEM', 'GENETICS', 'SOC', 'ANTHRO', 'PHILOS', 'ART', 'MUSIC'
+])
 
 export function DepartmentNav({ selectedDept, onSelectDept }: DepartmentNavProps) {
   const { data: schools, isLoading } = trpc.course.getDepartmentsBySchool.useQuery()
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['Letters & Science', 'CDIS', 'Engineering']))
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(
+    new Set(['Letters & Science', 'CDIS', 'Engineering'])
+  )
+
+  // Group schools by display category
+  const groupedData = useMemo(() => {
+    if (!schools) return []
+
+    const groups: Record<string, {
+      emoji: string
+      priority: number
+      departments: Array<{ id: string; code: string; name: string; courseCount: number }>
+    }> = {}
+
+    schools.forEach(school => {
+      const mapping = SCHOOL_TO_GROUP[school.name]
+      const groupName = mapping?.group || 'Other'
+      const emoji = mapping?.emoji || '🏛️'
+      const priority = mapping?.priority || 99
+
+      if (!groups[groupName]) {
+        groups[groupName] = { emoji, priority, departments: [] }
+      }
+
+      school.departments.forEach(dept => {
+        groups[groupName].departments.push({
+          id: dept.id,
+          code: dept.code,
+          name: dept.name,
+          courseCount: dept._count.courses
+        })
+      })
+    })
+
+    // Sort departments within each group - featured first, then by code
+    Object.values(groups).forEach(group => {
+      group.departments.sort((a, b) => {
+        const aFeatured = FEATURED_DEPTS.has(a.code)
+        const bFeatured = FEATURED_DEPTS.has(b.code)
+        if (aFeatured && !bFeatured) return -1
+        if (!aFeatured && bFeatured) return 1
+        return a.code.localeCompare(b.code)
+      })
+    })
+
+    // Convert to sorted array
+    return Object.entries(groups)
+      .map(([name, data]) => ({ name, ...data }))
+      .sort((a, b) => a.priority - b.priority)
+  }, [schools])
 
   const toggleGroup = (group: string) => {
-    const newExpanded = new Set(expandedGroups)
-    if (newExpanded.has(group)) {
-      newExpanded.delete(group)
-    } else {
-      newExpanded.add(group)
-    }
-    setExpandedGroups(newExpanded)
+    setExpandedGroups(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(group)) {
+        newSet.delete(group)
+      } else {
+        newSet.add(group)
+      }
+      return newSet
+    })
   }
 
   if (isLoading) {
     return (
       <div className="space-y-3">
-        {[1, 2, 3].map(i => (
+        {[1, 2, 3, 4].map(i => (
           <div key={i} className="animate-pulse">
-            <div className="h-6 bg-surface-tertiary rounded w-32 mb-2" />
-            <div className="grid grid-cols-3 gap-1.5">
-              {[1, 2, 3].map(j => (
-                <div key={j} className="h-8 bg-surface-tertiary rounded" />
-              ))}
-            </div>
+            <div className="h-10 bg-surface-tertiary rounded-lg mb-2" />
           </div>
         ))}
       </div>
     )
   }
 
-  if (!schools) return null
-
-  // Group departments by school category
-  const groupedSchools: Record<string, typeof schools> = {}
-  
-  schools.forEach(school => {
-    let assigned = false
-    for (const [groupName, group] of Object.entries(SCHOOL_GROUPS)) {
-      if (group.schools.some(s => school.name.includes(s) || s.includes(school.name))) {
-        if (!groupedSchools[groupName]) groupedSchools[groupName] = []
-        groupedSchools[groupName].push(school)
-        assigned = true
-        break
-      }
-    }
-    if (!assigned) {
-      if (!groupedSchools['Other']) groupedSchools['Other'] = []
-      groupedSchools['Other'].push(school)
-    }
-  })
-
   return (
-    <div className="space-y-4">
-      {/* Back button when dept selected */}
-      {selectedDept && (
-        <button
-          onClick={() => onSelectDept(null)}
-          className="flex items-center gap-2 text-sm text-wf-crimson hover:text-wf-crimson-dark transition-colors mb-2"
-        >
-          ← All Departments
-        </button>
-      )}
+    <div className="space-y-2">
+      {groupedData.map(({ name: groupName, emoji, departments }) => {
+        if (departments.length === 0) return null
 
-      {Object.entries(SCHOOL_GROUPS).map(([groupName, { emoji }]) => {
-        const schoolsInGroup = groupedSchools[groupName] || []
-        if (schoolsInGroup.length === 0) return null
-
-        const allDepts = schoolsInGroup.flatMap(s => s.departments)
         const isExpanded = expandedGroups.has(groupName)
-
-        // Filter featured depts for this group
-        const featuredInGroup = allDepts.filter(d => FEATURED_DEPTS.includes(d.code))
-        const otherDepts = allDepts.filter(d => !FEATURED_DEPTS.includes(d.code))
+        const displayDepts = isExpanded ? departments.slice(0, 12) : []
+        const hasMore = departments.length > 12
 
         return (
-          <div key={groupName} className="bg-surface-primary rounded-lg border border-surface-tertiary overflow-hidden">
+          <div 
+            key={groupName} 
+            className="bg-surface-primary rounded-xl border border-surface-tertiary overflow-hidden"
+          >
+            {/* Group Header */}
             <button
               onClick={() => toggleGroup(groupName)}
-              className="w-full flex items-center justify-between px-3 py-2 hover:bg-hover-bg transition-colors"
+              className="w-full flex items-center justify-between px-3 py-2.5 hover:bg-hover-bg transition-colors"
             >
               <span className="flex items-center gap-2 font-medium text-sm text-text-primary">
                 <span>{emoji}</span>
-                {groupName}
+                <span>{groupName}</span>
               </span>
               <span className="flex items-center gap-2">
-                <span className="text-xs text-text-tertiary">{allDepts.length}</span>
-                {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                <span className="text-xs text-text-tertiary bg-surface-secondary px-1.5 py-0.5 rounded">
+                  {departments.length}
+                </span>
+                {isExpanded ? (
+                  <ChevronDown size={14} className="text-text-tertiary" />
+                ) : (
+                  <ChevronRight size={14} className="text-text-tertiary" />
+                )}
               </span>
             </button>
 
+            {/* Department Grid */}
             {isExpanded && (
               <div className="px-2 pb-2">
                 <div className="grid grid-cols-3 gap-1">
-                  {featuredInGroup.slice(0, 9).map(dept => (
+                  {displayDepts.map(dept => (
                     <button
                       key={dept.id}
                       onClick={() => onSelectDept(dept.code)}
-                      className={`px-2 py-1.5 text-xs font-medium rounded transition-colors truncate ${
+                      className={`px-1.5 py-1.5 text-[11px] font-medium rounded transition-colors text-center ${
                         selectedDept === dept.code
                           ? 'bg-wf-crimson text-white'
-                          : 'bg-surface-secondary text-text-secondary hover:bg-hover-bg hover:text-text-primary'
+                          : 'bg-surface-secondary text-text-secondary hover:bg-wf-crimson/10 hover:text-wf-crimson'
                       }`}
-                      title={dept.name}
+                      title={`${dept.code}: ${dept.name} (${dept.courseCount} courses)`}
                     >
-                      {dept.code}
+                      {dept.code.length > 8 ? dept.code.substring(0, 7) + '…' : dept.code}
                     </button>
                   ))}
                 </div>
-                {allDepts.length > 9 && (
-                  <div className="mt-1.5 text-xs text-text-tertiary text-center">
-                    +{allDepts.length - Math.min(featuredInGroup.length, 9)} more
+                {hasMore && (
+                  <div className="mt-2 text-center">
+                    <button 
+                      className="text-xs text-wf-crimson hover:text-wf-crimson-dark"
+                      onClick={() => {/* TODO: show all */}}
+                    >
+                      +{departments.length - 12} more departments
+                    </button>
                   </div>
                 )}
               </div>

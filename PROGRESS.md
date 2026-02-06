@@ -177,6 +177,63 @@ Full-text:     All courses indexed (tsvector + GIN)
 ✅ Redis (Upstash)   ✅ Zod validation    ✅ Course Aliases
 ```
 
+### Planned Additions
+| Tool | Purpose | Status |
+|------|---------|--------|
+| Recharts | Charts/visualization | ✅ Added |
+| React Hook Form + Zod | Forms | ✅ Using |
+| Zustand | State management (if needed) | Pending |
+| Uploadthing / S3 | File uploads | Pending |
+| Resend / SendGrid | Email notifications | Pending |
+| Vercel Analytics | Analytics | Pending |
+| Sentry | Error monitoring | Pending |
+
+---
+
+## 📅 Timeline & Goals
+
+### Short-term (1-2 weeks)
+- [ ] Complete Phase 3 remaining items
+- [ ] Performance optimization (lazy loading, code splitting)
+
+### Mid-term (1 month)
+- [ ] Deploy to production (Vercel)
+- [ ] Complete data pipeline automation
+- [ ] Begin Phase 4 AI features
+
+### Long-term (2-3 months)
+- [ ] Launch AI review summaries
+- [ ] Community features
+- [ ] Admin portal (Phase 5)
+- [ ] Official Beta release
+
+---
+
+## 🎯 Success Metrics
+
+| Category | Target | Current |
+|----------|--------|---------|
+| Registered users | > 1,000 | - |
+| Monthly active users | > 500 | - |
+| User retention | > 60% | - |
+| Course reviews | > 5,000 | - |
+| Course coverage | > 80% popular | ~100% catalog |
+| Page load time | < 2s | ✅ |
+| Mobile score | > 90 | - |
+
+---
+
+## 🚀 Deployment Checklist
+
+- [ ] Environment variable security audit
+- [ ] Rate limiting setup
+- [ ] Content moderation system
+- [ ] Database backups configured
+- [ ] Analytics integration
+- [ ] SEO optimization
+- [ ] Performance monitoring
+- [ ] CI/CD pipeline
+
 ---
 
 ## 📝 Recent Commits

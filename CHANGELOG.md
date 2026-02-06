@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.5.1-dev] - 2026-02-06
+
+### Changed — Documentation Reorganization
+
+#### Merged Progress Documents
+- **PROGRESS.md** (root): Now the single source of truth for current status
+  - Added: Timeline & Goals section
+  - Added: Success Metrics table
+  - Added: Tech Stack Planned Additions
+  - Added: Deployment Checklist
+- **docs/ROADMAP.md** (new): Future planning document
+  - Phase 4: Advanced Features (AI, community, analytics, notifications)
+  - Phase 5: Admin Portal (moderation, data management)
+  - Phase 6: GPA Prediction ML (experimental)
+  - Data Requirements & Acquisition Plan
+  - Commit Strategy guidelines
+
+#### Removed Duplicate Documents
+- `docs/PROJECT_ROADMAP.md` → Merged into PROGRESS.md + docs/ROADMAP.md
+- `docs/DEVELOPMENT_PLAN.md` → Merged into PROGRESS.md + docs/ROADMAP.md
+
+#### Document Responsibilities
+| Document | Purpose |
+|----------|---------|
+| `PROGRESS.md` | Current status, statistics, recent commits |
+| `docs/ROADMAP.md` | Future phases, planning, vision |
+| `docs/PHASE3_PROGRESS.md` | Phase 3 UX details (unchanged) |
+
+---
+
 ## [0.5.0-dev] - 2026-02-04
 
 ### Added — Phase 3: UX Optimization (In Progress)

@@ -32,15 +32,23 @@ function getGPAColor(gpa: number | null) {
 
 // Compact grid of course numbers (for left sidebar when dept selected)
 export function CourseNumberGrid({ courses, selectedCourse }: CourseGridProps) {
-  // Smart display: show full code if short enough, otherwise just the number
+  // Determine display mode for the entire department
+  // If ANY course code is too long, show numbers only for ALL courses
+  const MAX_LENGTH = 8 // e.g., "MATH 222" fits, "BIOLOGY 100" doesn't
+  
+  const showNumbersOnly = courses.some(course => {
+    const officialCode = toOfficialCode(course.code)
+    return officialCode.length > MAX_LENGTH
+  })
+
   const getDisplayText = (code: string) => {
-    const officialCode = toOfficialCode(code)
     const parts = code.split(' ')
     const num = parts[parts.length - 1]
     
-    // If full code is ≤ 10 chars, show it all (e.g., "CS 577", "MATH 222")
-    // Otherwise just show the number (e.g., "501" for "BIOCHEM 501")
-    return officialCode.length <= 10 ? officialCode : num
+    if (showNumbersOnly) {
+      return num
+    }
+    return toOfficialCode(code)
   }
 
   return (
@@ -54,7 +62,7 @@ export function CourseNumberGrid({ courses, selectedCourse }: CourseGridProps) {
             <Link
               key={course.id}
               href={`/courses/${course.id}`}
-              className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors text-center ${
+              className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors text-center whitespace-nowrap ${
                 isSelected
                   ? 'bg-wf-crimson text-white'
                   : 'bg-surface-secondary text-text-secondary hover:bg-wf-crimson/10 hover:text-wf-crimson'

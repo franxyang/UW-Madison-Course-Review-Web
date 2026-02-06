@@ -164,7 +164,7 @@ function CoursesPageContent() {
         {/* Main Layout: Sidebar + Content */}
         <div className="flex gap-6">
           {/* Left Sidebar - Filters (Desktop) */}
-          <aside className="w-72 flex-shrink-0 hidden lg:block">
+          <aside className="w-56 xl:w-64 flex-shrink-0 hidden lg:block">
             <FilterPanel filters={filters} onFilterChange={handleFilterChange} />
           </aside>
 
@@ -224,7 +224,7 @@ function CoursesPageContent() {
                       </div>
 
                       <div className="flex items-center justify-between mt-4 pt-3 border-t border-surface-tertiary">
-                        <div className="text-xs text-text-tertiary truncate max-w-[60%]">
+                        <div className="text-xs text-text-secondary truncate max-w-[60%]">
                           {course.school.name}
                         </div>
                         <div className="flex items-center gap-3 text-sm">

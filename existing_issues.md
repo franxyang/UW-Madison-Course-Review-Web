@@ -35,18 +35,19 @@ Last Updated: 2026-02-06
 ## 中优先级 / Medium Priority
 
 ### 4. Dark Mode
-- **状态:** 未开始
-- **说明:** CSS 变量已准备，需要添加 toggle
-- **文件:** `globals.css`, `tailwind.config.ts`
+- **状态:** ✅ 已完成 (2026-02-06)
+- **说明:** CSS 变量 light/dark + ThemeToggle 组件
+- **文件:** `globals.css`, `tailwind.config.ts`, `components/ThemeToggle.tsx`
 
 ### 5. Grade Flow 可视化
-- **状态:** 计划中
-- **说明:** 用流式分布条替换当前柱状图
-- **参考:** USTSPACE 设计
+- **状态:** ✅ 已实现基础版
+- **说明:** 水平条形图已实现，流式分布条为可选优化
+- **文件:** `components/CoursePageLayout.tsx` RightSidebar
 
 ### 6. 搜索增强 - 实时预览
-- **状态:** 计划中
-- **说明:** 输入时显示预览卡片
+- **状态:** ✅ 已完成 (2026-02-06)
+- **说明:** SearchWithPreview 组件，debounced API，显示前 6 结果
+- **文件:** `components/SearchWithPreview.tsx`, `lib/hooks/useDebounce.ts`
 
 ### 7. Instructor 过滤器优化
 - **状态:** 计划中

@@ -2,8 +2,11 @@ import { auth } from '@/auth'
 import Link from 'next/link'
 import { Logo } from '@/components/Logo'
 import { prisma } from '@/lib/prisma'
-import { Search, BookOpen, Users, Star, TrendingUp, ArrowRight, Sparkles } from 'lucide-react'
+import { BookOpen, Users, Star, TrendingUp, ArrowRight, Calendar, MessageSquare } from 'lucide-react'
 import { toOfficialCode } from '@/lib/courseCodeDisplay'
+import { HomeSearch } from '@/components/HomeSearch'
+import { ContributorProgress } from '@/components/ContributorProgress'
+import { ThemeToggle } from '@/components/ThemeToggle'
 
 async function getStats() {
   const [courseCount, reviewCount, instructorCount] = await Promise.all([
@@ -35,13 +38,30 @@ async function getFeaturedCourses() {
   return courses
 }
 
+async function getRecentReviews() {
+  const reviews = await prisma.review.findMany({
+    select: {
+      id: true,
+      title: true,
+      createdAt: true,
+      course: {
+        select: { id: true, code: true, name: true }
+      }
+    },
+    orderBy: { createdAt: 'desc' },
+    take: 5
+  })
+  return reviews
+}
+
 export default async function Home() {
   const session = await auth()
   const stats = await getStats()
   const featuredCourses = await getFeaturedCourses()
+  const recentReviews = await getRecentReviews()
 
   return (
-    <div className="min-h-screen bg-surface-primary">
+    <div className="min-h-screen bg-surface-secondary">
       {/* Header */}
       <header className="bg-surface-primary border-b border-surface-tertiary sticky top-0 z-20">
         <div className="max-w-6xl mx-auto px-6">
@@ -57,264 +77,224 @@ export default async function Home() {
               <Link href="/instructors" className="text-text-secondary hover:text-text-primary transition-colors">
                 Instructors
               </Link>
+              <ThemeToggle />
               {session?.user ? (
                 <Link href="/profile" className="px-4 py-2 bg-wf-crimson text-white rounded-lg hover:bg-wf-crimson-dark transition-colors font-medium">
                   Profile
                 </Link>
               ) : (
-                <div className="flex items-center gap-3">
-                  <Link href="/auth/signin" className="text-text-secondary hover:text-text-primary transition-colors">
-                    Sign In
-                  </Link>
-                  <Link href="/auth/signup" className="px-4 py-2 bg-wf-crimson text-white rounded-lg hover:bg-wf-crimson-dark transition-colors font-medium">
-                    Sign Up
-                  </Link>
-                </div>
+                <Link href="/auth/signin" className="px-4 py-2 bg-wf-crimson text-white rounded-lg hover:bg-wf-crimson-dark transition-colors font-medium">
+                  Sign In
+                </Link>
               )}
             </nav>
           </div>
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className="relative overflow-hidden">
-        {/* Background gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-wf-crimson/5 via-transparent to-amber-50/50" />
-        
-        <div className="relative max-w-6xl mx-auto px-6 py-20">
-          <div className="text-center max-w-3xl mx-auto">
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-wf-crimson/10 text-wf-crimson rounded-full text-sm font-medium mb-6">
-              <Sparkles size={16} />
-              <span>Trusted by UW-Madison Students</span>
+      {/* Main Content */}
+      <main className="max-w-6xl mx-auto px-6 py-8">
+        {/* Welcome Section */}
+        <div className="bg-surface-primary rounded-xl border border-surface-tertiary p-6 mb-6">
+          <div className="flex flex-col lg:flex-row lg:items-center gap-6">
+            <div className="flex-1">
+              <h1 className="text-2xl font-bold text-text-primary mb-2">
+                Welcome to WiscFlow 👋
+              </h1>
+              <p className="text-text-secondary">
+                A community-driven platform by UW-Madison students, for UW-Madison students. 
+                Browse course reviews, check grade distributions, and make informed decisions about your classes.
+              </p>
+            </div>
+            <div className="lg:w-80">
+              <HomeSearch />
+            </div>
+          </div>
+        </div>
+
+        {/* Main Grid */}
+        <div className="grid lg:grid-cols-3 gap-6">
+          {/* Left Column - Stats & Featured */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Quick Stats */}
+            <div className="grid grid-cols-4 gap-4">
+              <div className="bg-surface-primary rounded-xl border border-surface-tertiary p-4 text-center">
+                <BookOpen className="mx-auto mb-2 text-wf-crimson" size={24} />
+                <div className="text-2xl font-bold text-text-primary">{stats.courseCount.toLocaleString()}</div>
+                <div className="text-xs text-text-tertiary">Courses</div>
+              </div>
+              <div className="bg-surface-primary rounded-xl border border-surface-tertiary p-4 text-center">
+                <MessageSquare className="mx-auto mb-2 text-emerald-500" size={24} />
+                <div className="text-2xl font-bold text-text-primary">{stats.reviewCount.toLocaleString()}</div>
+                <div className="text-xs text-text-tertiary">Reviews</div>
+              </div>
+              <div className="bg-surface-primary rounded-xl border border-surface-tertiary p-4 text-center">
+                <Users className="mx-auto mb-2 text-amber-500" size={24} />
+                <div className="text-2xl font-bold text-text-primary">{stats.instructorCount.toLocaleString()}</div>
+                <div className="text-xs text-text-tertiary">Instructors</div>
+              </div>
+              <div className="bg-surface-primary rounded-xl border border-surface-tertiary p-4 text-center">
+                <TrendingUp className="mx-auto mb-2 text-blue-500" size={24} />
+                <div className="text-2xl font-bold text-text-primary">23</div>
+                <div className="text-xs text-text-tertiary">Schools</div>
+              </div>
             </div>
 
-            {/* Headline */}
-            <h1 className="text-5xl md:text-6xl font-bold text-text-primary mb-6 leading-tight">
-              Make Smarter
-              <span className="text-wf-crimson"> Course Decisions</span>
-            </h1>
-
-            {/* Subtitle */}
-            <p className="text-xl text-text-secondary mb-10 leading-relaxed">
-              Real reviews from fellow Badgers. Grade distributions, instructor ratings, and everything you need to plan your academic journey.
-            </p>
-
-            {/* Search Bar */}
-            <div className="max-w-2xl mx-auto mb-8">
-              <form action="/courses" method="get" className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-text-tertiary" size={20} />
-                <input
-                  type="text"
-                  name="search"
-                  placeholder="Search courses (e.g., CS 577, Calculus, Economics...)"
-                  className="w-full pl-12 pr-32 py-4 text-lg bg-surface-primary border-2 border-surface-tertiary rounded-xl
-                           focus:outline-none focus:border-wf-crimson focus:ring-4 focus:ring-wf-crimson/10
-                           shadow-sm hover:shadow-md transition-all"
-                />
-                <button
-                  type="submit"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 px-6 py-2.5 bg-wf-crimson text-white font-medium rounded-lg
-                           hover:bg-wf-crimson-dark transition-colors"
-                >
-                  Search
-                </button>
-              </form>
+            {/* Most Reviewed Courses */}
+            <div className="bg-surface-primary rounded-xl border border-surface-tertiary overflow-hidden">
+              <div className="flex items-center justify-between px-5 py-4 border-b border-surface-tertiary">
+                <h2 className="font-semibold text-text-primary flex items-center gap-2">
+                  <Star size={18} className="text-amber-400" />
+                  Most Reviewed Courses
+                </h2>
+                <Link href="/courses" className="text-sm text-wf-crimson hover:text-wf-crimson-dark flex items-center gap-1">
+                  View all <ArrowRight size={14} />
+                </Link>
+              </div>
+              <div className="divide-y divide-surface-tertiary">
+                {featuredCourses.map(course => (
+                  <Link
+                    key={course.id}
+                    href={`/courses/${course.id}`}
+                    className="flex items-center justify-between px-5 py-3 hover:bg-hover-bg transition-colors"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-text-primary">
+                          {toOfficialCode(course.code)}
+                        </span>
+                        <span className="text-xs text-text-tertiary">
+                          {course._count.reviews} reviews
+                        </span>
+                      </div>
+                      <div className="text-sm text-text-secondary truncate">
+                        {course.name}
+                      </div>
+                    </div>
+                    {course.avgGPA != null && course.avgGPA > 0 && (
+                      <div className={`text-lg font-bold ml-4 ${
+                        course.avgGPA >= 3.5 ? 'text-emerald-500' :
+                        course.avgGPA >= 3.0 ? 'text-emerald-400' :
+                        course.avgGPA >= 2.5 ? 'text-amber-500' : 'text-orange-500'
+                      }`}>
+                        {course.avgGPA.toFixed(2)}
+                      </div>
+                    )}
+                  </Link>
+                ))}
+              </div>
             </div>
 
             {/* Quick Links */}
-            <div className="flex items-center justify-center gap-3 text-sm">
-              <span className="text-text-tertiary">Popular:</span>
-              <Link href="/courses?search=COMP SCI" className="px-3 py-1.5 bg-surface-secondary hover:bg-hover-bg rounded-full text-text-secondary transition-colors">
-                Computer Science
-              </Link>
-              <Link href="/courses?search=MATH" className="px-3 py-1.5 bg-surface-secondary hover:bg-hover-bg rounded-full text-text-secondary transition-colors">
-                Mathematics
-              </Link>
-              <Link href="/courses?search=ECON" className="px-3 py-1.5 bg-surface-secondary hover:bg-hover-bg rounded-full text-text-secondary transition-colors">
-                Economics
-              </Link>
-              <Link href="/courses?search=PSYCH" className="px-3 py-1.5 bg-surface-secondary hover:bg-hover-bg rounded-full text-text-secondary transition-colors">
-                Psychology
-              </Link>
+            <div className="bg-surface-primary rounded-xl border border-surface-tertiary p-5">
+              <h2 className="font-semibold text-text-primary mb-4">Popular Departments</h2>
+              <div className="flex flex-wrap gap-2">
+                {['Computer Sciences', 'Mathematics', 'Economics', 'Psychology', 'Biology', 'Chemistry', 'Physics', 'Statistics'].map(dept => (
+                  <Link
+                    key={dept}
+                    href={`/courses?search=${encodeURIComponent(dept)}`}
+                    className="px-3 py-1.5 bg-surface-secondary hover:bg-hover-bg rounded-lg text-sm text-text-secondary hover:text-text-primary transition-colors"
+                  >
+                    {dept}
+                  </Link>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* Stats Section */}
-      <section className="border-y border-surface-tertiary bg-surface-secondary/50">
-        <div className="max-w-6xl mx-auto px-6 py-12">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            <div className="text-center">
-              <div className="flex items-center justify-center w-12 h-12 mx-auto mb-3 bg-wf-crimson/10 rounded-xl">
-                <BookOpen className="text-wf-crimson" size={24} />
-              </div>
-              <div className="text-3xl font-bold text-text-primary">{stats.courseCount.toLocaleString()}</div>
-              <div className="text-sm text-text-secondary">Courses</div>
-            </div>
-            <div className="text-center">
-              <div className="flex items-center justify-center w-12 h-12 mx-auto mb-3 bg-emerald-100 rounded-xl">
-                <Star className="text-emerald-600" size={24} />
-              </div>
-              <div className="text-3xl font-bold text-text-primary">{stats.reviewCount.toLocaleString()}</div>
-              <div className="text-sm text-text-secondary">Reviews</div>
-            </div>
-            <div className="text-center">
-              <div className="flex items-center justify-center w-12 h-12 mx-auto mb-3 bg-amber-100 rounded-xl">
-                <Users className="text-amber-600" size={24} />
-              </div>
-              <div className="text-3xl font-bold text-text-primary">{stats.instructorCount.toLocaleString()}</div>
-              <div className="text-sm text-text-secondary">Instructors</div>
-            </div>
-            <div className="text-center">
-              <div className="flex items-center justify-center w-12 h-12 mx-auto mb-3 bg-blue-100 rounded-xl">
-                <TrendingUp className="text-blue-600" size={24} />
-              </div>
-              <div className="text-3xl font-bold text-text-primary">23</div>
-              <div className="text-sm text-text-secondary">Schools</div>
-            </div>
-          </div>
-        </div>
-      </section>
+          {/* Right Column - Sidebar */}
+          <div className="space-y-6">
+            {/* Contributor Progress */}
+            <ContributorProgress />
 
-      {/* Featured Courses */}
-      {featuredCourses.length > 0 && (
-        <section className="max-w-6xl mx-auto px-6 py-16">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="text-2xl font-bold text-text-primary">Most Reviewed Courses</h2>
-              <p className="text-text-secondary mt-1">See what fellow students are saying</p>
-            </div>
-            <Link 
-              href="/courses" 
-              className="flex items-center gap-2 text-wf-crimson hover:text-wf-crimson-dark font-medium transition-colors"
-            >
-              View all courses
-              <ArrowRight size={18} />
-            </Link>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {featuredCourses.map(course => (
-              <Link
-                key={course.id}
-                href={`/courses/${course.id}`}
-                className="group p-5 bg-surface-primary border border-surface-tertiary rounded-xl hover:shadow-md hover:border-wf-crimson/30 transition-all"
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <h3 className="font-semibold text-text-primary group-hover:text-wf-crimson transition-colors">
-                      {toOfficialCode(course.code)}
-                    </h3>
-                    <p className="text-sm text-text-secondary line-clamp-1">{course.name}</p>
-                  </div>
-                  {course.avgGPA != null && course.avgGPA > 0 && (
-                    <div className={`text-lg font-bold ${
-                      course.avgGPA >= 3.5 ? 'text-emerald-500' :
-                      course.avgGPA >= 3.0 ? 'text-emerald-400' :
-                      course.avgGPA >= 2.5 ? 'text-amber-500' : 'text-orange-500'
-                    }`}>
-                      {course.avgGPA.toFixed(2)}
+            {/* Recent Activity */}
+            <div className="bg-surface-primary rounded-xl border border-surface-tertiary overflow-hidden">
+              <div className="px-5 py-4 border-b border-surface-tertiary">
+                <h2 className="font-semibold text-text-primary flex items-center gap-2">
+                  <MessageSquare size={18} className="text-text-tertiary" />
+                  Recent Reviews
+                </h2>
+              </div>
+              <div className="divide-y divide-surface-tertiary">
+                {recentReviews.map(review => (
+                  <Link
+                    key={review.id}
+                    href={`/courses/${review.course.id}`}
+                    className="block px-5 py-3 hover:bg-hover-bg transition-colors"
+                  >
+                    <div className="text-sm font-medium text-text-primary truncate">
+                      {toOfficialCode(review.course.code)}
                     </div>
-                  )}
+                    <div className="text-xs text-text-tertiary">
+                      {new Date(review.createdAt).toLocaleDateString()}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* Academic Calendar Placeholder */}
+            <div className="bg-surface-primary rounded-xl border border-surface-tertiary p-5">
+              <h2 className="font-semibold text-text-primary mb-3 flex items-center gap-2">
+                <Calendar size={18} className="text-wf-crimson" />
+                Upcoming Dates
+              </h2>
+              <div className="space-y-3 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-text-secondary">Spring 2026 Start</span>
+                  <span className="text-text-primary font-medium">Jan 21</span>
                 </div>
-                <div className="flex items-center gap-3 text-xs text-text-tertiary">
-                  <span className="flex items-center gap-1">
-                    <Star size={12} className="text-amber-400" />
-                    {course._count.reviews} reviews
-                  </span>
-                  <span>{course.credits} credits</span>
-                  <span className={`px-2 py-0.5 rounded ${
-                    course.level === 'Elementary' ? 'bg-emerald-50 text-emerald-700' :
-                    course.level === 'Intermediate' ? 'bg-amber-50 text-amber-700' :
-                    'bg-orange-50 text-orange-700'
-                  }`}>
-                    {course.level}
-                  </span>
+                <div className="flex justify-between">
+                  <span className="text-text-secondary">Add/Drop Deadline</span>
+                  <span className="text-text-primary font-medium">Feb 7</span>
                 </div>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* How It Works */}
-      <section className="bg-surface-secondary/50 border-y border-surface-tertiary">
-        <div className="max-w-6xl mx-auto px-6 py-16">
-          <div className="text-center mb-12">
-            <h2 className="text-2xl font-bold text-text-primary mb-2">How WiscFlow Works</h2>
-            <p className="text-text-secondary">Three simple steps to better course decisions</p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="w-14 h-14 mx-auto mb-4 bg-wf-crimson text-white rounded-2xl flex items-center justify-center text-xl font-bold">
-                1
+                <div className="flex justify-between">
+                  <span className="text-text-secondary">Spring Break</span>
+                  <span className="text-text-primary font-medium">Mar 15-23</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-text-secondary">Finals Week</span>
+                  <span className="text-text-primary font-medium">May 4-9</span>
+                </div>
               </div>
-              <h3 className="font-semibold text-text-primary mb-2">Search Courses</h3>
-              <p className="text-sm text-text-secondary">
-                Browse 10,000+ courses across all UW-Madison schools and departments
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="w-14 h-14 mx-auto mb-4 bg-wf-crimson text-white rounded-2xl flex items-center justify-center text-xl font-bold">
-                2
-              </div>
-              <h3 className="font-semibold text-text-primary mb-2">Read Reviews</h3>
-              <p className="text-sm text-text-secondary">
-                Get insights from real students on content, teaching, grading, and workload
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="w-14 h-14 mx-auto mb-4 bg-wf-crimson text-white rounded-2xl flex items-center justify-center text-xl font-bold">
-                3
-              </div>
-              <h3 className="font-semibold text-text-primary mb-2">Share Your Experience</h3>
-              <p className="text-sm text-text-secondary">
-                Write one review to unlock full access and help future Badgers
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="max-w-6xl mx-auto px-6 py-16">
-        <div className="bg-gradient-to-r from-wf-crimson to-wf-crimson-dark rounded-2xl p-10 text-center text-white">
-          <h2 className="text-3xl font-bold mb-4">Ready to get started?</h2>
-          <p className="text-white/80 mb-8 max-w-xl mx-auto">
-            Join thousands of UW-Madison students making informed course decisions with WiscFlow.
-          </p>
-          <div className="flex items-center justify-center gap-4">
-            <Link
-              href="/courses"
-              className="px-8 py-3 bg-white text-wf-crimson font-semibold rounded-lg hover:bg-white/90 transition-colors"
-            >
-              Browse Courses
-            </Link>
-            {!session?.user && (
-              <Link
-                href="/auth/signup"
-                className="px-8 py-3 bg-white/10 text-white font-semibold rounded-lg border-2 border-white/30 hover:bg-white/20 transition-colors"
+              <a 
+                href="https://registrar.wisc.edu/academic-calendar/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block mt-4 text-xs text-wf-crimson hover:text-wf-crimson-dark"
               >
-                Create Account
+                View full academic calendar →
+              </a>
+            </div>
+
+            {/* How to Contribute */}
+            <div className="bg-gradient-to-br from-wf-crimson to-wf-crimson-dark rounded-xl p-5 text-white">
+              <h2 className="font-semibold mb-2">Help Fellow Badgers</h2>
+              <p className="text-sm text-white/80 mb-4">
+                Share your course experiences to help others make informed decisions and unlock full access.
+              </p>
+              <Link
+                href="/courses"
+                className="block w-full py-2 text-center text-sm font-medium bg-white text-wf-crimson rounded-lg hover:bg-white/90 transition-colors"
+              >
+                Write a Review
               </Link>
-            )}
+            </div>
           </div>
         </div>
-      </section>
+      </main>
 
       {/* Footer */}
-      <footer className="border-t border-surface-tertiary bg-surface-secondary/30">
-        <div className="max-w-6xl mx-auto px-6 py-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Logo size={24} />
-              <span className="font-semibold text-text-primary">WiscFlow</span>
+      <footer className="border-t border-surface-tertiary bg-surface-primary mt-8">
+        <div className="max-w-6xl mx-auto px-6 py-6">
+          <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center gap-2 text-text-secondary">
+              <Logo size={20} />
+              <span className="font-medium">WiscFlow</span>
+              <span className="text-text-tertiary">• By students, for students</span>
             </div>
-            <div className="text-sm text-text-tertiary">
-              Made with ❤️ for UW-Madison students
+            <div className="text-text-tertiary">
+              Made with ❤️ at UW-Madison
             </div>
           </div>
         </div>

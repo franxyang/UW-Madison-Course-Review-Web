@@ -300,7 +300,7 @@ export default async function ProfilePage() {
                       <div className="text-xs text-slate-600 mt-0.5 line-clamp-1">{saved.course.name}</div>
                       <div className="flex items-center gap-2 mt-1 text-xs text-slate-500">
                         <span>{saved.course.credits} cr</span>
-                        {saved.course.avgGPA && (
+                        {saved.course.avgGPA != null && saved.course.avgGPA > 0 && (
                           <span className="flex items-center gap-0.5">
                             <Star size={10} /> {saved.course.avgGPA.toFixed(2)}
                           </span>

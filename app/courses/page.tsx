@@ -233,7 +233,7 @@ function CoursesPageContent() {
                               <span className="font-medium">{course._count.reviews}</span>
                             </div>
                           )}
-                          {course.avgGPA && (
+                          {course.avgGPA != null && course.avgGPA > 0 && (
                             <div className={`flex items-center gap-1 font-semibold ${getGPAColor(course.avgGPA)}`}>
                               <Star size={14} />
                               <span>{course.avgGPA.toFixed(2)}</span>

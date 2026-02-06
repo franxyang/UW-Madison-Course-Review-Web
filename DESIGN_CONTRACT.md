@@ -428,23 +428,12 @@
 ### 配色系统
 | 名称 | 色值 | 用途 |
 |------|------|------|
-| **UW Red** | `#c5050c` | 主色、强调、链接 |
-| **UW Red Dark** | `#9b0000` | Hover 状态 |
-| **White** | `#ffffff` | 背景 (surface-primary) |
-| **Light Gray** | `#f7f7f7` | 次级背景 (surface-secondary) |
-| **Border Gray** | `#e5e7eb` | 边框 (surface-tertiary) |
-| **Text Primary** | `#111827` | 主要文字 |
-| **Text Secondary** | `#4b5563` | 次要文字 |
-| **Text Tertiary** | `#9ca3af` | 辅助文字 |
+
 
 ### GPA 动态配色
 | GPA 范围 | 颜色 |
 |----------|------|
-| ≥ 3.5 | `emerald-500` |
-| ≥ 3.0 | `emerald-400` |
-| ≥ 2.5 | `amber-500` |
-| ≥ 2.0 | `orange-500` |
-| < 2.0 | `red-500` |
+
 
 ### 响应式断点
 - **Mobile**: < 640px (sm)

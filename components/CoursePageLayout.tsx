@@ -232,7 +232,7 @@ function LeftSidebar({
                   }`}
                 >
                   <span className="font-medium">{courseNum}</span>
-                  {c.avgGPA && (
+                  {c.avgGPA != null && c.avgGPA > 0 && (
                     <span className={`text-xs font-semibold ${getGPAColor(c.avgGPA)}`}>
                       {c.avgGPA.toFixed(2)}
                     </span>
@@ -673,7 +673,7 @@ export function CoursePageLayout({
                   </div>
                   <h2 className="text-lg text-text-secondary">{course.name}</h2>
                 </div>
-                {course.avgGPA && (
+                {course.avgGPA != null && course.avgGPA > 0 && (
                   <div className="text-right">
                     <div className={`text-2xl font-bold ${
                       course.avgGPA >= 3.5 ? 'text-emerald-500' :

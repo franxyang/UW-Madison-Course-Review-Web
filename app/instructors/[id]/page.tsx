@@ -332,7 +332,7 @@ export default function InstructorPage() {
                           <div className="font-semibold text-text-primary text-sm">{ci.course.code}</div>
                           <div className="text-xs text-text-secondary mt-0.5 line-clamp-1">{ci.course.name}</div>
                         </div>
-                        {ci.course.avgGPA && (
+                        {ci.course.avgGPA != null && ci.course.avgGPA > 0 && (
                           <div className={`text-sm font-bold ${
                             ci.course.avgGPA >= 3.5 ? 'text-emerald-500' :
                             ci.course.avgGPA >= 3.0 ? 'text-emerald-400' :

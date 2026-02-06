@@ -208,7 +208,7 @@ export default async function Home() {
                     </h3>
                     <p className="text-sm text-text-secondary line-clamp-1">{course.name}</p>
                   </div>
-                  {course.avgGPA && (
+                  {course.avgGPA != null && course.avgGPA > 0 && (
                     <div className={`text-lg font-bold ${
                       course.avgGPA >= 3.5 ? 'text-emerald-500' :
                       course.avgGPA >= 3.0 ? 'text-emerald-400' :

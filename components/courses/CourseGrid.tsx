@@ -32,17 +32,22 @@ function getGPAColor(gpa: number | null) {
 
 // Compact grid of course numbers (for left sidebar when dept selected)
 export function CourseNumberGrid({ courses, selectedCourse }: CourseGridProps) {
-  // Extract just the course number since dept is shown in header
-  const getCourseNumber = (code: string) => {
+  // Smart display: show full code if short enough, otherwise just the number
+  const getDisplayText = (code: string) => {
+    const officialCode = toOfficialCode(code)
     const parts = code.split(' ')
-    return parts[parts.length - 1]
+    const num = parts[parts.length - 1]
+    
+    // If full code is ≤ 10 chars, show it all (e.g., "CS 577", "MATH 222")
+    // Otherwise just show the number (e.g., "501" for "BIOCHEM 501")
+    return officialCode.length <= 10 ? officialCode : num
   }
 
   return (
     <div className="max-h-64 overflow-y-auto">
       <div className="grid grid-cols-2 gap-1.5">
         {courses.map(course => {
-          const num = getCourseNumber(course.code)
+          const displayText = getDisplayText(course.code)
           const isSelected = selectedCourse === course.id
           
           return (
@@ -56,7 +61,7 @@ export function CourseNumberGrid({ courses, selectedCourse }: CourseGridProps) {
               }`}
               title={`${toOfficialCode(course.code)}: ${course.name}`}
             >
-              {num}
+              {displayText}
             </Link>
           )
         })}

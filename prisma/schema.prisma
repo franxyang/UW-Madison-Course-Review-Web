@@ -102,6 +102,9 @@ model Course {
   lastOffered        String?
   updatedAt          DateTime                 @updatedAt
   searchVector       Unsupported("tsvector")?
+  // Cross-listed courses share the same crossListGroupId
+  crossListGroupId   String?
+  crossListGroup     CrossListGroup?          @relation(fields: [crossListGroupId], references: [id])
   school             School                   @relation(fields: [schoolId], references: [id])
   departments        CourseDepartment[]
   instructors        CourseInstructor[]
@@ -114,7 +117,17 @@ model Course {
   @@index([code])
   @@index([schoolId])
   @@index([level])
+  @@index([crossListGroupId])
   @@index([searchVector], type: Gin)
+}
+
+// Groups cross-listed courses together (e.g., CS 514 / MATH 514)
+model CrossListGroup {
+  id          String   @id @default(cuid())
+  // Primary course code for display (e.g., "COMP SCI 514 / MATH 514")
+  displayCode String?
+  courses     Course[]
+  createdAt   DateTime @default(now())
 }
 
 model CourseDepartment {

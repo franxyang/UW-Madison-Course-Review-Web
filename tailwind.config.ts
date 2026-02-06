@@ -6,6 +6,7 @@ const config: Config = {
     './components/**/*.{js,ts,jsx,tsx,mdx}',
     './app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
@@ -19,18 +20,18 @@ const config: Config = {
         'uw-dark': '#9B0000',         // → 使用 wf-crimson-dark
         'uw-light': '#D93036',        // → 使用 wf-crimson-light
         
-        // === 表面色 ===
+        // === 表面色 (Light Mode - use CSS vars for dark mode) ===
         'surface': {
-          primary: '#FFFFFF',
-          secondary: '#F8F9FA',
-          tertiary: '#E9ECEF',
+          primary: 'var(--surface-primary)',
+          secondary: 'var(--surface-secondary)',
+          tertiary: 'var(--surface-tertiary)',
         },
         
-        // === 文字色 ===
+        // === 文字色 (use CSS vars for dark mode) ===
         'text': {
-          primary: '#212529',
-          secondary: '#6C757D',
-          tertiary: '#ADB5BD',
+          primary: 'var(--text-primary)',
+          secondary: 'var(--text-secondary)',
+          tertiary: 'var(--text-tertiary)',
         },
         
         // === 数据可视化（柔和渐变 - Tailwind 标准色）===

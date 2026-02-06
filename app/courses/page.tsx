@@ -10,6 +10,7 @@ import { useState, useCallback, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { FilterPanel, type CourseFilters } from '@/components/FilterPanel'
 import { MobileNav } from '@/components/MobileNav'
+import { ThemeToggle } from '@/components/ThemeToggle'
 import { SlidersHorizontal, X } from 'lucide-react'
 import { toOfficialCode } from '@/lib/courseCodeDisplay'
 
@@ -94,10 +95,14 @@ function CoursesPageContent() {
                   About
                 </Link>
               </nav>
-              <div className="hidden lg:block">
+              <div className="hidden lg:flex items-center gap-2">
+                <ThemeToggle />
                 {session?.user ? <UserMenu user={session.user} /> : <GuestMenu />}
               </div>
-              <MobileNav user={session?.user} currentPath="/courses" />
+              <div className="flex items-center gap-2 lg:hidden">
+                <ThemeToggle />
+                <MobileNav user={session?.user} currentPath="/courses" />
+              </div>
             </div>
           </div>
         </div>

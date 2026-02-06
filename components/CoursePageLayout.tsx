@@ -22,8 +22,11 @@ import {
   Search,
   Filter,
   ChevronDown,
-  X
+  X,
+  Moon,
+  Sun
 } from 'lucide-react'
+import { ThemeToggle } from '@/components/ThemeToggle'
 
 // Types
 interface Course {
@@ -658,6 +661,7 @@ export function CoursePageLayout({
               <Link href="/courses" className="text-wf-crimson font-medium">Courses</Link>
               <Link href="/instructors" className="text-text-secondary hover:text-text-primary transition-colors">Instructors</Link>
               <Link href="/about" className="text-text-secondary hover:text-text-primary transition-colors">About</Link>
+              <ThemeToggle />
             </nav>
           </div>
         </div>

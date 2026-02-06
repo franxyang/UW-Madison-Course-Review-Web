@@ -12,12 +12,12 @@
     --wf-crimson-dark: #9B0000;
     --wf-crimson-light: #D93036;
     
-    /* 表面色 */
+    /* 表面色 - Light Mode */
     --surface-primary: #FFFFFF;
     --surface-secondary: #F8F9FA;
     --surface-tertiary: #E9ECEF;
     
-    /* 文字色 */
+    /* 文字色 - Light Mode */
     --text-primary: #212529;
     --text-secondary: #6C757D;
     --text-tertiary: #ADB5BD;
@@ -35,10 +35,24 @@
     --error: #EF4444;
     --info: #3B82F6;
     
-    /* 交互状态 */
+    /* 交互状态 - Light Mode */
     --hover-bg: #F1F5F9;
     --active-bg: #FEF2F2;
     --focus-ring: rgba(197, 5, 12, 0.2);
+  }
+
+  /* Dark Mode */
+  .dark {
+    --surface-primary: #1A1A1A;
+    --surface-secondary: #242424;
+    --surface-tertiary: #333333;
+    
+    --text-primary: #F5F5F5;
+    --text-secondary: #A0A0A0;
+    --text-tertiary: #6B6B6B;
+    
+    --hover-bg: #2A2A2A;
+    --active-bg: #3D1A1A;
   }
 
   body {

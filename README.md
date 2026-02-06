@@ -18,11 +18,14 @@ WiscFlow helps UW-Madison students share honest course experiences and make info
 ### Key Features
 
 - 🔍 **Full-text Search** — Find courses by code, name, or keyword with PostgreSQL-powered search and alias support (e.g. `CS 577` ↔ `COMP SCI 577`)
-- 🏫 **Smart Filtering** — Filter by school, department (209 depts), course level, credits, and sort by GPA/reviews/relevance
+- 🏫 **Smart Filtering** — Filter by school, department (209 depts), course level, credits, GPA range, and instructor
 - ⭐ **Multi-dimensional Reviews** — Rate courses on content, teaching, grading, and workload
-- 📊 **Grade Distributions** — Historical GPA data from MadGrades
+- 📊 **Grade Distributions** — Historical GPA data from MadGrades with per-instructor filtering
+- 👨‍🏫 **Instructor Profiles** — Teaching portfolio with radar charts, timelines, and aggregated ratings
+- 🏆 **Contributor System** — 6-tier progression (Reader → Legend) with XP and badges
 - 💬 **Community** — Upvote helpful reviews and discuss in comment threads
 - 🔗 **Cross-listed Courses** — 1,368 cross-listed course groups properly linked across departments
+- 🌙 **Dark Mode** — System-aware theme switching
 - 🔐 **@wisc.edu Only** — Verified UW-Madison student community via Google OAuth
 
 ---
@@ -124,7 +127,8 @@ wiscflow/
 | Schools | 23 |
 | Departments | 209 |
 | Courses | 10,174 |
-| Course-Department Links | 10,174 |
+| Instructors | 20,607 |
+| Grade Distributions | 247,234 |
 | Cross-listed Groups | 1,368 |
 
 Data sourced from UW-Madison's official course catalog and [MadGrades](https://madgrades.com/).
@@ -136,19 +140,26 @@ Data sourced from UW-Madison's official course catalog and [MadGrades](https://m
 ### ✅ Phase 1 — Infrastructure (Complete)
 PostgreSQL migration, tRPC integration, full-text search, Redis caching, department import, course alias search, left sidebar filters, pagination.
 
-### 🔄 Phase 2 — Core Features (In Progress)
-Advanced search, instructor pages, user dashboard, review management (edit/delete/report), user incentive system, mobile responsiveness.
+### ✅ Phase 2 — Core Features (Complete)
+Advanced search, instructor pages, user dashboard, review management (edit/delete/report), user incentive system (contributor levels + XP), mobile responsiveness.
 
-### 📅 Phase 3 — UX & Visualization
-Interactive grade charts, prerequisite graph, dark mode, performance optimization.
+### 🔄 Phase 3 — UX & Visualization (80% Complete)
+- ✅ Color system overhaul (UW crimson + soft gradients)
+- ✅ Course detail page 3-column layout
+- ✅ Instructor Teaching Portfolio (radar chart + timeline)
+- ✅ Dark mode support
+- ✅ Real-time search preview
+- 🔨 Component unification, performance optimization
 
-### 🚀 Phase 4 — Advanced Features
-AI review summaries, timetable planner, course recommendations, community features, notification system.
+### 📅 Phase 4 — Advanced Features (Planned)
+AI review summaries, course recommendations, community features, notification system.
 
-### 🔐 Phase 5 — Admin
+### 🔐 Phase 5 — Admin (Planned)
 Moderation tools, data management, analytics dashboard.
 
-See [PROGRESS.md](PROGRESS.md) for detailed tracking.
+**Documentation:**
+- [PROGRESS.md](PROGRESS.md) — Current status & statistics
+- [docs/ROADMAP.md](docs/ROADMAP.md) — Future planning (Phase 4-6)
 
 ---
 

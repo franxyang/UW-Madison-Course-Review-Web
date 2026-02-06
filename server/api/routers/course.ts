@@ -334,6 +334,19 @@ export const courseRouter = router({
               name: true,
             },
           },
+          // Include cross-listed courses
+          crossListGroup: {
+            include: {
+              courses: {
+                select: {
+                  id: true,
+                  code: true,
+                  name: true,
+                  avgGPA: true,
+                },
+              },
+            },
+          },
         },
       })
 

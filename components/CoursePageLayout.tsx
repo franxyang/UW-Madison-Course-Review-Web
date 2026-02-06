@@ -63,6 +63,11 @@ interface Course {
     totalReviews: number
   }
   departments?: { department: { code: string; name: string } }[]
+  crossListGroup?: {
+    id: string
+    displayCode: string | null
+    courses: { id: string; code: string; name: string; avgGPA: number | null }[]
+  } | null
 }
 
 interface RelatedCourse {
@@ -690,6 +695,25 @@ export function CoursePageLayout({
                     </span>
                   </div>
                   <h2 className="text-lg text-text-secondary">{course.name}</h2>
+                  {/* Cross-listed courses */}
+                  {course.crossListGroup && course.crossListGroup.courses.length > 1 && (
+                    <div className="flex items-center gap-2 mt-2">
+                      <span className="text-xs text-text-tertiary">Also listed as:</span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {course.crossListGroup.courses
+                          .filter(c => c.id !== course.id)
+                          .map(c => (
+                            <Link
+                              key={c.id}
+                              href={`/courses/${c.id}`}
+                              className="px-2 py-0.5 text-xs bg-surface-secondary text-text-secondary rounded hover:bg-wf-crimson/10 hover:text-wf-crimson transition-colors"
+                            >
+                              {toOfficialCode(c.code)}
+                            </Link>
+                          ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
                 {course.avgGPA != null && course.avgGPA > 0 && (
                   <div className="text-right">

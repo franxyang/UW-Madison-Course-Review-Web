@@ -7,6 +7,7 @@ import { BookOpen, MessageSquare, Star, ChevronRight, Calendar, TrendingUp } fro
 import { trpc } from '@/lib/trpc/client'
 import { useSession } from 'next-auth/react'
 import { useMemo } from 'react'
+import { toOfficialCode, getOfficialDeptPrefix } from '@/lib/courseCodeDisplay'
 
 function getRatingLabel(avg: number): string {
   if (avg >= 4.5) return 'A'
@@ -221,7 +222,7 @@ export default function InstructorPage() {
                   <h1 className="text-2xl font-bold text-text-primary">{instructor.name}</h1>
                   <p className="text-text-secondary text-sm mt-1">
                     {instructor.courses.length > 0 
-                      ? `Teaching ${instructor.courses.map(c => c.course.code.split(' ')[0]).filter((v, i, a) => a.indexOf(v) === i).join(', ')}`
+                      ? `Teaching ${instructor.courses.map(c => getOfficialDeptPrefix(c.course.code)).filter((v, i, a) => a.indexOf(v) === i).join(', ')}`
                       : 'Instructor'}
                   </p>
                   
@@ -329,7 +330,7 @@ export default function InstructorPage() {
                     >
                       <div className="flex items-start justify-between">
                         <div>
-                          <div className="font-semibold text-text-primary text-sm">{ci.course.code}</div>
+                          <div className="font-semibold text-text-primary text-sm">{toOfficialCode(ci.course.code)}</div>
                           <div className="text-xs text-text-secondary mt-0.5 line-clamp-1">{ci.course.name}</div>
                         </div>
                         {ci.course.avgGPA != null && ci.course.avgGPA > 0 && (
@@ -375,7 +376,7 @@ export default function InstructorPage() {
                             href={`/courses/${review.course.id}`}
                             className="text-sm font-semibold text-wf-crimson hover:text-wf-crimson-dark transition-colors"
                           >
-                            {review.course.code}
+                            {toOfficialCode(review.course.code)}
                           </Link>
                           <div className="text-xs text-text-tertiary mt-0.5">
                             {review.term} · Grade: {review.gradeReceived}

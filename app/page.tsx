@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { Logo } from '@/components/Logo'
 import { prisma } from '@/lib/prisma'
 import { Search, BookOpen, Users, Star, TrendingUp, ArrowRight, Sparkles } from 'lucide-react'
+import { toOfficialCode } from '@/lib/courseCodeDisplay'
 
 async function getStats() {
   const [courseCount, reviewCount, instructorCount] = await Promise.all([
@@ -204,7 +205,7 @@ export default async function Home() {
                 <div className="flex items-start justify-between mb-3">
                   <div>
                     <h3 className="font-semibold text-text-primary group-hover:text-wf-crimson transition-colors">
-                      {course.code}
+                      {toOfficialCode(course.code)}
                     </h3>
                     <p className="text-sm text-text-secondary line-clamp-1">{course.name}</p>
                   </div>

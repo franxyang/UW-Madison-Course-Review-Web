@@ -11,6 +11,7 @@ import { ReviewGateOverlay, FrostedReview } from '@/components/ReviewGate'
 import { ContributorBadge } from '@/components/ContributorBadge'
 import { ReviewActions } from '@/components/ReviewActions'
 import { ReportButton } from '@/components/ReportButton'
+import { toOfficialCode, getOfficialDeptPrefix, getCourseNumber } from '@/lib/courseCodeDisplay'
 import {
   ChevronRight,
   Building,
@@ -148,11 +149,11 @@ function LeftSidebar({
 }) {
   const [searchQuery, setSearchQuery] = useState('')
   
-  // Get department code for same-dept courses
-  const deptCode = course.code.split(' ').slice(0, -1).join(' ')
+  // Get official department code for display
+  const officialDeptCode = getOfficialDeptPrefix(course.code)
   
   return (
-    <aside className="w-[200px] flex-shrink-0 space-y-5">
+    <aside className="w-[320px] flex-shrink-0 space-y-5">
       {/* Search */}
       <div className="relative">
         <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary" />
@@ -172,14 +173,19 @@ function LeftSidebar({
           <h3 className="flex items-center gap-1.5 text-xs font-semibold text-text-tertiary uppercase tracking-wider mb-2">
             <span>📌</span> Prerequisites
           </h3>
-          <div className="space-y-0.5">
+          <div className="space-y-1">
             {course.prerequisites.map(prereq => (
               <Link
                 key={prereq.id}
                 href={`/courses/${prereq.id}`}
-                className="flex items-center justify-between px-3 py-2 text-sm hover:bg-hover-bg rounded-lg transition-colors group"
+                className="block px-3 py-2 hover:bg-hover-bg rounded-lg transition-colors group"
               >
-                <span className="text-text-secondary group-hover:text-text-primary font-medium">{prereq.code}</span>
+                <div className="font-medium text-sm text-text-secondary group-hover:text-wf-crimson">
+                  {toOfficialCode(prereq.code)}
+                </div>
+                <div className="text-xs text-text-tertiary line-clamp-1 mt-0.5">
+                  {prereq.name}
+                </div>
               </Link>
             ))}
           </div>
@@ -192,14 +198,19 @@ function LeftSidebar({
           <h3 className="flex items-center gap-1.5 text-xs font-semibold text-text-tertiary uppercase tracking-wider mb-2">
             <span>🔓</span> Unlocks
           </h3>
-          <div className="space-y-0.5">
+          <div className="space-y-1">
             {course.prerequisiteFor.slice(0, 5).map(next => (
               <Link
                 key={next.id}
                 href={`/courses/${next.id}`}
-                className="flex items-center justify-between px-3 py-2 text-sm hover:bg-hover-bg rounded-lg transition-colors group"
+                className="block px-3 py-2 hover:bg-hover-bg rounded-lg transition-colors group"
               >
-                <span className="text-text-secondary group-hover:text-text-primary font-medium">{next.code}</span>
+                <div className="font-medium text-sm text-text-secondary group-hover:text-wf-crimson">
+                  {toOfficialCode(next.code)}
+                </div>
+                <div className="text-xs text-text-tertiary line-clamp-1 mt-0.5">
+                  {next.name}
+                </div>
               </Link>
             ))}
             {course.prerequisiteFor.length > 5 && (
@@ -211,31 +222,38 @@ function LeftSidebar({
         </div>
       )}
 
-      {/* Same Department */}
+      {/* Same Department - Two Column Grid */}
       {relatedCourses.length > 0 && (
         <div>
           <h3 className="flex items-center gap-1.5 text-xs font-semibold text-text-tertiary uppercase tracking-wider mb-2">
-            <span>📚</span> {deptCode}
+            <span>📚</span> {officialDeptCode}
           </h3>
-          <div className="space-y-0.5">
+          <div className="grid grid-cols-2 gap-1.5">
             {relatedCourses.map(c => {
               const isActive = c.id === course.id
-              const courseNum = c.code.split(' ').pop()
+              const officialCode = toOfficialCode(c.code)
               return (
                 <Link
                   key={c.id}
                   href={`/courses/${c.id}`}
-                  className={`flex items-center justify-between px-3 py-2 text-sm rounded-lg transition-colors ${
+                  className={`block px-2.5 py-2 rounded-lg transition-colors ${
                     isActive 
-                      ? 'bg-wf-crimson/10 text-wf-crimson' 
-                      : 'hover:bg-hover-bg text-text-secondary hover:text-text-primary'
+                      ? 'bg-wf-crimson/10 ring-1 ring-wf-crimson/30' 
+                      : 'hover:bg-hover-bg'
                   }`}
                 >
-                  <span className="font-medium">{courseNum}</span>
+                  <div className={`font-medium text-xs ${
+                    isActive ? 'text-wf-crimson' : 'text-text-secondary'
+                  }`}>
+                    {officialCode}
+                  </div>
+                  <div className="text-[10px] text-text-tertiary line-clamp-1 mt-0.5">
+                    {c.name}
+                  </div>
                   {c.avgGPA != null && c.avgGPA > 0 && (
-                    <span className={`text-xs font-semibold ${getGPAColor(c.avgGPA)}`}>
-                      {c.avgGPA.toFixed(2)}
-                    </span>
+                    <div className={`text-[10px] font-semibold mt-0.5 ${getGPAColor(c.avgGPA)}`}>
+                      GPA {c.avgGPA.toFixed(2)}
+                    </div>
                   )}
                 </Link>
               )
@@ -652,7 +670,7 @@ export function CoursePageLayout({
             <div className="flex items-center gap-2 text-sm text-text-secondary mb-4">
               <Link href="/courses" className="hover:text-text-primary transition-colors">Courses</Link>
               <ChevronRight size={16} />
-              <span className="text-text-primary font-medium">{course.code}</span>
+              <span className="text-text-primary font-medium">{toOfficialCode(course.code)}</span>
             </div>
 
             {/* Course Header Card */}
@@ -660,7 +678,7 @@ export function CoursePageLayout({
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <div className="flex items-center gap-3 mb-2">
-                    <h1 className="text-2xl font-bold text-text-primary">{course.code}</h1>
+                    <h1 className="text-2xl font-bold text-text-primary">{toOfficialCode(course.code)}</h1>
                     <span className={`px-2.5 py-0.5 text-xs font-medium rounded-md border ${
                       course.level === 'Elementary'
                         ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
@@ -761,7 +779,7 @@ export function CoursePageLayout({
 
               {/* Review Form */}
               <div id="review-form" className="bg-surface-primary rounded-xl border border-surface-tertiary p-6 scroll-mt-24">
-                <ReviewForm courseId={course.id} courseName={`${course.code}: ${course.name}`} />
+                <ReviewForm courseId={course.id} courseName={`${toOfficialCode(course.code)}: ${course.name}`} />
               </div>
 
               {/* Reviews List */}

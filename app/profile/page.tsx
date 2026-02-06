@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { Mail, Calendar, LogOut, BookOpen, Star, MessageSquare, ThumbsUp, Trophy, Zap } from 'lucide-react'
 import { signOut } from '@/auth'
 import { computeContributorLevel, getAllLevels } from '@/lib/contributorLevel'
+import { toOfficialCode } from '@/lib/courseCodeDisplay'
 
 export default async function ProfilePage() {
   const session = await auth()
@@ -196,7 +197,7 @@ export default async function ProfilePage() {
                     >
                       <div className="flex items-start justify-between mb-2">
                         <div>
-                          <h3 className="font-semibold text-slate-900">{review.course.code}: {review.course.name}</h3>
+                          <h3 className="font-semibold text-slate-900">{toOfficialCode(review.course.code)}: {review.course.name}</h3>
                           <p className="text-sm text-slate-600">{review.instructor.name} · {review.term}</p>
                         </div>
                         <div className="flex items-center gap-2">
@@ -296,7 +297,7 @@ export default async function ProfilePage() {
                       href={`/courses/${saved.courseId}`}
                       className="block p-3 border border-slate-200 rounded-lg hover:border-uw-red transition-colors"
                     >
-                      <div className="font-medium text-sm text-slate-900">{saved.course.code}</div>
+                      <div className="font-medium text-sm text-slate-900">{toOfficialCode(saved.course.code)}</div>
                       <div className="text-xs text-slate-600 mt-0.5 line-clamp-1">{saved.course.name}</div>
                       <div className="flex items-center gap-2 mt-1 text-xs text-slate-500">
                         <span>{saved.course.credits} cr</span>

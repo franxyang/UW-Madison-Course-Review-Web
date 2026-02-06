@@ -11,6 +11,7 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import { FilterPanel, type CourseFilters } from '@/components/FilterPanel'
 import { MobileNav } from '@/components/MobileNav'
 import { SlidersHorizontal, X } from 'lucide-react'
+import { toOfficialCode } from '@/lib/courseCodeDisplay'
 
 export default function CoursesPage() {
   return (
@@ -213,7 +214,7 @@ function CoursesPageContent() {
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex-1 min-w-0">
                           <h3 className="font-semibold text-text-primary group-hover:text-wf-crimson transition-colors">
-                            {course.code}
+                            {toOfficialCode(course.code)}
                           </h3>
                           <p className="text-sm text-text-secondary mt-1 line-clamp-2">{course.name}</p>
                         </div>

@@ -32,33 +32,37 @@ function getGPAColor(gpa: number | null) {
 
 // Compact grid of course numbers (for left sidebar when dept selected)
 export function CourseNumberGrid({ courses, selectedCourse }: CourseGridProps) {
-  // Extract just the number part from course code
-  const getCourseNumber = (code: string) => {
+  // Get department prefix and course number
+  const getDisplayCode = (code: string) => {
     const parts = code.split(' ')
-    return parts[parts.length - 1]
+    const dept = parts.slice(0, -1).join(' ')
+    const num = parts[parts.length - 1]
+    return { dept, num, full: `${dept} ${num}` }
   }
 
   return (
-    <div className="grid grid-cols-4 gap-1">
-      {courses.map(course => {
-        const num = getCourseNumber(course.code)
-        const isSelected = selectedCourse === course.id
-        
-        return (
-          <Link
-            key={course.id}
-            href={`/courses/${course.id}`}
-            className={`px-1.5 py-1.5 text-xs font-medium rounded text-center transition-colors ${
-              isSelected
-                ? 'bg-wf-crimson text-white'
-                : 'bg-surface-secondary text-text-secondary hover:bg-wf-crimson/10 hover:text-wf-crimson'
-            }`}
-            title={`${toOfficialCode(course.code)}: ${course.name}`}
-          >
-            {num}
-          </Link>
-        )
-      })}
+    <div className="max-h-64 overflow-y-auto">
+      <div className="grid grid-cols-2 gap-1.5">
+        {courses.map(course => {
+          const { full } = getDisplayCode(course.code)
+          const isSelected = selectedCourse === course.id
+          
+          return (
+            <Link
+              key={course.id}
+              href={`/courses/${course.id}`}
+              className={`px-2 py-2 text-xs font-medium rounded-lg transition-colors truncate ${
+                isSelected
+                  ? 'bg-wf-crimson text-white'
+                  : 'bg-surface-secondary text-text-secondary hover:bg-wf-crimson/10 hover:text-wf-crimson'
+              }`}
+              title={`${toOfficialCode(course.code)}: ${course.name}`}
+            >
+              {toOfficialCode(course.code)}
+            </Link>
+          )
+        })}
+      </div>
     </div>
   )
 }

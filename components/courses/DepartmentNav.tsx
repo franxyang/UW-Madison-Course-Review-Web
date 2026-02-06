@@ -25,6 +25,22 @@ const SCHOOL_TO_GROUP: Record<string, { group: string; emoji: string; priority: 
   'Law School': { group: 'Professional', emoji: '⚖️', priority: 8 },
   'Music, School of': { group: 'Arts', emoji: '🎵', priority: 9 },
   'Journalism & Mass Communication, School of': { group: 'Communication', emoji: '📰', priority: 10 },
+  'Human Ecology, School of': { group: 'Human Ecology', emoji: '🏠', priority: 11 },
+  'Social Work, School of': { group: 'Social Sciences', emoji: '🤝', priority: 12 },
+  'Veterinary Medicine, School of': { group: 'Health Sciences', emoji: '🏥', priority: 6 },
+  'Continuing Studies, School of': { group: 'Other', emoji: '🏛️', priority: 99 },
+  'Graduate School': { group: 'Other', emoji: '🏛️', priority: 99 },
+}
+
+// Department code overrides - for departments that are misclassified by school
+const DEPT_GROUP_OVERRIDE: Record<string, { group: string; emoji: string; priority: number }> = {
+  'ACCT I S': { group: 'Business', emoji: '📊', priority: 4 },
+  'FINANCE': { group: 'Business', emoji: '📊', priority: 4 },
+  'MARKETNG': { group: 'Business', emoji: '📊', priority: 4 },
+  'M H R': { group: 'Business', emoji: '📊', priority: 4 },
+  'OTM': { group: 'Business', emoji: '📊', priority: 4 },
+  'R M I': { group: 'Business', emoji: '📊', priority: 4 },
+  'GEN BUS': { group: 'Business', emoji: '📊', priority: 4 },
 }
 
 // Featured departments to highlight
@@ -51,16 +67,19 @@ export function DepartmentNav({ selectedDept, onSelectDept }: DepartmentNavProps
     }> = {}
 
     schools.forEach(school => {
-      const mapping = SCHOOL_TO_GROUP[school.name]
-      const groupName = mapping?.group || 'Other'
-      const emoji = mapping?.emoji || '🏛️'
-      const priority = mapping?.priority || 99
-
-      if (!groups[groupName]) {
-        groups[groupName] = { emoji, priority, departments: [] }
-      }
-
       school.departments.forEach(dept => {
+        // Check for department-level override first
+        const deptOverride = DEPT_GROUP_OVERRIDE[dept.code]
+        const schoolMapping = SCHOOL_TO_GROUP[school.name]
+        
+        const groupName = deptOverride?.group || schoolMapping?.group || 'Other'
+        const emoji = deptOverride?.emoji || schoolMapping?.emoji || '🏛️'
+        const priority = deptOverride?.priority || schoolMapping?.priority || 99
+
+        if (!groups[groupName]) {
+          groups[groupName] = { emoji, priority, departments: [] }
+        }
+
         groups[groupName].departments.push({
           id: dept.id,
           code: dept.code,
@@ -117,8 +136,6 @@ export function DepartmentNav({ selectedDept, onSelectDept }: DepartmentNavProps
         if (departments.length === 0) return null
 
         const isExpanded = expandedGroups.has(groupName)
-        const displayDepts = isExpanded ? departments.slice(0, 12) : []
-        const hasMore = departments.length > 12
 
         return (
           <div 
@@ -149,32 +166,24 @@ export function DepartmentNav({ selectedDept, onSelectDept }: DepartmentNavProps
             {/* Department Grid */}
             {isExpanded && (
               <div className="px-2 pb-2">
-                <div className="grid grid-cols-3 gap-1">
-                  {displayDepts.map(dept => (
-                    <button
-                      key={dept.id}
-                      onClick={() => onSelectDept(dept.code)}
-                      className={`px-1.5 py-1.5 text-[11px] font-medium rounded transition-colors text-center ${
-                        selectedDept === dept.code
-                          ? 'bg-wf-crimson text-white'
-                          : 'bg-surface-secondary text-text-secondary hover:bg-wf-crimson/10 hover:text-wf-crimson'
-                      }`}
-                      title={`${dept.code}: ${dept.name} (${dept.courseCount} courses)`}
-                    >
-                      {dept.code.length > 8 ? dept.code.substring(0, 7) + '…' : dept.code}
-                    </button>
-                  ))}
-                </div>
-                {hasMore && (
-                  <div className="mt-2 text-center">
-                    <button 
-                      className="text-xs text-wf-crimson hover:text-wf-crimson-dark"
-                      onClick={() => {/* TODO: show all */}}
-                    >
-                      +{departments.length - 12} more departments
-                    </button>
+                <div className="max-h-48 overflow-y-auto">
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {departments.map(dept => (
+                      <button
+                        key={dept.id}
+                        onClick={() => onSelectDept(dept.code)}
+                        className={`px-2 py-2 text-xs font-medium rounded-lg transition-colors text-left truncate ${
+                          selectedDept === dept.code
+                            ? 'bg-wf-crimson text-white'
+                            : 'bg-surface-secondary text-text-secondary hover:bg-wf-crimson/10 hover:text-wf-crimson'
+                        }`}
+                        title={`${dept.code}: ${dept.name} (${dept.courseCount} courses)`}
+                      >
+                        {dept.code}
+                      </button>
+                    ))}
                   </div>
-                )}
+                </div>
               </div>
             )}
           </div>

@@ -11,6 +11,7 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import { FilterPanel, type CourseFilters } from '@/components/FilterPanel'
 import { MobileNav } from '@/components/MobileNav'
 import { ThemeToggle } from '@/components/ThemeToggle'
+import { SearchWithPreview } from '@/components/SearchWithPreview'
 import { SlidersHorizontal, X } from 'lucide-react'
 import { toOfficialCode } from '@/lib/courseCodeDisplay'
 
@@ -115,22 +116,21 @@ function CoursesPageContent() {
           <p className="text-text-secondary">Explore UW Madison&apos;s course catalog with reviews from fellow students</p>
         </div>
 
-        {/* Search Bar */}
-        <form onSubmit={handleSearch} className="flex gap-3 mb-6">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary" size={20} />
-            <input
-              type="text"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              placeholder="Search by course code (CS 577, MATH 521) or name..."
-              className="w-full pl-10 pr-4 py-2.5 bg-surface-primary border border-surface-tertiary rounded-lg focus:outline-none focus:ring-2 focus:ring-focus-ring focus:border-wf-crimson transition-colors"
-            />
-          </div>
-          <button type="submit" className="btn-primary">
+        {/* Search Bar with Preview */}
+        <div className="flex gap-3 mb-6">
+          <SearchWithPreview 
+            initialQuery={searchParams.get('search') || ''} 
+            onSearch={(q) => {
+              setSearchInput(q)
+              const params = new URLSearchParams()
+              if (q) params.set('search', q)
+              router.push(`/courses?${params.toString()}`)
+            }}
+          />
+          <button onClick={handleSearch} className="btn-primary">
             Search
           </button>
-        </form>
+        </div>
 
         {/* Mobile Filter Button */}
         <div className="lg:hidden mb-4">

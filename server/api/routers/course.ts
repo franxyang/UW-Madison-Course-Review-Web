@@ -469,4 +469,102 @@ export const courseRouter = router({
         TTL.DEPARTMENTS
       )
     }),
+
+  // Get departments grouped by school (for navigation)
+  getDepartmentsBySchool: publicProcedure.query(async ({ ctx }) => {
+    const schools = await ctx.prisma.school.findMany({
+      include: {
+        departments: {
+          select: {
+            id: true,
+            code: true,
+            name: true,
+            _count: { select: { courses: true } }
+          },
+          orderBy: { code: 'asc' }
+        },
+        _count: { select: { courses: true } }
+      },
+      orderBy: { name: 'asc' }
+    })
+    return schools
+  }),
+
+  // Get department stats
+  getDepartmentStats: publicProcedure
+    .input(z.object({ departmentCode: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const dept = await ctx.prisma.department.findUnique({
+        where: { code: input.departmentCode },
+        include: {
+          courses: {
+            include: {
+              course: {
+                select: {
+                  id: true,
+                  code: true,
+                  name: true,
+                  avgGPA: true,
+                  credits: true,
+                  level: true,
+                  _count: { select: { reviews: true } }
+                }
+              }
+            }
+          },
+          school: { select: { name: true } }
+        }
+      })
+      
+      if (!dept) return null
+      
+      const courses = dept.courses.map(c => c.course)
+      const validGPAs = courses.filter(c => c.avgGPA && c.avgGPA > 0).map(c => c.avgGPA!)
+      const avgGPA = validGPAs.length > 0 
+        ? validGPAs.reduce((a, b) => a + b, 0) / validGPAs.length 
+        : null
+      const totalReviews = courses.reduce((sum, c) => sum + c._count.reviews, 0)
+      
+      return {
+        code: dept.code,
+        name: dept.name,
+        schoolName: dept.school.name,
+        courseCount: courses.length,
+        avgGPA,
+        totalReviews,
+        courses: courses.sort((a, b) => a.code.localeCompare(b.code)),
+        topCourses: [...courses].sort((a, b) => b._count.reviews - a._count.reviews).slice(0, 5)
+      }
+    }),
+
+  // Get featured courses for homepage/initial view
+  getFeatured: publicProcedure.query(async ({ ctx }) => {
+    const [mostReviewed, recentReviews] = await Promise.all([
+      ctx.prisma.course.findMany({
+        where: { reviews: { some: {} } },
+        select: {
+          id: true,
+          code: true,
+          name: true,
+          avgGPA: true,
+          credits: true,
+          _count: { select: { reviews: true } }
+        },
+        orderBy: { reviews: { _count: 'desc' } },
+        take: 8
+      }),
+      ctx.prisma.review.findMany({
+        select: {
+          id: true,
+          title: true,
+          contentRating: true,
+          createdAt: true,
+          course: { select: { id: true, code: true, name: true } }
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 6
+      })
+    ])
+    return { mostReviewed, recentReviews }
+  }),
 })

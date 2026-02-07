@@ -6,20 +6,22 @@ interface LogoProps {
 }
 
 /**
- * MadSpace dual-color text logo.
- * "Mad" in UW crimson red, "Space" in dark slate.
+ * MadSpace logo: #MadSpace.|
+ * # in red, Mad in dark, Space in gray, . small, | orange-red cursor
  */
 export const Logo: React.FC<LogoProps> = ({ className = '', size = 32 }) => {
-  // Scale font size relative to the size prop (32 → ~1.25rem)
   const fontSize = size * 0.625
   
   return (
     <span
-      className={`inline-flex items-center font-extrabold tracking-tight select-none ${className}`}
+      className={`inline-flex items-baseline font-extrabold tracking-tight select-none ${className}`}
       style={{ fontSize: `${fontSize}px`, lineHeight: 1 }}
     >
-      <span className="text-wf-crimson">Mad</span>
-      <span className="text-text-primary">Space</span>
+      <span className="text-wf-crimson">#</span>
+      <span className="text-text-primary">Mad</span>
+      <span className="text-text-tertiary">Space</span>
+      <span className="text-text-tertiary text-[0.6em]">.</span>
+      <span className="text-orange-500 font-light">|</span>
     </span>
   )
 }

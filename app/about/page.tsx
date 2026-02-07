@@ -2,7 +2,7 @@
 
 import { Header } from '@/components/Header'
 import { Logo } from '@/components/Logo'
-import { BookOpen, Users, Shield, Heart, Code2, AlertTriangle } from 'lucide-react'
+import { BookOpen, Users, Shield, Heart, Code2, AlertTriangle, Github } from 'lucide-react'
 
 export default function AboutPage() {
   return (
@@ -118,16 +118,37 @@ export default function AboutPage() {
           </ul>
         </section>
 
-        {/* Tech Stack */}
-        <section className="bg-surface-primary rounded-xl p-6 border border-surface-tertiary mb-10">
-          <div className="flex items-center gap-4">
-            <Code2 size={32} className="text-text-secondary flex-shrink-0" />
-            <div>
-              <h3 className="font-semibold text-text-primary">Built with Modern Technologies</h3>
-              <p className="text-text-secondary text-sm mt-1">
-                Next.js, TypeScript, Tailwind CSS, PostgreSQL, Prisma, and tRPC — 
-                designed for performance, accessibility, and a great developer experience.
-              </p>
+        {/* Tech Stack & Open Source */}
+        <section className="space-y-4 mb-10">
+          <div className="bg-surface-primary rounded-xl p-6 border border-surface-tertiary">
+            <div className="flex items-center gap-4">
+              <Code2 size={32} className="text-text-secondary flex-shrink-0" />
+              <div>
+                <h3 className="font-semibold text-text-primary">Built with Modern Technologies</h3>
+                <p className="text-text-secondary text-sm mt-1">
+                  Next.js, TypeScript, Tailwind CSS, PostgreSQL, Prisma, and tRPC — 
+                  designed for performance, accessibility, and a great developer experience.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-surface-primary rounded-xl p-6 border border-surface-tertiary">
+            <div className="flex items-center gap-4">
+              <Github size={32} className="text-text-secondary flex-shrink-0" />
+              <div>
+                <h3 className="font-semibold text-text-primary">Open Source</h3>
+                <p className="text-text-secondary text-sm mt-1">
+                  MadSpace is open source. Contributions, feedback, and bug reports are welcome.{' '}
+                  <a 
+                    href="https://github.com/franxyang/UW-Madison-Course-Review-Web" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-wf-crimson hover:underline"
+                  >
+                    View on GitHub →
+                  </a>
+                </p>
+              </div>
             </div>
           </div>
         </section>

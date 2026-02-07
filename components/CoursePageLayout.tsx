@@ -187,6 +187,15 @@ function LeftSidebar({
   // Get official department code for display
   const officialDeptCode = getOfficialDeptPrefix(course.code)
   
+  // Filter related courses by search query
+  const filteredRelatedCourses = relatedCourses.filter(c => {
+    if (!searchQuery.trim()) return true
+    const query = searchQuery.toLowerCase()
+    const code = toOfficialCode(c.code).toLowerCase()
+    const name = c.name.toLowerCase()
+    return code.includes(query) || name.includes(query)
+  })
+  
   return (
     <aside className="w-[320px] flex-shrink-0 space-y-5">
       {/* Search */}
@@ -257,14 +266,19 @@ function LeftSidebar({
         </div>
       )}
 
-      {/* Same Department - Two Column Grid */}
+      {/* Same Level Courses - Two Column Grid */}
       {relatedCourses.length > 0 && (
         <div>
           <h3 className="flex items-center gap-1.5 text-xs font-semibold text-text-tertiary uppercase tracking-wider mb-2">
-            <span>📚</span> {officialDeptCode}
+            <span>📚</span> {officialDeptCode} (Same Level)
           </h3>
-          <div className="grid grid-cols-2 gap-1.5">
-            {relatedCourses.map(c => {
+          {filteredRelatedCourses.length === 0 ? (
+            <div className="text-xs text-text-tertiary text-center py-4">
+              No courses match "{searchQuery}"
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-1.5">
+              {filteredRelatedCourses.map(c => {
               const isActive = c.id === course.id
               const officialCode = toOfficialCode(c.code)
               return (
@@ -293,7 +307,8 @@ function LeftSidebar({
                 </Link>
               )
             })}
-          </div>
+            </div>
+          )}
         </div>
       )}
     </aside>

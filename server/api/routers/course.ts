@@ -284,15 +284,15 @@ export const courseRouter = router({
         }))
       }
 
-      // Use prefix matching for partial queries (autocomplete)
+      // Use tolerant full-text query that won't throw on multi-word input
       const results = await ctx.prisma.$queryRaw<any[]>`
         SELECT 
           c."id", c."code", c."name", c."credits", c."level",
           s."name" as "school_name",
-          ts_rank(c."searchVector", to_tsquery('english', ${searchTerm + ':*'})) AS rank
+          ts_rank(c."searchVector", plainto_tsquery('english', ${searchTerm})) AS rank
         FROM "Course" c
         JOIN "School" s ON c."schoolId" = s."id"
-        WHERE c."searchVector" @@ to_tsquery('english', ${searchTerm + ':*'})
+        WHERE c."searchVector" @@ plainto_tsquery('english', ${searchTerm})
            OR c."code" ILIKE ${`%${rawTerm}%`}
         ORDER BY 
           CASE WHEN c."code" ILIKE ${`${rawTerm}%`} THEN 0 ELSE 1 END,
@@ -431,6 +431,8 @@ export const courseRouter = router({
         ])
       )
 
+      const currentUserId = ctx.session?.user?.id ?? null
+
       // P0 Security Fix: Server-side review filtering based on access level
       // Only return full review data if user has access, otherwise return limited preview
       const sanitizedReviews = sortedReviews.map((review, index) => {
@@ -459,6 +461,10 @@ export const courseRouter = router({
           // Don't include: userId, user
         })) || []
 
+        const currentUserVoted = currentUserId
+          ? (review.votes?.some(vote => vote.userId === currentUserId) ?? false)
+          : false
+
         // If user has full access OR this is the first (preview) review, return full content
         if (hasFullAccess || index === 0) {
           return {
@@ -466,6 +472,7 @@ export const courseRouter = router({
             author: safeAuthor,
             comments: safeComments,
             votes: safeVotes,
+            currentUserVoted,
             authorLevel: authorLevelMap.get(review.authorId) || computeContributorLevel(0, 0),
           }
         }
@@ -498,6 +505,7 @@ export const courseRouter = router({
           author: safeAuthor,
           comments: [], // Hide comments for non-contributors
           votes: safeVotes,
+          currentUserVoted,
           authorLevel: authorLevelMap.get(review.authorId) || computeContributorLevel(0, 0),
           _redacted: true, // Flag for frontend
         }

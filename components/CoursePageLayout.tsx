@@ -891,7 +891,7 @@ export function CoursePageLayout({
                             </span>
                             <ReviewActions
                               reviewId={review.id}
-                              isOwner={session?.user?.email === review.author?.email}
+                              isOwner={session?.user?.id === review.authorId}
                             />
                           </div>
                         </div>
@@ -955,17 +955,13 @@ export function CoursePageLayout({
                           <VoteButton
                             reviewId={review.id}
                             initialVoteCount={review.votes?.length || 0}
-                            initialIsVoted={
-                              session?.user?.email
-                                ? review.votes?.some((vote: any) => vote.user?.email === session?.user?.email) || false
-                                : false
-                            }
-                            userEmail={session?.user?.email || undefined}
+                            initialIsVoted={review.currentUserVoted || false}
+                            userId={session?.user?.id || undefined}
                           />
                           {session?.user && (
                             <ReportButton
                               reviewId={review.id}
-                              isOwner={session?.user?.email === review.author?.email}
+                              isOwner={session?.user?.id === review.authorId}
                             />
                           )}
                         </div>
@@ -974,7 +970,7 @@ export function CoursePageLayout({
                         <CommentSection
                           reviewId={review.id}
                           comments={review.comments}
-                          userEmail={session?.user?.email}
+                          userId={session?.user?.id}
                         />
                       </div>
                     )

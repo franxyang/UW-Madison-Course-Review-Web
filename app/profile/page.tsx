@@ -184,7 +184,7 @@ export default async function ProfilePage() {
 
         <div className="grid lg:grid-cols-3 gap-6">
           {/* My Reviews */}
-          <div className="lg:col-span-2">
+          <div id="reviews" className="lg:col-span-2 scroll-mt-24">
             <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
               <h2 className="text-xl font-bold text-slate-900 mb-4">My Reviews ({totalReviews})</h2>
               {user.reviews.length > 0 ? (
@@ -284,7 +284,7 @@ export default async function ProfilePage() {
             </div>
 
             {/* Saved Courses */}
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+            <div id="saved" className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 scroll-mt-24">
               <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
                 <BookOpen size={18} />
                 Saved Courses ({user.savedCourses.length})

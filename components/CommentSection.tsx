@@ -12,17 +12,17 @@ interface Comment {
   author: {
     id: string
     name: string | null
-    email: string
+    image?: string | null
   }
 }
 
 interface CommentSectionProps {
   reviewId: string
   comments: Comment[]
-  userEmail?: string | null
+  userId?: string | null
 }
 
-export function CommentSection({ reviewId, comments, userEmail }: CommentSectionProps) {
+export function CommentSection({ reviewId, comments, userId }: CommentSectionProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [commentText, setCommentText] = useState('')
 
@@ -58,7 +58,7 @@ export function CommentSection({ reviewId, comments, userEmail }: CommentSection
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!userEmail) {
+    if (!userId) {
       toast.error('Please sign in to comment')
       return
     }
@@ -101,7 +101,7 @@ export function CommentSection({ reviewId, comments, userEmail }: CommentSection
       {isExpanded && (
         <div className="mt-4 space-y-4">
           {/* Comment Form */}
-          {userEmail && (
+          {userId && (
             <form onSubmit={handleSubmit} className="flex gap-2">
               <input
                 type="text"
@@ -123,7 +123,7 @@ export function CommentSection({ reviewId, comments, userEmail }: CommentSection
             </form>
           )}
 
-          {!userEmail && (
+          {!userId && (
             <div className="text-sm text-slate-600 bg-slate-50 border border-slate-200 rounded-lg p-3">
               Please sign in to comment
             </div>
@@ -141,7 +141,7 @@ export function CommentSection({ reviewId, comments, userEmail }: CommentSection
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-sm font-medium text-slate-900">
-                          {comment.author.name || comment.author.email.split('@')[0]}
+                          {comment.author.name || 'Anonymous'}
                         </span>
                         <span className="text-xs text-slate-500">
                           {new Date(comment.createdAt).toLocaleDateString()}
@@ -151,7 +151,7 @@ export function CommentSection({ reviewId, comments, userEmail }: CommentSection
                     </div>
 
                     {/* Delete Button (only for own comments) */}
-                    {userEmail === comment.author.email && (
+                    {userId === comment.author.id && (
                       <button
                         onClick={() => handleDelete(comment.id)}
                         disabled={isPending}

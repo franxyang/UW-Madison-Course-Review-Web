@@ -9,14 +9,14 @@ interface VoteButtonProps {
   reviewId: string
   initialVoteCount: number
   initialIsVoted: boolean
-  userEmail?: string | null
+  userId?: string | null
 }
 
 export function VoteButton({ 
   reviewId, 
   initialVoteCount, 
   initialIsVoted,
-  userEmail 
+  userId 
 }: VoteButtonProps) {
   const [isVoted, setIsVoted] = useState(initialIsVoted)
   const [voteCount, setVoteCount] = useState(initialVoteCount)
@@ -49,7 +49,7 @@ export function VoteButton({
   })
 
   const handleVote = async () => {
-    if (!userEmail) {
+    if (!userId) {
       toast.error('Please sign in to vote', {
         description: 'You need to be signed in to upvote reviews.'
       })

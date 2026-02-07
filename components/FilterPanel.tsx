@@ -33,10 +33,10 @@ function FilterSection({
   const [isOpen, setIsOpen] = useState(defaultOpen)
   
   return (
-    <div className="border-b border-slate-200 pb-4">
+    <div className="border-b border-surface-tertiary pb-4">
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center justify-between w-full py-2 text-sm font-semibold text-slate-900 hover:text-uw-red transition-colors"
+        className="flex items-center justify-between w-full py-2 text-sm font-semibold text-text-primary hover:text-wf-crimson transition-colors"
       >
         {title}
         {isOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
@@ -77,9 +77,9 @@ export function FilterPanel({ filters, onFilterChange }: FilterPanelProps) {
   }
 
   const LEVELS = [
-    { value: 'Elementary', label: 'Elementary (100-200)', color: 'bg-green-100 text-green-700' },
-    { value: 'Intermediate', label: 'Intermediate (300-400)', color: 'bg-blue-100 text-blue-700' },
-    { value: 'Advanced', label: 'Advanced (500+)', color: 'bg-purple-100 text-purple-700' },
+    { value: 'Elementary', label: 'Elementary (100-200)', color: 'grade-badge-A' },
+    { value: 'Intermediate', label: 'Intermediate (300-400)', color: 'grade-badge-B' },
+    { value: 'Advanced', label: 'Advanced (500+)', color: 'grade-badge-C' },
   ]
 
   const filteredDepts = departments?.filter(d => 
@@ -92,14 +92,14 @@ export function FilterPanel({ filters, onFilterChange }: FilterPanelProps) {
   const displayedDepts = showAllDepts ? filteredDepts : filteredDepts.slice(0, 10)
 
   return (
-    <div className="bg-white rounded-lg border border-slate-200 p-4 sticky top-24">
+    <div className="bg-surface-primary rounded-lg border border-surface-tertiary p-4 sticky top-24">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <SlidersHorizontal size={18} className="text-slate-700" />
-          <h3 className="font-semibold text-slate-900">Filters</h3>
+          <SlidersHorizontal size={18} className="text-text-secondary" />
+          <h3 className="font-semibold text-text-primary">Filters</h3>
           {activeFilterCount > 0 && (
-            <span className="px-2 py-0.5 text-xs font-medium bg-uw-red text-white rounded-full">
+            <span className="px-2 py-0.5 text-xs font-medium bg-wf-crimson text-white rounded-full">
               {activeFilterCount}
             </span>
           )}
@@ -107,7 +107,7 @@ export function FilterPanel({ filters, onFilterChange }: FilterPanelProps) {
         {activeFilterCount > 0 && (
           <button
             onClick={clearAll}
-            className="text-xs text-slate-500 hover:text-uw-red transition-colors"
+            className="text-xs text-text-tertiary hover:text-wf-crimson transition-colors"
           >
             Clear all
           </button>
@@ -119,14 +119,14 @@ export function FilterPanel({ filters, onFilterChange }: FilterPanelProps) {
         <FilterSection title="🏫 School" defaultOpen>
           <div className="space-y-1 max-h-48 overflow-y-auto">
             {displayedSchools?.map(school => (
-              <label key={school.id} className="flex items-center gap-2 px-1 py-1 rounded hover:bg-slate-50 cursor-pointer">
+              <label key={school.id} className="flex items-center gap-2 px-1 py-1 rounded hover:bg-hover-bg cursor-pointer transition-colors">
                 <input
                   type="checkbox"
                   checked={filters.schools?.includes(school.id) || false}
                   onChange={() => toggleArrayFilter('schools', school.id)}
-                  className="rounded border-slate-300 text-uw-red focus:ring-uw-red"
+                  className="rounded border-surface-tertiary text-wf-crimson focus:ring-focus-ring"
                 />
-                <span className="text-sm text-slate-700 truncate">
+                <span className="text-sm text-text-secondary truncate">
                   {school.name.replace(', College of', '').replace(', School of', '').replace(', Wisconsin School of', '')}
                 </span>
               </label>
@@ -135,7 +135,7 @@ export function FilterPanel({ filters, onFilterChange }: FilterPanelProps) {
           {schools && schools.length > 8 && (
             <button
               onClick={() => setShowAllSchools(!showAllSchools)}
-              className="text-xs text-uw-red hover:text-uw-dark mt-1"
+              className="text-xs text-wf-crimson hover:text-wf-crimson-dark mt-1 transition-colors"
             >
               {showAllSchools ? 'Show less' : `Show all ${schools.length}`}
             </button>
@@ -149,25 +149,25 @@ export function FilterPanel({ filters, onFilterChange }: FilterPanelProps) {
             value={deptSearch}
             onChange={(e) => setDeptSearch(e.target.value)}
             placeholder="Search departments..."
-            className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded mb-2 focus:outline-none focus:ring-1 focus:ring-uw-red/30"
+            className="w-full px-2 py-1.5 text-sm border border-surface-tertiary rounded mb-2 focus:outline-none focus:ring-1 focus:ring-focus-ring focus:border-wf-crimson transition-colors"
           />
           <div className="space-y-1 max-h-48 overflow-y-auto">
             {displayedDepts.map(dept => (
-              <label key={dept.id} className="flex items-center gap-2 px-1 py-1 rounded hover:bg-slate-50 cursor-pointer">
+              <label key={dept.id} className="flex items-center gap-2 px-1 py-1 rounded hover:bg-hover-bg cursor-pointer transition-colors">
                 <input
                   type="checkbox"
                   checked={filters.departments?.includes(dept.id) || false}
                   onChange={() => toggleArrayFilter('departments', dept.id)}
-                  className="rounded border-slate-300 text-uw-red focus:ring-uw-red"
+                  className="rounded border-surface-tertiary text-wf-crimson focus:ring-focus-ring"
                 />
-                <span className="text-sm text-slate-700">{dept.code}</span>
+                <span className="text-sm text-text-secondary">{dept.code}</span>
               </label>
             ))}
           </div>
           {filteredDepts.length > 10 && (
             <button
               onClick={() => setShowAllDepts(!showAllDepts)}
-              className="text-xs text-uw-red hover:text-uw-dark mt-1"
+              className="text-xs text-wf-crimson hover:text-wf-crimson-dark mt-1 transition-colors"
             >
               {showAllDepts ? 'Show less' : `Show all ${filteredDepts.length}`}
             </button>
@@ -178,12 +178,12 @@ export function FilterPanel({ filters, onFilterChange }: FilterPanelProps) {
         <FilterSection title="📊 Course Level" defaultOpen>
           <div className="space-y-1">
             {LEVELS.map(level => (
-              <label key={level.value} className="flex items-center gap-2 px-1 py-1 rounded hover:bg-slate-50 cursor-pointer">
+              <label key={level.value} className="flex items-center gap-2 px-1 py-1 rounded hover:bg-hover-bg cursor-pointer transition-colors">
                 <input
                   type="checkbox"
                   checked={filters.levels?.includes(level.value) || false}
                   onChange={() => toggleArrayFilter('levels', level.value)}
-                  className="rounded border-slate-300 text-uw-red focus:ring-uw-red"
+                  className="rounded border-surface-tertiary text-wf-crimson focus:ring-focus-ring"
                 />
                 <span className={`text-xs px-2 py-0.5 rounded-full ${level.color}`}>
                   {level.label}
@@ -202,21 +202,21 @@ export function FilterPanel({ filters, onFilterChange }: FilterPanelProps) {
                 ...filters, 
                 minCredits: e.target.value ? parseInt(e.target.value) : undefined 
               })}
-              className="flex-1 px-2 py-1.5 text-sm border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-uw-red/30"
+              className="flex-1 px-2 py-1.5 text-sm border border-surface-tertiary rounded focus:outline-none focus:ring-1 focus:ring-focus-ring focus:border-wf-crimson"
             >
               <option value="">Min</option>
               {[1, 2, 3, 4, 5, 6].map(n => (
                 <option key={n} value={n}>{n}</option>
               ))}
             </select>
-            <span className="text-slate-400">–</span>
+            <span className="text-text-tertiary">–</span>
             <select
               value={filters.maxCredits ?? ''}
               onChange={(e) => onFilterChange({ 
                 ...filters, 
                 maxCredits: e.target.value ? parseInt(e.target.value) : undefined 
               })}
-              className="flex-1 px-2 py-1.5 text-sm border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-uw-red/30"
+              className="flex-1 px-2 py-1.5 text-sm border border-surface-tertiary rounded focus:outline-none focus:ring-1 focus:ring-focus-ring focus:border-wf-crimson"
             >
               <option value="">Max</option>
               {[1, 2, 3, 4, 5, 6].map(n => (
@@ -235,21 +235,21 @@ export function FilterPanel({ filters, onFilterChange }: FilterPanelProps) {
                 ...filters, 
                 minGPA: e.target.value ? parseFloat(e.target.value) : undefined 
               })}
-              className="flex-1 px-2 py-1.5 text-sm border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-uw-red/30"
+              className="flex-1 px-2 py-1.5 text-sm border border-surface-tertiary rounded focus:outline-none focus:ring-1 focus:ring-focus-ring focus:border-wf-crimson"
             >
               <option value="">Min</option>
               {[1.0, 1.5, 2.0, 2.5, 3.0, 3.2, 3.5, 3.7].map(n => (
                 <option key={n} value={n}>{n.toFixed(1)}</option>
               ))}
             </select>
-            <span className="text-slate-400">–</span>
+            <span className="text-text-tertiary">–</span>
             <select
               value={filters.maxGPA ?? ''}
               onChange={(e) => onFilterChange({ 
                 ...filters, 
                 maxGPA: e.target.value ? parseFloat(e.target.value) : undefined 
               })}
-              className="flex-1 px-2 py-1.5 text-sm border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-uw-red/30"
+              className="flex-1 px-2 py-1.5 text-sm border border-surface-tertiary rounded focus:outline-none focus:ring-1 focus:ring-focus-ring focus:border-wf-crimson"
             >
               <option value="">Max</option>
               {[2.0, 2.5, 3.0, 3.2, 3.5, 3.7, 3.9, 4.0].map(n => (
@@ -269,7 +269,7 @@ export function FilterPanel({ filters, onFilterChange }: FilterPanelProps) {
               instructorName: e.target.value || undefined,
             })}
             placeholder="Search by instructor name..."
-            className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-uw-red/30"
+            className="w-full px-2 py-1.5 text-sm border border-surface-tertiary rounded focus:outline-none focus:ring-1 focus:ring-focus-ring focus:border-wf-crimson"
           />
         </FilterSection>
 
@@ -278,7 +278,7 @@ export function FilterPanel({ filters, onFilterChange }: FilterPanelProps) {
           <select
             value={filters.sortBy || 'code'}
             onChange={(e) => onFilterChange({ ...filters, sortBy: e.target.value })}
-            className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-uw-red/30"
+            className="w-full px-2 py-1.5 text-sm border border-surface-tertiary rounded focus:outline-none focus:ring-1 focus:ring-focus-ring focus:border-wf-crimson"
           >
             <option value="code">Course Code (A-Z)</option>
             <option value="relevance">Relevance</option>
@@ -290,14 +290,14 @@ export function FilterPanel({ filters, onFilterChange }: FilterPanelProps) {
 
       {/* Active Filters Summary */}
       {activeFilterCount > 0 && (
-        <div className="mt-4 pt-4 border-t border-slate-200">
+        <div className="mt-4 pt-4 border-t border-surface-tertiary">
           <div className="flex flex-wrap gap-1.5">
             {filters.schools?.map(id => {
               const school = schools?.find(s => s.id === id)
               return school ? (
-                <span key={id} className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-slate-100 text-slate-700 rounded-full">
+                <span key={id} className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-surface-secondary text-text-secondary rounded-full border border-surface-tertiary">
                   {school.name.split(',')[0]}
-                  <button onClick={() => toggleArrayFilter('schools', id)}>
+                  <button onClick={() => toggleArrayFilter('schools', id)} className="hover:text-wf-crimson transition-colors">
                     <X size={12} />
                   </button>
                 </span>
@@ -306,34 +306,34 @@ export function FilterPanel({ filters, onFilterChange }: FilterPanelProps) {
             {filters.departments?.map(id => {
               const dept = departments?.find(d => d.id === id)
               return dept ? (
-                <span key={id} className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-slate-100 text-slate-700 rounded-full">
+                <span key={id} className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-surface-secondary text-text-secondary rounded-full border border-surface-tertiary">
                   {dept.code}
-                  <button onClick={() => toggleArrayFilter('departments', id)}>
+                  <button onClick={() => toggleArrayFilter('departments', id)} className="hover:text-wf-crimson transition-colors">
                     <X size={12} />
                   </button>
                 </span>
               ) : null
             })}
             {filters.levels?.map(level => (
-              <span key={level} className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-slate-100 text-slate-700 rounded-full">
+              <span key={level} className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-surface-secondary text-text-secondary rounded-full border border-surface-tertiary">
                 {level}
-                <button onClick={() => toggleArrayFilter('levels', level)}>
+                <button onClick={() => toggleArrayFilter('levels', level)} className="hover:text-wf-crimson transition-colors">
                   <X size={12} />
                 </button>
               </span>
             ))}
             {(filters.minGPA !== undefined || filters.maxGPA !== undefined) && (
-              <span className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-slate-100 text-slate-700 rounded-full">
+              <span className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-surface-secondary text-text-secondary rounded-full border border-surface-tertiary">
                 GPA: {filters.minGPA?.toFixed(1) ?? '0'} – {filters.maxGPA?.toFixed(1) ?? '4.0'}
-                <button onClick={() => onFilterChange({ ...filters, minGPA: undefined, maxGPA: undefined })}>
+                <button onClick={() => onFilterChange({ ...filters, minGPA: undefined, maxGPA: undefined })} className="hover:text-wf-crimson transition-colors">
                   <X size={12} />
                 </button>
               </span>
             )}
             {filters.instructorName && (
-              <span className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-slate-100 text-slate-700 rounded-full">
+              <span className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-surface-secondary text-text-secondary rounded-full border border-surface-tertiary">
                 👨‍🏫 {filters.instructorName}
-                <button onClick={() => onFilterChange({ ...filters, instructorName: undefined })}>
+                <button onClick={() => onFilterChange({ ...filters, instructorName: undefined })} className="hover:text-wf-crimson transition-colors">
                   <X size={12} />
                 </button>
               </span>

@@ -22,7 +22,8 @@ WiscFlow helps UW-Madison students share honest course experiences and make info
 - ⭐ **Multi-dimensional Reviews** — Rate courses on content, teaching, grading, and workload
 - 📊 **Grade Distributions** — Historical GPA data from MadGrades with per-instructor filtering
 - 👨‍🏫 **Instructor Profiles** — Teaching portfolio with radar charts, timelines, and aggregated ratings
-- 🏆 **Contributor System** — 6-tier progression (Reader → Legend) with XP and badges
+- 🏆 **Contributor System** — 6-tier progression (🐾→🐣→🐥→🦡→👑→🏆) with XP and quality-weighted leveling
+- 🔒 **Privacy-first Nicknames** — Real names hidden; all public interactions use user-chosen nicknames
 - 💬 **Community** — Upvote helpful reviews and discuss in comment threads
 - 🔗 **Cross-listed Courses** — 1,368 cross-listed course groups properly linked across departments
 - 🌙 **Dark Mode** — System-aware theme switching
@@ -36,7 +37,7 @@ WiscFlow helps UW-Madison students share honest course experiences and make info
 |-------|-----------|
 | **Framework** | Next.js 15, React, TypeScript |
 | **Styling** | Tailwind CSS, Lucide Icons |
-| **API** | tRPC (end-to-end type safety) |
+| **API** | tRPC v11 (end-to-end type safety) |
 | **Database** | PostgreSQL (Neon Serverless) + Prisma ORM |
 | **Search** | PostgreSQL tsvector + GIN index |
 | **Caching** | Upstash Redis (graceful degradation) |
@@ -103,7 +104,7 @@ wiscflow/
 │   ├── profile/              # User profile
 │   └── api/                  # tRPC + NextAuth routes
 ├── server/api/               # tRPC routers
-│   └── routers/              # course, review, comment
+│   └── routers/              # course, review, comment, instructor, user
 ├── components/               # React components
 │   ├── FilterPanel.tsx       # Left sidebar filters
 │   ├── ReviewForm.tsx        # Multi-dimensional review form
@@ -143,21 +144,25 @@ PostgreSQL migration, tRPC integration, full-text search, Redis caching, departm
 ### ✅ Phase 2 — Core Features (Complete)
 Advanced search, instructor pages, user dashboard, review management (edit/delete/report), user incentive system (contributor levels + XP), mobile responsiveness.
 
-### 🔄 Phase 3 — UX & Visualization (85% Complete)
+### 🔄 Phase 3 — UX & Visualization (95% Complete)
 - ✅ Color system overhaul (UW crimson + soft gradients)
 - ✅ Course detail page 3-column layout + Term/Instructor filters
 - ✅ Instructor Teaching Portfolio (radar chart + timeline)
 - ✅ Dark mode support
-- ✅ Real-time search preview
+- ✅ Real-time search preview (global, with live dropdown)
 - ✅ Homepage redesign with stats + mini calendar
 - ✅ ReviewForm UX with gradient background
-- 🔨 Component unification, performance optimization
+- ✅ Component unification (FilterPanel, UserMenu, CommentSection, ReviewCard)
+- ✅ Nickname system (privacy-first, first-login prompt, editable)
+- ✅ Contributor level redesign (🐾→🐣→🐥→🦡→👑→🏆, quality-weighted)
+- ✅ Security audit fixes (P0/P1/P2)
+- 🔨 Performance optimization, mobile audit
 
-### 📅 Phase 4 — Advanced Features (Planned)
+### 🔐 Phase 4 — Admin Portal (Planned)
+Content moderation, user management, reporting queue, system dashboard. **Required before launch.**
+
+### 🚀 Phase 5 — Advanced Features (Planned)
 AI review summaries, course recommendations, community features, notification system.
-
-### 🔐 Phase 5 — Admin (Planned)
-Moderation tools, data management, analytics dashboard.
 
 **Documentation:**
 - [PROGRESS.md](PROGRESS.md) — Current status & statistics

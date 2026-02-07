@@ -85,11 +85,11 @@ export function CommentSection({ reviewId, comments, userId }: CommentSectionPro
   const isPending = createCommentMutation.isPending || deleteCommentMutation.isPending
 
   return (
-    <div className="mt-4 pt-4 border-t border-slate-100">
+    <div className="mt-4 pt-4 border-t border-surface-tertiary">
       {/* Header */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="flex items-center gap-2 text-sm font-medium text-slate-700 hover:text-slate-900 transition-colors"
+        className="flex items-center gap-2 text-sm font-medium text-text-secondary hover:text-text-primary transition-colors"
       >
         <MessageSquare size={16} />
         <span>
@@ -110,12 +110,12 @@ export function CommentSection({ reviewId, comments, userId }: CommentSectionPro
                 placeholder="Add a comment..."
                 disabled={isPending}
                 maxLength={500}
-                className="flex-1 px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-uw-red/20 focus:border-uw-red disabled:opacity-50"
+                className="flex-1 px-3 py-2 text-sm border border-surface-tertiary rounded-lg focus:outline-none focus:ring-2 focus:ring-focus-ring focus:border-wf-crimson disabled:opacity-50"
               />
               <button
                 type="submit"
                 disabled={isPending || !commentText.trim()}
-                className="px-4 py-2 bg-uw-red text-white rounded-lg hover:bg-uw-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="btn-primary px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 <Send size={16} />
                 <span className="hidden sm:inline">Post</span>
@@ -124,7 +124,7 @@ export function CommentSection({ reviewId, comments, userId }: CommentSectionPro
           )}
 
           {!userId && (
-            <div className="text-sm text-slate-600 bg-slate-50 border border-slate-200 rounded-lg p-3">
+            <div className="text-sm text-text-secondary bg-surface-secondary border border-slate-200 rounded-lg p-3">
               Please sign in to comment
             </div>
           )}
@@ -135,19 +135,19 @@ export function CommentSection({ reviewId, comments, userId }: CommentSectionPro
               {comments.map((comment) => (
                 <div
                   key={comment.id}
-                  className="p-3 bg-slate-50 rounded-lg border border-slate-100"
+                  className="p-3 bg-surface-secondary rounded-lg border border-surface-tertiary"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="text-sm font-medium text-slate-900">
+                        <span className="text-sm font-medium text-text-primary">
                           {comment.author.name || 'Anonymous'}
                         </span>
-                        <span className="text-xs text-slate-500">
+                        <span className="text-xs text-text-tertiary">
                           {new Date(comment.createdAt).toLocaleDateString()}
                         </span>
                       </div>
-                      <p className="text-sm text-slate-700">{comment.text}</p>
+                      <p className="text-sm text-text-secondary">{comment.text}</p>
                     </div>
 
                     {/* Delete Button (only for own comments) */}
@@ -166,7 +166,7 @@ export function CommentSection({ reviewId, comments, userId }: CommentSectionPro
               ))}
             </div>
           ) : (
-            <p className="text-sm text-slate-500 text-center py-4">
+            <p className="text-sm text-text-tertiary text-center py-4">
               No comments yet. Be the first to comment!
             </p>
           )}

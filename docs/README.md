@@ -1,8 +1,8 @@
-# WiscFlow Documentation
+# MadSpace Documentation
 
 **Last Updated**: 2026-02-03
 
-This folder contains all design, planning, and migration documentation for the WiscFlow project.
+This folder contains all design, planning, and migration documentation for the MadSpace project.
 
 ---
 
@@ -102,7 +102,7 @@ DATABASE_URL="postgresql://user:password@hostname/database"
 ## 📋 Recommended GitHub Documentation Structure
 
 ```
-wiscflow/
+madspace/
 ├── README.md                    # Project introduction
 ├── docs/
 │   ├── README.md               # This file
@@ -200,7 +200,7 @@ git push
 ### 1. Use Relative Paths
 ```markdown
 # ❌ Don't use absolute paths
-/Users/yifanyang/Desktop/wiscflow/...
+/Users/yifanyang/Desktop/madspace/...
 
 # ✅ Use relative paths
 ../scripts/seedCourses.ts
@@ -209,7 +209,7 @@ git push
 ### 2. Remove Local Information
 ```markdown
 # ❌ Don't include local directories
-Working directory: /Users/yifanyang/Desktop/wiscflow
+Working directory: /Users/yifanyang/Desktop/madspace
 
 # ✅ Use generic paths
 Working directory: <project-root>

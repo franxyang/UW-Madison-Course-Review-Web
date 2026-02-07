@@ -70,7 +70,6 @@ export default async function ProfilePage() {
         <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <Logo size={32} />
-            <span className="font-bold text-xl text-slate-900">WiscFlow</span>
           </Link>
           <nav className="flex items-center gap-4">
             <Link href="/courses" className="text-slate-600 hover:text-slate-900">Courses</Link>

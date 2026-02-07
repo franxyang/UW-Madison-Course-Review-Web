@@ -1,6 +1,6 @@
 # Design Contract - UW-Madison Course Review
 
-> 本文档定义了 WiscFlow 项目的技术架构、组件规范和设计约束。
+> 本文档定义了 MadSpace 项目的技术架构、组件规范和设计约束。
 > 用于 AI 辅助 UI 重构时保持一致性。
 
 ---

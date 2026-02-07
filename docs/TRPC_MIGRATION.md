@@ -8,7 +8,7 @@
 
 ## 🎯 What Was Done
 
-Successfully migrated WiscFlow from Next.js Server Actions to **tRPC** for end-to-end type-safe API calls.
+Successfully migrated MadSpace from Next.js Server Actions to **tRPC** for end-to-end type-safe API calls.
 
 ---
 

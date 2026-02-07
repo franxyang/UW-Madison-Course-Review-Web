@@ -61,7 +61,7 @@ export const Dashboard: React.FC<{ onViewCourse: () => void }> = ({ onViewCourse
 
                 <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4 tracking-tight">
                     Plan your perfect semester with <span className="text-uw-red relative inline-block">
-                        WiscFlow
+                        MadSpace
                         <svg className="absolute w-full h-2 -bottom-1 left-0 text-red-200 -z-10" viewBox="0 0 100 10" preserveAspectRatio="none">
                             <path d="M0 5 Q 50 10 100 5" stroke="currentColor" strokeWidth="8" fill="none" />
                         </svg>

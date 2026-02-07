@@ -1,4 +1,4 @@
-# WiscFlow Testing Report
+# MadSpace Testing Report
 **Date**: 2026-02-04  
 **Tested By**: Automated Testing + Manual Verification  
 **Version**: Phase 2B Complete

@@ -1,4 +1,4 @@
-# 🔴 WiscFlow
+# 🔴 MadSpace
 
 **A modern course review platform built by and for UW-Madison students.**
 
@@ -11,9 +11,9 @@
 
 ---
 
-## What is WiscFlow?
+## What is MadSpace?
 
-WiscFlow helps UW-Madison students share honest course experiences and make informed enrollment decisions. Browse **10,000+ courses**, read student reviews with multi-dimensional ratings, and filter by school, department, level, or credits — all in one place.
+MadSpace helps UW-Madison students share honest course experiences and make informed enrollment decisions. Browse **10,000+ courses**, read student reviews with multi-dimensional ratings, and filter by school, department, level, or credits — all in one place.
 
 ### Key Features
 
@@ -59,7 +59,7 @@ WiscFlow helps UW-Madison students share honest course experiences and make info
 ```bash
 # Clone the repo
 git clone https://github.com/franxyang/UW-Madison-Course-Review-Web.git
-cd wiscflow
+cd madspace
 
 # Install dependencies
 npm install
@@ -97,7 +97,7 @@ Open [http://localhost:3000](http://localhost:3000).
 ## Project Structure
 
 ```
-wiscflow/
+madspace/
 ├── app/                      # Next.js App Router
 │   ├── courses/              # Course browse & detail pages
 │   ├── auth/                 # Sign in / Sign up

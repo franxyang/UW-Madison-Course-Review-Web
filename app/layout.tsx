@@ -4,7 +4,7 @@ import { Toaster } from '@/components/Toaster'
 import { Providers } from './providers'
 
 export const metadata: Metadata = {
-  title: 'WiscFlow - UW Madison Course Reviews',
+  title: 'MadSpace - UW Madison Course Reviews',
   description: 'Community-driven course reviews and academic planning for UW Madison students',
 }
 

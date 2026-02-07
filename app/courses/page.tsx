@@ -118,7 +118,6 @@ function CoursesPageContent() {
           <div className="flex items-center justify-between h-16">
             <Link href="/" className="flex items-center gap-2">
               <Logo size={32} />
-              <span className="text-xl font-bold text-text-primary">WiscFlow</span>
             </Link>
             <div className="flex items-center gap-6">
               <nav className="hidden lg:flex items-center gap-6">

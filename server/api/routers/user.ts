@@ -5,7 +5,7 @@ import { TRPCError } from '@trpc/server'
 
 // Nickname validation rules
 const NICKNAME_REGEX = /^[a-zA-Z0-9\u4e00-\u9fff_\-. ]+$/
-const RESERVED_NAMES = ['admin', 'moderator', 'wiscflow', 'anonymous', 'system', 'deleted']
+const RESERVED_NAMES = ['admin', 'moderator', 'madspace', 'anonymous', 'system', 'deleted']
 
 const nicknameSchema = z.string()
   .min(2, 'Nickname must be at least 2 characters')

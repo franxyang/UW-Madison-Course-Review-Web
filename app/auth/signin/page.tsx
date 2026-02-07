@@ -12,7 +12,7 @@ export default function SignInPage() {
           <div className="flex justify-center mb-4">
             <Logo size={48} />
           </div>
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Welcome to WiscFlow</h1>
+          <h1 className="text-3xl font-bold text-slate-900 mb-2">Welcome to MadSpace</h1>
           <p className="text-slate-600">Sign in with your @wisc.edu Google account</p>
         </div>
 
@@ -22,7 +22,7 @@ export default function SignInPage() {
           <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg flex gap-3">
             <AlertCircle className="text-blue-600 flex-shrink-0 mt-0.5" size={20} />
             <div className="text-sm text-blue-800">
-              <strong>UW Madison students only.</strong> You must use a @wisc.edu email address to access WiscFlow.
+              <strong>UW Madison students only.</strong> You must use a @wisc.edu email address to access MadSpace.
             </div>
           </div>
 
@@ -49,14 +49,14 @@ export default function SignInPage() {
 
           {/* Help Text */}
           <p className="mt-6 text-center text-sm text-slate-600">
-            New to WiscFlow? Just sign in with your UW Madison Google account to get started.
+            New to MadSpace? Just sign in with your UW Madison Google account to get started.
           </p>
         </div>
 
         {/* Footer */}
         <div className="mt-6 text-center text-xs text-slate-500">
           <p>
-            By continuing, you agree to WiscFlow's{' '}
+            By continuing, you agree to MadSpace's{' '}
             <Link href="/terms" className="underline hover:text-slate-700">
               Terms of Service
             </Link>{' '}

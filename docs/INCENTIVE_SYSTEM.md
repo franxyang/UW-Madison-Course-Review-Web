@@ -97,7 +97,7 @@ return {
 | 2 | **Active Reviewer** | 5 reviews | 🔵 |
 | 3 | **Trusted Reviewer** | 15 reviews + 10 upvotes received | 🟣 |
 | 4 | **Expert Reviewer** | 30 reviews + 50 upvotes received | 🟡 |
-| 5 | **WiscFlow Legend** | 50 reviews + 100 upvotes received | 🔴 |
+| 5 | **MadSpace Legend** | 50 reviews + 100 upvotes received | 🔴 |
 
 ### Perks by Level
 

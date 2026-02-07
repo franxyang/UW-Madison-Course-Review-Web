@@ -44,7 +44,6 @@ export function MobileNav({ user, currentPath }: MobileNavProps) {
             <div className="flex items-center justify-between p-4 border-b border-slate-200">
               <Link href="/" className="flex items-center gap-2" onClick={() => setIsOpen(false)}>
                 <Logo size={28} />
-                <span className="text-lg font-bold text-slate-900">WiscFlow</span>
               </Link>
               <button
                 onClick={() => setIsOpen(false)}

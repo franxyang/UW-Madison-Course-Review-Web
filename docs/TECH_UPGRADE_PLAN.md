@@ -1,4 +1,4 @@
-# WiscFlow 技术架构升级计划
+# MadSpace 技术架构升级计划
 
 **最后更新**: 2026-02-03
 
@@ -23,7 +23,7 @@
 ## 🏗️ 升级架构图
 
 ```
-wiscflow/
+madspace/
 ├── apps/
 │   ├── web/              # Next.js 主应用
 │   ├── admin/            # 管理后台 (未来)
@@ -58,7 +58,7 @@ npx create-turbo@latest --skip-install --skip-git
 ```bash
 # 创建 monorepo 结构
 mkdir -p apps packages
-mv wiscflow apps/web  # 移动现有项目到 apps/web
+mv madspace apps/web  # 移动现有项目到 apps/web
 
 # 创建共享包
 cd packages
@@ -94,7 +94,7 @@ mkdir ui api db auth config types
 **根目录 `package.json`**:
 ```json
 {
-  "name": "wiscflow",
+  "name": "madspace",
   "private": true,
   "workspaces": [
     "apps/*",
@@ -137,8 +137,8 @@ npm install -D @types/node typescript
 import { initTRPC, TRPCError } from '@trpc/server'
 import { type CreateNextContextOptions } from '@trpc/server/adapters/next'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@wiscflow/auth'
-import { prisma } from '@wiscflow/db'
+import { authOptions } from '@madspace/auth'
+import { prisma } from '@madspace/db'
 import superjson from 'superjson'
 
 export const createTRPCContext = async (opts: CreateNextContextOptions) => {
@@ -362,8 +362,8 @@ export type AppRouter = typeof appRouter
 ```typescript
 import { fetchRequestHandler } from '@trpc/server/adapters/fetch'
 import { type NextRequest } from 'next/server'
-import { appRouter } from '@wiscflow/api'
-import { createTRPCContext } from '@wiscflow/api/trpc'
+import { appRouter } from '@madspace/api'
+import { createTRPCContext } from '@madspace/api/trpc'
 
 const handler = (req: NextRequest) =>
   fetchRequestHandler({
@@ -379,7 +379,7 @@ export { handler as GET, handler as POST }
 **`apps/web/src/lib/trpc/client.ts`**:
 ```typescript
 import { createTRPCReact } from '@trpc/react-query'
-import type { AppRouter } from '@wiscflow/api'
+import type { AppRouter } from '@madspace/api'
 
 export const trpc = createTRPCReact<AppRouter>()
 ```
@@ -506,7 +506,7 @@ export { redis }
 #### 步骤 3.4: 实现缓存策略
 **`packages/api/src/utils/cache.ts`**:
 ```typescript
-import { redis } from '@wiscflow/db/redis'
+import { redis } from '@madspace/db/redis'
 
 export class CacheService {
   // 缓存课程列表 (5分钟)
@@ -746,7 +746,7 @@ export const courseRouter = router({
 #### 步骤 4.4: 性能对比测试
 ```typescript
 // 性能测试脚本
-import { prisma } from '@wiscflow/db'
+import { prisma } from '@madspace/db'
 
 async function testSearch() {
   const query = 'computer science'

@@ -22,7 +22,6 @@ export function Header({ currentPath = '' }: HeaderProps) {
         <div className="flex items-center justify-between h-16">
           <Link href="/" className="flex items-center gap-2">
             <Logo size={32} />
-            <span className="font-bold text-xl text-text-primary">WiscFlow</span>
           </Link>
           
           {/* Desktop Nav */}

@@ -27,7 +27,7 @@ export default function AboutPage() {
           <div className="flex justify-center mb-6">
             <Logo size={64} />
           </div>
-          <h1 className="text-4xl font-bold text-text-primary mb-4">About WiscFlow</h1>
+          <h1 className="text-4xl font-bold text-text-primary mb-4">About MadSpace</h1>
           <p className="text-xl text-text-secondary max-w-2xl mx-auto">
             A modern course review platform built by and for UW-Madison students.
           </p>
@@ -40,7 +40,7 @@ export default function AboutPage() {
             Our Mission
           </h2>
           <p className="text-text-secondary leading-relaxed">
-            WiscFlow helps UW-Madison students share honest course experiences and make informed 
+            MadSpace helps UW-Madison students share honest course experiences and make informed 
             enrollment decisions. We believe in the power of peer reviews to create a more 
             transparent academic experience for everyone.
           </p>
@@ -83,7 +83,7 @@ export default function AboutPage() {
             Privacy & Security
           </h2>
           <p className="text-text-secondary leading-relaxed">
-            WiscFlow is exclusively for UW-Madison students. We require @wisc.edu email 
+            MadSpace is exclusively for UW-Madison students. We require @wisc.edu email 
             verification to ensure a trusted community. We never share personal information 
             and all reviews can be posted anonymously.
           </p>
@@ -109,7 +109,7 @@ export default function AboutPage() {
             <div>
               <h3 className="font-semibold text-text-primary">Open Source</h3>
               <p className="text-text-secondary text-sm">
-                WiscFlow is open source.{' '}
+                MadSpace is open source.{' '}
                 <a 
                   href="https://github.com/franxyang/UW-Madison-Course-Review-Web" 
                   target="_blank" 

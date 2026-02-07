@@ -61,7 +61,7 @@ export function NicknameSetupModal({ show, onComplete }: NicknameSetupModalProps
           <div className="w-16 h-16 bg-uw-red/10 rounded-full flex items-center justify-center mx-auto mb-4">
             <UserCircle className="w-8 h-8 text-uw-red" />
           </div>
-          <h2 className="text-2xl font-bold text-slate-900">Welcome to WiscFlow!</h2>
+          <h2 className="text-2xl font-bold text-slate-900">Welcome to MadSpace!</h2>
           <p className="text-slate-600 mt-2">
             Choose a nickname for your account. This is what other students will see — your real name will stay private.
           </p>

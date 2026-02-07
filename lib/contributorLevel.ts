@@ -32,12 +32,12 @@ interface LevelDef {
 }
 
 const LEVELS: LevelDef[] = [
-  { level: 0, title: 'New Badger',       badge: '🐾', color: 'bg-slate-100 text-slate-600',     description: 'Just joined — welcome to WiscFlow!',                    minReviews: 0,  minUpvotes: 0   },
+  { level: 0, title: 'New Badger',       badge: '🐾', color: 'bg-slate-100 text-slate-600',     description: 'Just joined — welcome to MadSpace!',                    minReviews: 0,  minUpvotes: 0   },
   { level: 1, title: 'Contributor',      badge: '🐣', color: 'bg-amber-50 text-amber-700',      description: 'Wrote your first review!',                              minReviews: 1,  minUpvotes: 0   },
   { level: 2, title: 'Active Reviewer',  badge: '🐥', color: 'bg-yellow-50 text-yellow-700',    description: 'Consistently sharing course experiences',               minReviews: 3,  minUpvotes: 0   },
-  { level: 3, title: 'Trusted Voice',    badge: '🦡', color: 'bg-orange-50 text-orange-700',    description: 'A respected member of the WiscFlow community',          minReviews: 5,  minUpvotes: 15  },
+  { level: 3, title: 'Trusted Voice',    badge: '🦡', color: 'bg-orange-50 text-orange-700',    description: 'A respected member of the MadSpace community',          minReviews: 5,  minUpvotes: 15  },
   { level: 4, title: 'Expert',           badge: '👑', color: 'bg-purple-50 text-purple-700',    description: 'Your reviews are highly valued by fellow Badgers',      minReviews: 10, minUpvotes: 50  },
-  { level: 5, title: 'Legend',           badge: '🏆', color: 'bg-red-50 text-red-700',          description: 'The highest honor — a pillar of the WiscFlow community', minReviews: 15, minUpvotes: 100 },
+  { level: 5, title: 'Legend',           badge: '🏆', color: 'bg-red-50 text-red-700',          description: 'The highest honor — a pillar of the MadSpace community', minReviews: 15, minUpvotes: 100 },
 ]
 
 /**

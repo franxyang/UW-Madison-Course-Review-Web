@@ -199,11 +199,11 @@ export async function GET() {
 
 ---
 
-## 💡 针对 WiscFlow 的建议
+## 💡 针对 MadSpace 的建议
 
 ### 当前需求分析
 ```typescript
-WiscFlow 需要的功能：
+MadSpace 需要的功能：
 ✅ PostgreSQL 数据库 - 都有
 ✅ 全文搜索 - 都支持
 ✅ 认证系统 - 已有 NextAuth（不需要 Supabase Auth）
@@ -262,7 +262,7 @@ WiscFlow 需要的功能：
 ```bash
 1. 访问 https://console.neon.tech
 2. GitHub 登录
-3. 创建项目 "wiscflow"
+3. 创建项目 "madspace"
 4. 复制连接字符串
 5. 完成 ✅
 
@@ -274,7 +274,7 @@ DATABASE_URL="postgresql://user:pass@ep-xxx.us-east-2.aws.neon.tech/neondb?sslmo
 ```bash
 1. 访问 https://supabase.com
 2. GitHub 登录
-3. 创建项目 "wiscflow"
+3. 创建项目 "madspace"
 4. 等待 1-2 分钟（创建数据库）
 5. 复制连接字符串
 6. 完成 ✅
@@ -319,7 +319,7 @@ if (需要上传课程笔记/作业样本) {
 
 ## ✅ 我的最终推荐
 
-**为 WiscFlow 选择 Neon**，因为：
+**为 MadSpace 选择 Neon**，因为：
 
 1. ✅ 你已经有 NextAuth（不需要 Supabase Auth）
 2. ✅ 暂时不需要文件存储

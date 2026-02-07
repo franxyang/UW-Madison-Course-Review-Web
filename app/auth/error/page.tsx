@@ -40,7 +40,7 @@ export default async function AuthErrorPage({
 
           {error === 'AccessDenied' && (
             <p className="text-slate-600 mb-6">
-              WiscFlow is only available to UW-Madison students. Please sign in with your @wisc.edu email address.
+              MadSpace is only available to UW-Madison students. Please sign in with your @wisc.edu email address.
             </p>
           )}
 

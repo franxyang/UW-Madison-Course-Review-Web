@@ -1,4 +1,4 @@
-# WiscFlow 配色系统 - 方案 C
+# MadSpace 配色系统 - 方案 C
 
 **最后更新**: 2026-02-04  
 **设计理念**: uwcourses 红白极简 + USTSPACE 柔和数据色
@@ -211,11 +211,11 @@ const gradeBadgeClasses = {
 
 ### 与竞品对比
 
-| 网站 | 配色策略 | WiscFlow 借鉴 |
+| 网站 | 配色策略 | MadSpace 借鉴 |
 |------|----------|---------------|
 | **uwcourses.com** | 黑红极简 | ✅ 主体框架（红白黑） |
 | **USTSPACE** | 淡蓝柔和 | ✅ 数据可视化的柔和感 |
-| **WiscFlow** | 红白极简 + 柔和数据色 | 🌟 两者融合 |
+| **MadSpace** | 红白极简 + 柔和数据色 | 🌟 两者融合 |
 
 ---
 

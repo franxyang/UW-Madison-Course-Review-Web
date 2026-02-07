@@ -1,4 +1,4 @@
-# USTSPACE Analysis & Lessons for WiscFlow
+# USTSPACE Analysis & Lessons for MadSpace
 
 **Date**: 2026-02-04  
 **Source**: [ust.space](https://ust.space) — HKUST's student-built course review platform (since ~2015)
@@ -43,7 +43,7 @@ USTSPACE isn't a single-purpose review site — it's a **student toolkit**:
 ### 2.1 ⭐ Timetable Planner → "Schedule Preview"
 **USTSPACE version**: Full timetable builder with drag-and-drop, time clash detection, import/export.
 
-**WiscFlow adaptation** (Phase 4):
+**MadSpace adaptation** (Phase 4):
 - **NOT** a full planner (that's a huge scope) 
 - Instead: **Schedule Preview widget** on course detail page
   - "If you add this course, here's how it fits your current schedule"
@@ -54,7 +54,7 @@ USTSPACE isn't a single-purpose review site — it's a **student toolkit**:
 ### 2.2 ⭐ Personalized Requirements Tracking
 **USTSPACE version**: Analyzes course history to show which requirements you still need.
 
-**WiscFlow adaptation** (Phase 4):
+**MadSpace adaptation** (Phase 4):
 - We already have `StudentCourseHistory` model in Prisma schema
 - MVP: Show breadth/gen-ed progress based on completed courses
 - "You still need: Communication B, 3 more Humanities breadth credits"
@@ -63,7 +63,7 @@ USTSPACE isn't a single-purpose review site — it's a **student toolkit**:
 ### 2.3 Book Marketplace → Resource Sharing
 **USTSPACE version**: Full buy/sell textbook marketplace.
 
-**WiscFlow adaptation** (lighter):
+**MadSpace adaptation** (lighter):
 - We already have `resourceLink` field on Review
 - Expand to: **Course Resources section** on course detail page
   - Shared study guides, past exams links, textbook recommendations
@@ -73,7 +73,7 @@ USTSPACE isn't a single-purpose review site — it's a **student toolkit**:
 ### 2.4 Clean Navigation Structure
 **USTSPACE**: HOME | REVIEW | PLANNER | MARKETPLACE | TOOLS  
 
-**WiscFlow** (current): Courses | Reviews | About  
+**MadSpace** (current): Courses | Reviews | About  
 
 **Suggested nav expansion** (as features ship):
 ```
@@ -133,7 +133,7 @@ USTSPACE has no AI. Our Phase 4 plans for AI review summaries, smart recommendat
 
 ## Summary
 
-USTSPACE's strength is being an **integrated student toolkit**, not just a review site. For WiscFlow:
+USTSPACE's strength is being an **integrated student toolkit**, not just a review site. For MadSpace:
 
 1. **Short-term**: Focus on review quality + user incentives (the cold-start problem is #1 priority)
 2. **Mid-term**: Add saved courses + schedule preview to create stickiness

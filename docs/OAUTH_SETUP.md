@@ -11,14 +11,14 @@ OAuth登录按钮点击后返回 **400 Bad Request**，原因是 **Google Cloud 
 ### **步骤 1: 访问 Google Cloud Console**
 
 1. 打开 https://console.cloud.google.com/
-2. 选择项目 **WiscFlow**
+2. 选择项目 **MadSpace**
 3. 侧边栏：**APIs & Services** → **Credentials**
 
 ---
 
 ### **步骤 2: 编辑 OAuth 客户端**
 
-1. 找到 **WiscFlow Web Client** OAuth 2.0 客户端
+1. 找到 **MadSpace Web Client** OAuth 2.0 客户端
 2. 点击编辑按钮（✏️ 图标）
 
 ---

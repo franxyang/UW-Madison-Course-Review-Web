@@ -47,7 +47,6 @@ function InstructorsPageContent() {
             <div className="flex items-center gap-3">
               <Link href="/" className="flex items-center gap-2">
                 <Logo size={32} />
-                <span className="text-xl font-bold text-text-primary">WiscFlow</span>
               </Link>
             </div>
             <div className="flex items-center gap-6">

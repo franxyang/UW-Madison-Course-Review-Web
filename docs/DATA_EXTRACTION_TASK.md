@@ -1,6 +1,6 @@
-# WiscFlow 数据提取任务文档
+# MadSpace 数据提取任务文档
 
-**项目**: WiscFlow - UW Madison 课程评价平台  
+**项目**: MadSpace - UW Madison 课程评价平台  
 **文档版本**: 1.0  
 **创建日期**: 2026-02-04  
 **目标**: 为另一个 Agent 提供完整的数据提取指南
@@ -9,7 +9,7 @@
 
 ## 📋 任务概述
 
-WiscFlow 需要从 Madgrades 数据源导入 UW Madison 的课程成绩分布数据，包括：
+MadSpace 需要从 Madgrades 数据源导入 UW Madison 的课程成绩分布数据，包括：
 - 每门课程的历史成绩分布
 - 每个学期的数据
 - **每个教师**对应的成绩分布（关键需求）
@@ -384,7 +384,7 @@ def build_instructor_grade_dist():
 ### 数据完整性检查
 
 1. **课程覆盖率**
-   - [ ] 至少覆盖 WiscFlow 现有的 10,174 门课程中的 80%+
+   - [ ] 至少覆盖 MadSpace 现有的 10,174 门课程中的 80%+
    - [ ] 每门课程至少有 1 个学期的数据
 
 2. **学期范围**
@@ -450,11 +450,11 @@ jq 'map(has("courseCode", "term", "avgGPA")) | all' grade_distributions.json
 
 ---
 
-## 📍 WiscFlow 项目路径
+## 📍 MadSpace 项目路径
 
 数据文件放置位置：
 ```
-~/Desktop/wiscflow/data/madgrades/
+~/Desktop/madspace/data/madgrades/
 ├── grade_distributions.json
 ├── instructor_grade_distributions.json
 ├── instructors.json
@@ -464,7 +464,7 @@ jq 'map(has("courseCode", "term", "avgGPA")) | all' grade_distributions.json
 
 导入脚本位置：
 ```
-~/Desktop/wiscflow/scripts/
+~/Desktop/madspace/scripts/
 ├── importMadgradesData.ts  (待创建)
 └── validateMadgradesData.ts (待创建)
 ```

@@ -1,4 +1,4 @@
-# WiscFlow Future Roadmap
+# MadSpace Future Roadmap
 
 **Last Updated**: 2026-02-07  
 **Current Status**: See [PROGRESS.md](../PROGRESS.md) for current completion status
@@ -7,7 +7,7 @@
 
 ## 🎯 Project Vision
 
-A modern course review platform designed for UW-Madison students to make informed course selection decisions. WiscFlow combines grade distributions, student reviews, and smart filtering to help Badgers navigate 10,000+ courses.
+A modern course review platform designed for UW-Madison students to make informed course selection decisions. MadSpace combines grade distributions, student reviews, and smart filtering to help Badgers navigate 10,000+ courses.
 
 ---
 

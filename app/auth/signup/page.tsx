@@ -12,7 +12,7 @@ export default function SignUpPage() {
           <div className="flex justify-center mb-4">
             <Logo size={48} />
           </div>
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Join WiscFlow</h1>
+          <h1 className="text-3xl font-bold text-slate-900 mb-2">Join MadSpace</h1>
           <p className="text-slate-600">Create your account to start reviewing courses</p>
         </div>
 

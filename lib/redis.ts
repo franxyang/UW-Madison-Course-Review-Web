@@ -108,13 +108,13 @@ export async function deleteCache(key: string): Promise<void> {
 
 // Cache key builders
 export const cacheKeys = {
-  schools: () => 'wiscflow:schools',
+  schools: () => 'madspace:schools',
   departments: (schoolId?: string) => 
-    schoolId ? `wiscflow:departments:${schoolId}` : 'wiscflow:departments:all',
+    schoolId ? `madspace:departments:${schoolId}` : 'madspace:departments:all',
   courseList: (params: Record<string, any>) => 
-    `wiscflow:courses:${JSON.stringify(params)}`,
-  courseDetail: (id: string) => `wiscflow:course:${id}`,
-  search: (query: string) => `wiscflow:search:${query.toLowerCase()}`,
+    `madspace:courses:${JSON.stringify(params)}`,
+  courseDetail: (id: string) => `madspace:course:${id}`,
+  search: (query: string) => `madspace:search:${query.toLowerCase()}`,
 }
 
 export { TTL, getRedis }

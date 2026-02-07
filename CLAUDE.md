@@ -7,7 +7,7 @@ Claude Code can only work in WISFLOW folder, any operation outside is not permit
 
 ## Project Overview
 
-**WiscFlow** - UW Madison Course Review & Academic Planning Platform
+**MadSpace** - UW Madison Course Review & Academic Planning Platform
 **Status:** React SPA Prototype transitioning to Next.js 14+ Production App
 **Domain Restriction:** @wisc.edu emails only
 

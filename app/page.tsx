@@ -71,7 +71,6 @@ export default async function Home() {
           <div className="flex items-center justify-between h-16">
             <Link href="/" className="flex items-center gap-2">
               <Logo size={32} />
-              <span className="font-bold text-xl text-text-primary">WiscFlow</span>
             </Link>
             <nav className="flex items-center gap-6">
               <Link href="/courses" className="text-text-secondary hover:text-text-primary transition-colors">
@@ -102,7 +101,7 @@ export default async function Home() {
           <div className="flex flex-col lg:flex-row lg:items-center gap-6">
             <div className="flex-1">
               <h1 className="text-2xl font-bold text-text-primary mb-2">
-                Welcome to WiscFlow 👋
+                Welcome to MadSpace 👋
               </h1>
               <p className="text-text-secondary">
                 A community-driven platform by UW-Madison students, for UW-Madison students. 
@@ -276,7 +275,6 @@ export default async function Home() {
           <div className="flex items-center justify-between text-sm">
             <div className="flex items-center gap-2 text-text-secondary">
               <Logo size={20} />
-              <span className="font-medium">WiscFlow</span>
               <span className="text-text-tertiary">• By students, for students</span>
             </div>
             <div className="text-text-tertiary">

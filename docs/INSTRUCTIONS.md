@@ -1,11 +1,11 @@
 
-# INSTRUCTIONS for WiscFlow Development
+# INSTRUCTIONS for MadSpace Development
 
-This document outlines the step-by-step execution plan for Claude Code to build the WiscFlow production application. Follow these phases sequentially.
+This document outlines the step-by-step execution plan for Claude Code to build the MadSpace production application. Follow these phases sequentially.
 
 ## Phase 1: Foundation & Infrastructure
 1.  **Init Next.js**: Initialize a new Next.js 14+ project with TypeScript, Tailwind, and ESLint.
-    *   `npx create-next-app@latest wiscflow --typescript --tailwind --eslint`
+    *   `npx create-next-app@latest madspace --typescript --tailwind --eslint`
 2.  **Setup Database**:
     *   Initialize Prisma: `npx prisma init`.
     *   Copy the Schema from `CLAUDE.md` into `prisma/schema.prisma`.
@@ -76,4 +76,4 @@ This document outlines the step-by-step execution plan for Claude Code to build 
 ## Execution Rules
 *   **Do not** verify code by running it unless explicitly asked.
 *   **Do not** introduce mock data files. Use seed scripts if necessary for local dev testing, but keep them separate.
-*   **Style**: Maintain the "WiscFlow" clean aesthetic defined in the prototype.
+*   **Style**: Maintain the "MadSpace" clean aesthetic defined in the prototype.

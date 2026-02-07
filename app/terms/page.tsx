@@ -15,7 +15,7 @@ export default function TermsPage() {
 
         <h1 className="text-3xl font-bold text-text-primary mt-6 mb-4">Terms of Service</h1>
         <div className="bg-surface-primary border border-surface-tertiary rounded-xl p-6 space-y-4 text-sm text-text-secondary leading-6">
-          <p>WiscFlow is a student community platform for course feedback at UW-Madison.</p>
+          <p>MadSpace is a student community platform for course feedback at UW-Madison.</p>
           <p>By using this site, you agree to post truthful, respectful, and course-relevant content.</p>
           <p>Harassment, spam, and intentionally misleading content may be removed.</p>
           <p>This project is independent and is not officially affiliated with UW-Madison.</p>

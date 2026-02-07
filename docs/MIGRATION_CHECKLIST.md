@@ -1,4 +1,4 @@
-# WiscFlow 架构升级执行清单
+# MadSpace 架构升级执行清单
 
 **开始日期**: 2026-02-03  
 **预计完成**: 2026-02-24 (3 周)  
@@ -32,14 +32,14 @@ Week 3 (Feb 17-24): Redis 缓存 + 性能优化 + 测试
 
 - [ ] **创建数据库**
   1. 访问 https://console.neon.tech
-  2. 创建新项目 "wiscflow"
+  2. 创建新项目 "madspace"
   3. 选择 Region: US East (Ohio)
   4. 复制连接字符串
 
 - [ ] **更新环境变量**
   ```bash
   # .env.local
-  DATABASE_URL="postgresql://user:password@ep-xxx.us-east-2.aws.neon.tech/wiscflow?sslmode=require"
+  DATABASE_URL="postgresql://user:password@ep-xxx.us-east-2.aws.neon.tech/madspace?sslmode=require"
   ```
 
 #### ✅ Step 2: 更新 Prisma Schema

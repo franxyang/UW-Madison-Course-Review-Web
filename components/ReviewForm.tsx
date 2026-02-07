@@ -106,6 +106,38 @@ function getRatingColor(rating: string) {
   return colors[rating] || colors['']
 }
 
+// Convert letter grade to numeric value
+function gradeToNumeric(grade: string): number {
+  const grades: Record<string, number> = {
+    'A': 4.0, 'AB': 3.5, 'B': 3.0, 'BC': 2.5, 'C': 2.0, 'D': 1.0, 'F': 0.0
+  }
+  return grades[grade] ?? -1
+}
+
+// Get modal background gradient based on average of 4 ratings
+function getModalGradientStyle(ratings: { content: string; teaching: string; grading: string; workload: string }) {
+  const values = [
+    gradeToNumeric(ratings.content),
+    gradeToNumeric(ratings.teaching),
+    gradeToNumeric(ratings.grading),
+    gradeToNumeric(ratings.workload)
+  ].filter(v => v >= 0)
+  
+  // If no ratings selected yet, return neutral
+  if (values.length === 0) {
+    return { background: undefined, borderColor: undefined }
+  }
+  
+  const avgNumeric = values.reduce((a, b) => a + b, 0) / values.length
+  // Map 0-4 to hue 0-120 (red to green)
+  const hue = (avgNumeric / 4) * 120
+  
+  return {
+    background: `linear-gradient(135deg, hsl(${hue}, 60%, 98%) 0%, hsl(${hue}, 50%, 95%) 100%)`,
+    borderColor: `hsl(${hue}, 50%, 80%)`
+  }
+}
+
 export const ReviewForm: React.FC<ReviewFormProps> = ({ 
   courseId, 
   courseName, 
@@ -155,6 +187,14 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
   // Check if selected term has data in database
   const termHasData = termsWithData.has(formData.term || '')
   const instructorsForTerm = termHasData ? getInstructorsForTerm(formData.term || '') : []
+
+  // Calculate modal gradient based on current ratings (real-time)
+  const modalGradient = useMemo(() => getModalGradientStyle({
+    content: formData.contentRating || '',
+    teaching: formData.teachingRating || '',
+    grading: formData.gradingRating || '',
+    workload: formData.workloadRating || ''
+  }), [formData.contentRating, formData.teachingRating, formData.gradingRating, formData.workloadRating])
 
   const utils = trpc.useUtils()
   const createReviewMutation = trpc.review.create.useMutation({
@@ -284,7 +324,13 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
         </div>
 
         {/* Modal */}
-        <div className="inline-block align-bottom bg-surface-primary rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full border border-surface-tertiary">
+        <div 
+          className="inline-block align-bottom rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full border"
+          style={{
+            background: modalGradient.background || 'var(--surface-primary)',
+            borderColor: modalGradient.borderColor || 'var(--surface-tertiary)'
+          }}
+        >
           {/* Header */}
           <div className="bg-surface-primary px-6 pt-6 pb-4 border-b border-surface-tertiary">
             <div className="flex items-start justify-between">

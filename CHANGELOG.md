@@ -7,7 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [0.5.1-dev] - 2026-02-06
+## [0.5.2-dev] - 2026-02-06
+
+### Added — Phase 3 UX Enhancements
+
+#### Course Detail Page 3-Column Layout
+- **Three-column redesign** (`5454fc8`): Left navigation + main content + right overview
+- **Term/Instructor in-page filters**: Real-time review filtering without page reload
+- **Department navigation improvements**: Smart course number display, consistent formatting
+
+#### Homepage Redesign
+- **More informative layout** (`caae165`): Stats section with Departments count
+- **Mini calendar widget** (`e187b9e`): Current date display
+- **Removed ad-like elements**: Cleaner, more professional appearance
+
+#### ReviewForm UX
+- **Real-time gradient background** (`c113c29`): Background color responds to rating input
+- **Term format fix** (`cb4bdb2`): Corrected to YYYY-Season format matching database
+- **Review card styling** (`e4e450d`): Improved visual hierarchy
 
 ### Changed — Documentation Reorganization
 
@@ -27,6 +44,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Removed Duplicate Documents
 - `docs/PROJECT_ROADMAP.md` → Merged into PROGRESS.md + docs/ROADMAP.md
 - `docs/DEVELOPMENT_PLAN.md` → Merged into PROGRESS.md + docs/ROADMAP.md
+
+### Fixed
+- **Department navigation** (`42f452d`, `0ed9a1b`): Correct school name mapping, improved layout
+- **Course grid display** (`5df0465`, `0762e93`): Show only course number, smart length-based display
+- **Same department format** (`6ef31e6`): Consistent formatting within department views
+- **GPA=0 display** (5 locations): Proper handling of missing GPA data
 
 #### Document Responsibilities
 | Document | Purpose |
@@ -469,4 +492,4 @@ BREAKING CHANGE: SQLite no longer supported
 
 **Maintainer**: Franx (franxyixx)  
 **AI Assistant**: Claude (Clawdbot)  
-**Last Updated**: 2026-02-04 23:55 CST
+**Last Updated**: 2026-02-06 20:00 CST

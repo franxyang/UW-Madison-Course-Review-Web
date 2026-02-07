@@ -1,8 +1,8 @@
 # WiscFlow Development Progress
 
-**Last Updated**: 2026-02-06 00:50 CST  
+**Last Updated**: 2026-02-06 20:00 CST  
 **Current Phase**: Phase 3 - IN PROGRESS 🚧  
-**Overall Completion**: ~72%
+**Overall Completion**: ~75%
 
 ---
 
@@ -11,11 +11,11 @@
 ```
 Phase 1: Infrastructure  ████████████████████ 100% ✅
 Phase 2: Core Features   ████████████████████ 100% ✅
-Phase 3: UX Optimization ████████████████░░░░  80% 🚧
+Phase 3: UX Optimization █████████████████░░░  85% 🚧
 Phase 4: Advanced Feat.  ░░░░░░░░░░░░░░░░░░░░   0%
 Phase 5: Admin Portal    ░░░░░░░░░░░░░░░░░░░░   0%
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Overall:                 ██████████████░░░░░░  72%
+Overall:                 ███████████████░░░░░  75%
 ```
 
 ---
@@ -83,7 +83,7 @@ Overall:                 ██████████████░░░░�
 
 ---
 
-## 🚧 Phase 3: UX Optimization — 60% IN PROGRESS
+## 🚧 Phase 3: UX Optimization — 85% IN PROGRESS
 
 ### ✅ Completed
 - [x] **配色系统建立**（方案 C - uwcourses 极简 + USTSPACE 柔和）
@@ -103,11 +103,12 @@ Overall:                 ██████████████░░░░�
   - **Grade Flow** 成绩分布条形图
   - Quick Stats（Credits + Level）
   - `CoursePageLayout` 组件抽取
-- [x] **首页重构** (`app/page.tsx`)
+- [x] **首页重构** (`app/page.tsx`) - 2026-02-06 更新
   - Hero Section（搜索框 + 品牌展示 + Popular 快捷链接）
-  - Stats Section（Courses/Reviews/Instructors/Schools 统计）
+  - Stats Section（Courses/Reviews/Instructors/Departments 统计）
   - Most Reviewed Courses（热门课程卡片）
   - How It Works（3步使用流程）
+  - **Mini Calendar**（当前日期显示）
   - CTA Section + Footer
 - [x] **Instructor Teaching Portfolio 页面** (`app/instructors/[id]/page.tsx`)
   - **雷达图**（4维评分可视化）
@@ -116,26 +117,28 @@ Overall:                 ██████████████░░░░�
   - Stats Row（Avg Rating / Reviews / Courses / Since）
   - Courses Taught 列表（带 GPA）
   - Student Reviews 紧凑卡片
-
-### 🔨 In Progress
-- [x] 左侧栏同系课程数据优化 ✅
-  - `sameDepartment` tRPC 查询已正常工作
-  - 修复 GPA=0 显示问题（5 处）
-- [x] Dark mode 支持 ✅ (2026-02-06)
+- [x] **Dark mode 支持** ✅ (2026-02-06)
   - CSS 变量 light/dark 切换
   - ThemeToggle 组件 + localStorage 持久化
   - 系统偏好检测
-- [x] 搜索增强 - 实时预览卡片 ✅ (2026-02-06)
+- [x] **搜索增强 - 实时预览卡片** ✅ (2026-02-06)
   - SearchWithPreview 组件
   - Debounced API 调用 (300ms)
   - 显示前 6 个结果 + "View all X results"
+- [x] **左侧栏同系课程数据优化** ✅ (2026-02-06)
+  - `sameDepartment` tRPC 查询正常工作
+  - 修复 GPA=0 显示问题（5 处）
+  - 智能显示课程编号（根据长度）
+  - 同系内格式一致性修复
+- [x] **ReviewForm UX 优化** ✅ (2026-02-06)
+  - 实时渐变背景响应评分
+  - Term 格式修复（YYYY-Season 匹配数据库）
+  - Review 卡片样式优化
 
-### 📋 Planned
-- [ ] **Grade Flow 可视化** - 流式分布条（已实现基础版）
-- [ ] **Instructor 过滤优化** - 课程页内过滤（USTSPACE 模式）- 已实现
-- [ ] **Semester 选择器** - 时间线式 pill 选择
+### 📋 Remaining
 - [ ] **组件统一** - FilterPanel, UserMenu, ReviewCard 等
 - [ ] **性能优化** - 图片懒加载、代码分割
+- [ ] **移动端完善** - 响应式审计
 
 详细进度见: [`docs/PHASE3_PROGRESS.md`](./docs/PHASE3_PROGRESS.md)
 
@@ -239,17 +242,19 @@ Full-text:     All courses indexed (tsvector + GIN)
 ## 📝 Recent Commits
 
 ```
-ecff1d2 feat(mobile): responsive navigation, mobile filter panel, layout fixes
-e18e14d feat(profile): enhanced user dashboard with levels, XP, and stats
-f4a86db feat(instructor): instructor list and detail pages
-371b0b5 feat(search): add GPA range filter and instructor search
-cf846d7 feat(report): review reporting system with modal UI
-cf867b2 feat(review): add edit and delete for own reviews
-b3230d5 feat(incentive): contributor level system with XP and badges
-ecf5055 feat(incentive): review-gated access with frosted glass blur
-a699727 docs: rewrite README in English + add incentive system & USTSPACE analysis
-3dade6a fix: department filter accuracy + add pagination
-ff86d21 feat: cross-listed courses, multi-select filters, school hierarchy
+c113c29 feat: real-time gradient background in ReviewForm modal
+e4e450d feat: improve ReviewForm UX + review card styling
+cb4bdb2 fix: correct term format in ReviewForm to match database (YYYY-Season)
+4e178ae fix: multiple UX improvements
+25f8c1d docs: update README with current progress and new features
+a916d5a docs: reorganize documentation - merge progress/roadmap docs
+6ef31e6 fix: consistent format within same department
+0762e93 fix: smart course display based on length
+5df0465 fix: show only course number in grid
+5454fc8 feat: redesign courses page with 3-column layout
+caae165 feat: redesign homepage - more informative, less ad-like
+a98f88b feat: add real-time search preview
+be702bd feat: add dark mode support
 ```
 
 ---

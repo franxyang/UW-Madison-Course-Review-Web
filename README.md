@@ -143,12 +143,14 @@ PostgreSQL migration, tRPC integration, full-text search, Redis caching, departm
 ### ✅ Phase 2 — Core Features (Complete)
 Advanced search, instructor pages, user dashboard, review management (edit/delete/report), user incentive system (contributor levels + XP), mobile responsiveness.
 
-### 🔄 Phase 3 — UX & Visualization (80% Complete)
+### 🔄 Phase 3 — UX & Visualization (85% Complete)
 - ✅ Color system overhaul (UW crimson + soft gradients)
-- ✅ Course detail page 3-column layout
+- ✅ Course detail page 3-column layout + Term/Instructor filters
 - ✅ Instructor Teaching Portfolio (radar chart + timeline)
 - ✅ Dark mode support
 - ✅ Real-time search preview
+- ✅ Homepage redesign with stats + mini calendar
+- ✅ ReviewForm UX with gradient background
 - 🔨 Component unification, performance optimization
 
 ### 📅 Phase 4 — Advanced Features (Planned)

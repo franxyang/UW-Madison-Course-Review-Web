@@ -1,6 +1,6 @@
 # Existing Issues - WiscFlow Course Evaluation Platform
 
-Last Updated: 2026-02-06
+Last Updated: 2026-02-06 21:10 CST
 
 ## Reference Documents
 - **Progress**: See `PROGRESS.md` for detailed phase completion
@@ -9,65 +9,70 @@ Last Updated: 2026-02-06
 
 ---
 
-## 高优先级 / High Priority
+## ✅ 已修复 (2026-02-06 Audit)
 
-### 1. 左侧双列响应式优化
-- **状态:** ✅ 已修复 (2026-02-06)
-- **问题:** 左侧 Filter 栏太宽 (w-72 = 288px)
-- **解决:** 调整为 `w-56 xl:w-64` (224px / 256px)
-- **文件:** `app/courses/page.tsx`
+### P0 权限绕过 + 隐私泄露 — ✅ FIXED
+- **问题:** 课程详情接口无论权限都返回完整 reviews/comments/votes/author/user
+- **修复:** 
+  - 服务端按 `hasFullAccess` 过滤 review 内容
+  - 非贡献者只能看到第一条完整 review，其余返回 `_redacted: true`
+  - 所有 author 对象移除 email 字段
+- **Commit:** `5074ce3`
 
-### 2. 课程小字颜色
-- **状态:** ✅ 已修复 (2026-02-06)
-- **问题:** school name 用 `text-text-tertiary` 太淡
-- **解决:** 改为 `text-text-secondary`
-- **文件:** `app/courses/page.tsx`
+### P0 调试接口暴露敏感信息 — ✅ FIXED
+- **问题:** `/api/test-db` 无鉴权返回 userCount、环境信息、异常栈
+- **修复:** 生产环境返回 404；开发环境只返回 `{status: 'ok'}`
+- **Commit:** `5074ce3`
 
-### 3. Cross-listed 课程显示
-- **状态:** ✅ 已实现
-- **说明:** 数据库已有 1,368 个 cross-list 组，UI 已支持 `crossListGroup`
-- **显示:** 课程详情页会显示所有 cross-listed codes (如 COMP SCI / MATH 514)
-- **搜索:** 支持搜索任意 code 找到同一课程
-- **文件:** `components/CoursePageLayout.tsx` line 699-707
+### P1 Instructor 评分统计错误 — ✅ FIXED
+- **问题:** 只识别 A/B/C/D/F，AB/BC 算成 0
+- **修复:** 7档映射 (A=5, AB=4.5, B=4, BC=3.5, C=3, D=2, F=1)
+- **Commit:** `5074ce3`
+
+### P1 登录页 Email 流程不可用 — ✅ FIXED
+- **问题:** 表单提交到 /api/auth/signin/email，但只配置了 Google
+- **修复:** 移除 Email 表单，只保留 Google OAuth
+- **Commit:** `5074ce3`
+
+### P1 并发下可产生重复 review — ✅ FIXED (Schema Ready)
+- **问题:** 先查重再创建，无唯一约束
+- **修复:** 添加 `@@unique([authorId, courseId, instructorId])`
+- **注意:** Schema 已更新，需运行 `prisma migrate` 应用到数据库
+- **Commit:** `5074ce3`
+
+### P2 review.update 存在字段更新缺失 — ✅ FIXED
+- **问题:** `recommendInstructor` 未写入；空 `assessments` 无法清空
+- **修复:** 显式处理两个字段，使用 `!== undefined` 检查
+- **Commit:** `5074ce3`
+
+### P2 搜索接口对普通输入不稳 — ✅ FIXED
+- **问题:** `to_tsquery(searchTerm + ':*')` 对特殊字符报错
+- **修复:** 清理输入 `[^\w\s\-]`，空查询 fallback 到 ILIKE
+- **Commit:** `5074ce3`
+
+### P2 导航与路由不一致（404） — ✅ FIXED
+- **问题:** /about、/profile/reviews 等不存在
+- **修复:** 
+  - 创建 `/about` 页面
+  - UserMenu 链接改为 `/profile#reviews`, `/profile#saved`
+  - 移除 Settings 链接（功能未实现）
+- **Commit:** `5074ce3`
 
 ---
 
-## 中优先级 / Medium Priority
+## ⚠️ 待处理
 
-### 4. Dark Mode
-- **状态:** ✅ 已完成 (2026-02-06)
-- **说明:** CSS 变量 light/dark + ThemeToggle 组件
-- **文件:** `globals.css`, `tailwind.config.ts`, `components/ThemeToggle.tsx`
+### P2 工程质量门禁未成型
+- **问题:** 
+  - `npm run lint` 进入交互式初始化
+  - `npx tsc --noEmit` 因 `.next/types` 引用失败
+- **建议:** 
+  - 落地 ESLint 配置 (`eslint.config.mjs`)
+  - tsconfig 不直接 include `.next/types`
 
-### 5. Grade Flow 可视化
-- **状态:** ✅ 已实现基础版
-- **说明:** 水平条形图已实现，流式分布条为可选优化
-- **文件:** `components/CoursePageLayout.tsx` RightSidebar
-
-### 6. 搜索增强 - 实时预览
-- **状态:** ✅ 已完成 (2026-02-06)
-- **说明:** SearchWithPreview 组件，debounced API，显示前 6 结果
-- **文件:** `components/SearchWithPreview.tsx`, `lib/hooks/useDebounce.ts`
-
-### 7. Instructor 过滤器优化
-- **状态:** 计划中
-- **说明:** 课程页内 instructor 过滤（USTSPACE 模式）
-
----
-
-## 低优先级 / Low Priority
-
-### 8. 图片懒加载 & 代码分割
-- **状态:** 未开始
-- **说明:** 性能优化
-
-### 9. 邮件通知
-- **状态:** 未开始
-- **说明:** 评论回复、课程更新通知
-
-### 10. AI 课程摘要
-- **状态:** Phase 4
-- **说明:** 自动生成课程评价摘要
+### DB Migration Drift
+- **问题:** Prisma migrations 与实际 schema 不同步
+- **建议:** 考虑 `prisma migrate reset` 或手动同步
 
 ---
 
@@ -76,27 +81,7 @@ Last Updated: 2026-02-06
 1. **组件统一:** FilterPanel, UserMenu, ReviewCard 等需要重构
 2. **测试覆盖:** 暂无自动化测试
 3. **Error Boundary:** 需要更好的错误处理 UI
-
----
-
-## 已完成功能 / Completed Features
-
-参见 `PROGRESS.md` 完整列表，主要包括：
-
-- ✅ 用户认证 (Google OAuth, @wisc.edu)
-- ✅ 课程列表 + 搜索 + 筛选 + 分页
-- ✅ 课程详情页 (成绩分布、先修课、评价)
-- ✅ 评价系统 (4维评分)
-- ✅ 投票 & 评论
-- ✅ Review-gated access (贡献者才能看完整评价)
-- ✅ Contributor level system (6 级 + XP + 徽章)
-- ✅ 评价编辑/删除
-- ✅ 举报系统
-- ✅ Instructor 页面 (列表 + 详情 + 雷达图)
-- ✅ 用户 Dashboard
-- ✅ 移动端响应式
-- ✅ Cross-listed 课程 (1,368 组)
-- ✅ Full-text 搜索 (PostgreSQL tsvector)
+4. **ESLint 配置:** 需要现代化配置
 
 ---
 

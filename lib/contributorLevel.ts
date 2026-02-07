@@ -2,7 +2,10 @@
  * Contributor Level System
  * 
  * Levels are computed from review count and upvotes received.
- * XP is tracked for future gamification features.
+ * Higher levels weight upvotes more heavily (quality > quantity).
+ * Designed for realistic undergrad usage (~32-40 courses over 4 years).
+ * 
+ * Progression: 🐾 → 🐣 → 🐥 → 🦡 → 👑 → 🏆
  */
 
 export interface ContributorInfo {
@@ -10,6 +13,7 @@ export interface ContributorInfo {
   title: string
   badge: string
   color: string       // Tailwind classes for badge styling
+  description: string // Tooltip text explaining the level
   nextLevel: {
     title: string
     reviewsNeeded: number
@@ -22,17 +26,18 @@ interface LevelDef {
   title: string
   badge: string
   color: string
+  description: string
   minReviews: number
   minUpvotes: number
 }
 
 const LEVELS: LevelDef[] = [
-  { level: 0, title: 'Reader',           badge: '',   color: 'bg-slate-100 text-slate-600',     minReviews: 0,  minUpvotes: 0   },
-  { level: 1, title: 'Contributor',      badge: '🟢', color: 'bg-green-100 text-green-700',     minReviews: 1,  minUpvotes: 0   },
-  { level: 2, title: 'Active Reviewer',  badge: '🔵', color: 'bg-blue-100 text-blue-700',       minReviews: 5,  minUpvotes: 0   },
-  { level: 3, title: 'Trusted Reviewer', badge: '🟣', color: 'bg-purple-100 text-purple-700',   minReviews: 15, minUpvotes: 10  },
-  { level: 4, title: 'Expert Reviewer',  badge: '🟡', color: 'bg-yellow-100 text-yellow-700',   minReviews: 30, minUpvotes: 50  },
-  { level: 5, title: 'WiscFlow Legend',  badge: '🔴', color: 'bg-red-100 text-red-700',         minReviews: 50, minUpvotes: 100 },
+  { level: 0, title: 'New Badger',       badge: '🐾', color: 'bg-slate-100 text-slate-600',     description: 'Just joined — welcome to WiscFlow!',                    minReviews: 0,  minUpvotes: 0   },
+  { level: 1, title: 'Contributor',      badge: '🐣', color: 'bg-amber-50 text-amber-700',      description: 'Wrote your first review!',                              minReviews: 1,  minUpvotes: 0   },
+  { level: 2, title: 'Active Reviewer',  badge: '🐥', color: 'bg-yellow-50 text-yellow-700',    description: 'Consistently sharing course experiences',               minReviews: 3,  minUpvotes: 0   },
+  { level: 3, title: 'Trusted Voice',    badge: '🦡', color: 'bg-orange-50 text-orange-700',    description: 'A respected member of the WiscFlow community',          minReviews: 5,  minUpvotes: 10  },
+  { level: 4, title: 'Expert',           badge: '👑', color: 'bg-purple-50 text-purple-700',    description: 'Your reviews are highly valued by fellow Badgers',      minReviews: 8,  minUpvotes: 30  },
+  { level: 5, title: 'WiscFlow Legend',  badge: '🏆', color: 'bg-red-50 text-red-700',          description: 'The highest honor — a pillar of the WiscFlow community', minReviews: 12, minUpvotes: 60  },
 ]
 
 /**
@@ -63,6 +68,7 @@ export function computeContributorLevel(reviewCount: number, upvotesReceived: nu
     title: currentLevel.title,
     badge: currentLevel.badge,
     color: currentLevel.color,
+    description: currentLevel.description,
     nextLevel,
   }
 }

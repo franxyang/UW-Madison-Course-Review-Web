@@ -953,6 +953,13 @@ export function CoursePageLayout({
                               {review.authorLevel && <ContributorBadge contributor={review.authorLevel} />}
                             </div>
                             <div className="text-sm text-text-tertiary mt-1 flex items-center gap-2">
+                              {review.author && (
+                                <span className="font-medium text-text-secondary">
+                                  {review.authorLevel?.badge && <span className="mr-0.5">{review.authorLevel.badge}</span>}
+                                  {review.author.name}
+                                </span>
+                              )}
+                              {review.author && <span className="text-text-tertiary">·</span>}
                               <span>{review.term} · {review.instructor?.name || 'Unknown Instructor'}</span>
                               {review.recommendInstructor === 'yes' && <span title="Recommends instructor">👍</span>}
                               {review.recommendInstructor === 'no' && <span title="Does not recommend instructor">👎</span>}

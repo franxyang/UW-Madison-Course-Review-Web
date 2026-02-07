@@ -19,7 +19,7 @@ export function ContributorBadge({ contributor, variant = 'inline' }: Contributo
     return (
       <span
         className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full ${contributor.color}`}
-        title={contributor.title}
+        title={`${contributor.title} — ${contributor.description || ''}`}
       >
         {contributor.badge && <span>{contributor.badge}</span>}
         {contributor.title}

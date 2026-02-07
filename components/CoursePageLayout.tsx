@@ -1006,30 +1006,30 @@ export function CoursePageLayout({
                           ))}
                         </div>
 
-                        {/* Comments */}
-                        <div className="space-y-2 text-sm">
+                        {/* Comments - each in its own card */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                           {review.contentComment && (
-                            <div>
-                              <span className="font-medium text-text-secondary">Content: </span>
-                              <span className="text-text-secondary">{review.contentComment}</span>
+                            <div className="p-3 rounded-lg border border-surface-tertiary bg-surface-secondary/50">
+                              <div className="text-xs font-semibold text-text-tertiary uppercase tracking-wide mb-1.5">Content</div>
+                              <p className="text-gray-800 dark:text-gray-200 whitespace-pre-line leading-relaxed">{review.contentComment}</p>
                             </div>
                           )}
                           {review.teachingComment && (
-                            <div>
-                              <span className="font-medium text-text-secondary">Teaching: </span>
-                              <span className="text-text-secondary">{review.teachingComment}</span>
+                            <div className="p-3 rounded-lg border border-surface-tertiary bg-surface-secondary/50">
+                              <div className="text-xs font-semibold text-text-tertiary uppercase tracking-wide mb-1.5">Teaching</div>
+                              <p className="text-gray-800 dark:text-gray-200 whitespace-pre-line leading-relaxed">{review.teachingComment}</p>
                             </div>
                           )}
                           {review.gradingComment && (
-                            <div>
-                              <span className="font-medium text-text-secondary">Grading: </span>
-                              <span className="text-text-secondary">{review.gradingComment}</span>
+                            <div className="p-3 rounded-lg border border-surface-tertiary bg-surface-secondary/50">
+                              <div className="text-xs font-semibold text-text-tertiary uppercase tracking-wide mb-1.5">Grading</div>
+                              <p className="text-gray-800 dark:text-gray-200 whitespace-pre-line leading-relaxed">{review.gradingComment}</p>
                             </div>
                           )}
                           {review.workloadComment && (
-                            <div>
-                              <span className="font-medium text-text-secondary">Workload: </span>
-                              <span className="text-text-secondary">{review.workloadComment}</span>
+                            <div className="p-3 rounded-lg border border-surface-tertiary bg-surface-secondary/50">
+                              <div className="text-xs font-semibold text-text-tertiary uppercase tracking-wide mb-1.5">Workload</div>
+                              <p className="text-gray-800 dark:text-gray-200 whitespace-pre-line leading-relaxed">{review.workloadComment}</p>
                             </div>
                           )}
                         </div>

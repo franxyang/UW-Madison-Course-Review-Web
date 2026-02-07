@@ -165,7 +165,7 @@ model Review {
   id              String     @id @default(cuid())
   term            String
   title           String?
-  gradeReceived   Grade
+  gradeReceived   Grade?
   contentRating   String
   teachingRating  String
   gradingRating   String

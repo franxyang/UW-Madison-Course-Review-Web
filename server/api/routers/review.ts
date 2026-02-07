@@ -13,7 +13,7 @@ export const reviewRouter = router({
         courseId: z.string(),
         title: z.string().min(1).max(200).optional(),
         term: z.string(),
-        gradeReceived: gradeEnum,
+        gradeReceived: gradeEnum.optional(),
         contentRating: gradeEnum,
         teachingRating: gradeEnum,
         gradingRating: gradeEnum,
@@ -92,7 +92,7 @@ export const reviewRouter = router({
           authorId: user.id,
           term: input.term,
           title: input.title || null,
-          gradeReceived: input.gradeReceived,
+          gradeReceived: input.gradeReceived || null,
           // Store rating enums as strings
           contentRating: input.contentRating,
           teachingRating: input.teachingRating,

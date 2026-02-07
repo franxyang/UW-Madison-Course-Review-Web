@@ -2,7 +2,8 @@ import { auth } from '@/auth'
 import Link from 'next/link'
 import { Logo } from '@/components/Logo'
 import { prisma } from '@/lib/prisma'
-import { BookOpen, Users, Star, Building2, ArrowRight, Calendar, MessageSquare, GraduationCap } from 'lucide-react'
+import { BookOpen, Users, Star, Building2, ArrowRight, MessageSquare, GraduationCap } from 'lucide-react'
+import { AcademicCalendar } from '@/components/AcademicCalendar'
 import { toOfficialCode } from '@/lib/courseCodeDisplay'
 import { HomeSearch } from '@/components/HomeSearch'
 import { ContributorProgress } from '@/components/ContributorProgress'
@@ -240,57 +241,8 @@ export default async function Home() {
               </div>
             </div>
 
-            {/* Academic Calendar Mini */}
-            <div className="bg-surface-primary rounded-xl border border-surface-tertiary overflow-hidden">
-              <div className="px-4 py-3 border-b border-surface-tertiary bg-wf-crimson text-white">
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold">February 2026</span>
-                  <Calendar size={16} />
-                </div>
-              </div>
-              {/* Mini Calendar Grid */}
-              <div className="p-3">
-                <div className="grid grid-cols-7 gap-1 text-center text-xs mb-2">
-                  {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(d => (
-                    <div key={d} className="text-text-tertiary font-medium py-1">{d}</div>
-                  ))}
-                </div>
-                <div className="grid grid-cols-7 gap-1 text-center text-xs">
-                  {/* Feb 2026 starts on Sunday */}
-                  {[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28].map(d => (
-                    <div 
-                      key={d} 
-                      className={`py-1.5 rounded ${
-                        d === 6 ? 'bg-wf-crimson text-white font-bold' : // Today (example)
-                        d === 7 ? 'bg-amber-100 text-amber-700 font-medium' : // Add/Drop deadline
-                        'text-text-secondary hover:bg-hover-bg'
-                      }`}
-                    >
-                      {d}
-                    </div>
-                  ))}
-                </div>
-              </div>
-              {/* Key Dates */}
-              <div className="px-4 py-3 border-t border-surface-tertiary space-y-2">
-                <div className="flex items-center gap-2 text-xs">
-                  <span className="w-2 h-2 rounded-full bg-amber-400"></span>
-                  <span className="text-text-secondary">Feb 7 - Add/Drop Deadline</span>
-                </div>
-                <div className="flex items-center gap-2 text-xs">
-                  <span className="w-2 h-2 rounded-full bg-blue-400"></span>
-                  <span className="text-text-secondary">Mar 15-23 - Spring Break</span>
-                </div>
-              </div>
-              <a 
-                href="https://registrar.wisc.edu/academic-calendar/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block px-4 py-2.5 text-xs text-center text-wf-crimson hover:bg-hover-bg border-t border-surface-tertiary transition-colors"
-              >
-                Full Academic Calendar →
-              </a>
-            </div>
+            {/* Academic Calendar Mini - Now with pagination */}
+            <AcademicCalendar />
 
             {/* How to Contribute */}
             <div className="bg-gradient-to-br from-wf-crimson to-wf-crimson-dark rounded-xl p-5 text-white">

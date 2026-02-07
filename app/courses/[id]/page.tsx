@@ -13,12 +13,17 @@ export default function CoursePage() {
   // Fetch course with tRPC
   const { data: course, isLoading, error } = trpc.course.byId.useQuery({ id })
   
-  // Fetch related courses (same department) - use new sameDepartment query
+  // Fetch related courses (same department) - prioritize same level
   const deptCode = course?.code ? course.code.split(' ').slice(0, -1).join(' ') : ''
+  const courseLevel = course?.level || '' // e.g., "Advanced" or extract from code
+  // Extract numeric level from course code (e.g., "MATH 521" -> "500")
+  const codeMatch = course?.code?.match(/\d{3}/)
+  const numericLevel = codeMatch ? codeMatch[0].charAt(0) + '00' : ''
+  
   const { data: sameDeptCourses } = trpc.course.sameDepartment.useQuery(
     { 
       codePrefix: deptCode,
-      // Don't exclude current course - we want to highlight it
+      currentLevel: numericLevel, // Pass level to prioritize same-level courses
       limit: 12
     },
     { 

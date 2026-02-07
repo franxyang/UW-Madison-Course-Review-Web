@@ -422,14 +422,20 @@ export const courseRouter = router({
       z.object({
         codePrefix: z.string().min(1),
         excludeId: z.string().optional(),
+        currentLevel: z.string().optional(), // e.g., "500" for 500-level courses
         limit: z.number().min(1).max(20).default(12),
       })
     )
     .query(async ({ ctx, input }) => {
-      const courses = await ctx.prisma.course.findMany({
+      // Extract level range (e.g., "500" -> 500-599)
+      const levelPrefix = input.currentLevel?.substring(0, 1) || ''
+      
+      // First, try to get same-level courses
+      let courses = await ctx.prisma.course.findMany({
         where: {
           code: { startsWith: input.codePrefix },
           ...(input.excludeId ? { id: { not: input.excludeId } } : {}),
+          ...(levelPrefix ? { level: { startsWith: levelPrefix } } : {}),
         },
         select: {
           id: true,
@@ -442,6 +448,30 @@ export const courseRouter = router({
         orderBy: { code: 'asc' },
         take: input.limit,
       })
+      
+      // If not enough same-level courses, fill with other courses from same department
+      if (courses.length < input.limit && levelPrefix) {
+        const existingIds = courses.map(c => c.id)
+        const additionalCourses = await ctx.prisma.course.findMany({
+          where: {
+            code: { startsWith: input.codePrefix },
+            id: { notIn: [input.excludeId || '', ...existingIds].filter(Boolean) },
+            level: { not: { startsWith: levelPrefix } },
+          },
+          select: {
+            id: true,
+            code: true,
+            name: true,
+            avgGPA: true,
+            credits: true,
+            level: true,
+          },
+          orderBy: { code: 'asc' },
+          take: input.limit - courses.length,
+        })
+        courses = [...courses, ...additionalCourses]
+      }
+      
       return courses
     }),
 

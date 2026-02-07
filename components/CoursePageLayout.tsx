@@ -807,7 +807,12 @@ export function CoursePageLayout({
 
               {/* Review Form */}
               <div id="review-form" className="bg-surface-primary rounded-xl border border-surface-tertiary p-6 scroll-mt-24">
-                <ReviewForm courseId={course.id} courseName={`${toOfficialCode(course.code)}: ${course.name}`} />
+                <ReviewForm 
+                  courseId={course.id} 
+                  courseName={`${toOfficialCode(course.code)}: ${course.name}`}
+                  gradeDistributions={course.gradeDistributions}
+                  courseInstructors={course.instructors}
+                />
               </div>
 
               {/* Reviews List */}

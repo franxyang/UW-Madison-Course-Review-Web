@@ -53,6 +53,19 @@
     
     --hover-bg: #2A2A2A;
     --active-bg: #3D1A1A;
+    
+    /* Input colors for dark mode */
+    --input-bg: #242424;
+    --input-border: #444444;
+    --input-text: #F5F5F5;
+    --input-placeholder: #6B6B6B;
+  }
+  
+  :root {
+    --input-bg: #FFFFFF;
+    --input-border: #E9ECEF;
+    --input-text: #212529;
+    --input-placeholder: #ADB5BD;
   }
 
   body {
@@ -97,6 +110,29 @@
 
   .card {
     @apply bg-surface-primary rounded-lg border border-surface-tertiary shadow-card hover:shadow-card-hover transition-shadow;
+  }
+
+  /* Form inputs with dark mode support */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="url"],
+  input[type="search"],
+  textarea,
+  select {
+    color: var(--input-text);
+    background-color: var(--input-bg);
+    border-color: var(--input-border);
+  }
+  
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--input-placeholder);
+  }
+  
+  select option {
+    background-color: var(--surface-primary);
+    color: var(--text-primary);
   }
 
   .grade-badge {

@@ -61,12 +61,12 @@ export function ContributorProgress() {
             <img src={session.user.image} alt="" className="w-10 h-10 rounded-full" />
           ) : (
             <div className="w-10 h-10 rounded-full bg-wf-crimson text-white flex items-center justify-center font-semibold">
-              {session.user.name?.[0] || session.user.email?.[0] || 'U'}
+              {(session.user as any).nickname?.[0] || session.user.name?.[0] || session.user.email?.[0] || 'U'}
             </div>
           )}
           <div>
             <div className="font-medium text-text-primary">
-              {session.user.name || 'Badger'}
+              {(session.user as any).nickname || session.user.name || 'Anonymous Badger'}
             </div>
             <div className="text-xs text-text-tertiary">
               View your progress →

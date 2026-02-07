@@ -6,6 +6,7 @@ import { SessionProvider } from 'next-auth/react'
 import { useState } from 'react'
 import superjson from 'superjson'
 import { trpc } from '@/lib/trpc/client'
+import { NicknameGuard } from '@/components/NicknameGuard'
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -34,7 +35,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <SessionProvider>
       <trpc.Provider client={trpcClient} queryClient={queryClient}>
-        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+        <QueryClientProvider client={queryClient}>
+          <NicknameGuard />
+          {children}
+        </QueryClientProvider>
       </trpc.Provider>
     </SessionProvider>
   )

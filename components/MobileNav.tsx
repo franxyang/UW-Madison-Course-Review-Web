@@ -86,11 +86,10 @@ export function MobileNav({ user, currentPath }: MobileNavProps) {
               {user ? (
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 bg-uw-red rounded-full flex items-center justify-center text-white text-sm font-bold">
-                    {user.name?.charAt(0) || user.email?.charAt(0)?.toUpperCase() || '?'}
+                    {(user as any).nickname?.charAt(0) || user.name?.charAt(0) || user.email?.charAt(0)?.toUpperCase() || '?'}
                   </div>
                   <div className="text-sm">
-                    <div className="font-medium text-slate-900">{user.name || 'Badger'}</div>
-                    <div className="text-xs text-slate-500 truncate">{user.email}</div>
+                    <div className="font-medium text-slate-900">{(user as any).nickname || user.name || 'Anonymous Badger'}</div>
                   </div>
                 </div>
               ) : (

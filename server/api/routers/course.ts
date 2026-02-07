@@ -436,12 +436,12 @@ export const courseRouter = router({
       // P0 Security Fix: Server-side review filtering based on access level
       // Only return full review data if user has access, otherwise return limited preview
       const sanitizedReviews = sortedReviews.map((review, index) => {
-        // Strip sensitive fields from author (never expose email)
+        // Strip sensitive fields from author (never expose email or real name)
         const safeAuthor = review.author ? {
           id: review.author.id,
-          name: review.author.name,
+          name: review.author.nickname || 'Anonymous Badger',
           image: review.author.image,
-          // Never include: email, emailVerified
+          // Never include: email, emailVerified, real name
         } : null
 
         // Strip sensitive fields from comment authors
@@ -449,7 +449,7 @@ export const courseRouter = router({
           ...comment,
           author: comment.author ? {
             id: comment.author.id,
-            name: comment.author.name,
+            name: comment.author.nickname || 'Anonymous Badger',
             image: comment.author.image,
           } : null,
         })) || []

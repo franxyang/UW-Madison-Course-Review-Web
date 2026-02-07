@@ -45,6 +45,8 @@ export const authConfig: NextAuthConfig = {
     async session({ session, user }) {
       if (session.user) {
         session.user.id = user.id
+        // Expose nickname in session (falls back to null)
+        ;(session.user as any).nickname = (user as any).nickname || null
       }
       return session
     }

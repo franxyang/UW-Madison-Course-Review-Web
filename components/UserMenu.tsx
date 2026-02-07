@@ -7,6 +7,7 @@ import Link from 'next/link'
 interface UserMenuProps {
   user: {
     name?: string | null
+    nickname?: string | null
     email?: string | null
     image?: string | null
   }
@@ -30,9 +31,12 @@ export function UserMenu({ user }: UserMenuProps) {
     }
   }, [isOpen])
 
+  // Prefer nickname over real name for display
+  const displayName = user.nickname || user.name || null
+
   // Get initials for avatar
-  const initials = user.name
-    ? user.name
+  const initials = displayName
+    ? displayName
         .split(' ')
         .map((n) => n[0])
         .join('')
@@ -59,7 +63,7 @@ export function UserMenu({ user }: UserMenuProps) {
           </div>
         )}
         <span className="text-sm font-medium text-text-secondary hidden sm:block">
-          {user.name || user.email?.split('@')[0]}
+          {displayName || user.email?.split('@')[0]}
         </span>
       </button>
 
@@ -68,7 +72,7 @@ export function UserMenu({ user }: UserMenuProps) {
         <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-surface-tertiary py-2 z-50">
           {/* User Info */}
           <div className="px-4 py-3 border-b border-surface-tertiary">
-            <p className="text-sm font-semibold text-text-primary">{user.name}</p>
+            <p className="text-sm font-semibold text-text-primary">{displayName || 'Anonymous Badger'}</p>
             <p className="text-xs text-text-tertiary truncate">{user.email}</p>
           </div>
 

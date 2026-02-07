@@ -193,34 +193,6 @@ export default async function Home() {
               </div>
             </div>
 
-            {/* Browse by Level */}
-            <div className="bg-surface-primary rounded-xl border border-surface-tertiary p-5">
-              <h2 className="font-semibold text-text-primary mb-4">Browse by Level</h2>
-              <div className="grid grid-cols-3 gap-3">
-                <Link
-                  href="/courses?levels=Elementary"
-                  className="p-4 rounded-lg border-2 border-blue-200 bg-blue-50 hover:bg-blue-100 transition-colors text-center group"
-                >
-                  <div className="font-semibold text-blue-700 mb-1">Elementary</div>
-                  <div className="text-xs text-blue-600/80">100-200 level</div>
-                </Link>
-                <Link
-                  href="/courses?levels=Intermediate"
-                  className="p-4 rounded-lg border-2 border-purple-200 bg-purple-50 hover:bg-purple-100 transition-colors text-center group"
-                >
-                  <div className="font-semibold text-purple-700 mb-1">Intermediate</div>
-                  <div className="text-xs text-purple-600/80">300-400 level</div>
-                </Link>
-                <Link
-                  href="/courses?levels=Advanced"
-                  className="p-4 rounded-lg border-2 border-slate-300 bg-slate-50 hover:bg-slate-100 transition-colors text-center group"
-                >
-                  <div className="font-semibold text-slate-700 mb-1">Advanced</div>
-                  <div className="text-xs text-slate-600/80">500+ level</div>
-                </Link>
-              </div>
-            </div>
-
             {/* Quick Links */}
             <div className="bg-surface-primary rounded-xl border border-surface-tertiary p-5">
               <h2 className="font-semibold text-text-primary mb-4">Popular Departments</h2>

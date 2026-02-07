@@ -57,13 +57,9 @@ export function ContributorProgress() {
     <Link href="/profile" className="block">
       <div className="bg-surface-primary border border-surface-tertiary rounded-xl p-5 hover:border-wf-crimson/30 transition-colors">
         <div className="flex items-center gap-3 mb-3">
-          {session.user.image ? (
-            <img src={session.user.image} alt="" className="w-10 h-10 rounded-full" />
-          ) : (
-            <div className="w-10 h-10 rounded-full bg-wf-crimson text-white flex items-center justify-center font-semibold">
-              {(session.user as any).nickname?.[0] || session.user.name?.[0] || session.user.email?.[0] || 'U'}
-            </div>
-          )}
+          <div className="w-10 h-10 rounded-full bg-wf-crimson text-white flex items-center justify-center font-semibold">
+            {(session.user as any).nickname?.[0]?.toUpperCase() || session.user.email?.[0]?.toUpperCase() || 'U'}
+          </div>
           <div>
             <div className="font-medium text-text-primary">
               {(session.user as any).nickname || session.user.name || 'Anonymous Badger'}

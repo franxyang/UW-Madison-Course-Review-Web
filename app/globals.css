@@ -172,4 +172,9 @@
   .review-card-average { @apply rounded-xl border p-6 transition-colors bg-amber-50/30 border-amber-200/50; }
   .review-card-below { @apply rounded-xl border p-6 transition-colors bg-orange-50/30 border-orange-200/50; }
   .review-card-poor { @apply rounded-xl border p-6 transition-colors bg-red-50/30 border-red-200/50; }
+
+  /* Level badges - neutral color system (not grade-based) */
+  .level-badge-elementary { @apply bg-blue-50 border border-blue-200 text-blue-700; }
+  .level-badge-intermediate { @apply bg-purple-50 border border-purple-200 text-purple-700; }
+  .level-badge-advanced { @apply bg-slate-50 border border-slate-300 text-slate-700; }
 }

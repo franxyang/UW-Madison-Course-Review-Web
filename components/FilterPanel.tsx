@@ -77,9 +77,9 @@ export function FilterPanel({ filters, onFilterChange }: FilterPanelProps) {
   }
 
   const LEVELS = [
-    { value: 'Elementary', label: 'Elementary (100-200)', color: 'grade-badge-A' },
-    { value: 'Intermediate', label: 'Intermediate (300-400)', color: 'grade-badge-B' },
-    { value: 'Advanced', label: 'Advanced (500+)', color: 'grade-badge-C' },
+    { value: 'Elementary', label: 'Elementary (100-200)', color: 'level-badge-elementary' },
+    { value: 'Intermediate', label: 'Intermediate (300-400)', color: 'level-badge-intermediate' },
+    { value: 'Advanced', label: 'Advanced (500+)', color: 'level-badge-advanced' },
   ]
 
   const filteredDepts = departments?.filter(d => 

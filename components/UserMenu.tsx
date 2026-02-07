@@ -45,38 +45,38 @@ export function UserMenu({ user }: UserMenuProps) {
       {/* Avatar Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-100 transition-colors"
+        className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-hover-bg transition-colors"
       >
         {user.image ? (
           <img
             src={user.image}
             alt={user.name || 'User'}
-            className="w-8 h-8 rounded-full border-2 border-slate-200"
+            className="w-8 h-8 rounded-full border-2 border-surface-tertiary"
           />
         ) : (
-          <div className="w-8 h-8 rounded-full bg-uw-red text-white flex items-center justify-center font-semibold text-sm">
+          <div className="w-8 h-8 rounded-full bg-wf-crimson text-white flex items-center justify-center font-semibold text-sm">
             {initials}
           </div>
         )}
-        <span className="text-sm font-medium text-slate-700 hidden sm:block">
+        <span className="text-sm font-medium text-text-secondary hidden sm:block">
           {user.name || user.email?.split('@')[0]}
         </span>
       </button>
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-slate-200 py-2 z-50">
+        <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-surface-tertiary py-2 z-50">
           {/* User Info */}
-          <div className="px-4 py-3 border-b border-slate-100">
-            <p className="text-sm font-semibold text-slate-900">{user.name}</p>
-            <p className="text-xs text-slate-500 truncate">{user.email}</p>
+          <div className="px-4 py-3 border-b border-surface-tertiary">
+            <p className="text-sm font-semibold text-text-primary">{user.name}</p>
+            <p className="text-xs text-text-tertiary truncate">{user.email}</p>
           </div>
 
           {/* Menu Items */}
           <div className="py-2">
             <Link
               href="/profile"
-              className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+              className="flex items-center gap-3 px-4 py-2.5 text-sm text-text-secondary hover:bg-hover-bg transition-colors"
               onClick={() => setIsOpen(false)}
             >
               <User size={16} />
@@ -86,7 +86,7 @@ export function UserMenu({ user }: UserMenuProps) {
             {/* P2 Fix: Link to profile page sections instead of non-existent routes */}
             <Link
               href="/profile#reviews"
-              className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+              className="flex items-center gap-3 px-4 py-2.5 text-sm text-text-secondary hover:bg-hover-bg transition-colors"
               onClick={() => setIsOpen(false)}
             >
               <Star size={16} />
@@ -95,7 +95,7 @@ export function UserMenu({ user }: UserMenuProps) {
 
             <Link
               href="/profile#saved"
-              className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+              className="flex items-center gap-3 px-4 py-2.5 text-sm text-text-secondary hover:bg-hover-bg transition-colors"
               onClick={() => setIsOpen(false)}
             >
               <BookMarked size={16} />
@@ -104,7 +104,7 @@ export function UserMenu({ user }: UserMenuProps) {
           </div>
 
           {/* Sign Out */}
-          <div className="border-t border-slate-100 pt-2">
+          <div className="border-t border-surface-tertiary pt-2">
             <form action="/api/auth/signout" method="POST">
               <button
                 type="submit"
@@ -127,13 +127,13 @@ export function GuestMenu() {
     <div className="flex items-center gap-3">
       <Link
         href="/auth/signin"
-        className="px-4 py-2 text-sm font-medium text-slate-700 hover:text-slate-900 transition-colors"
+        className="px-4 py-2 text-sm font-medium text-text-secondary hover:text-text-primary transition-colors"
       >
         Sign In
       </Link>
       <Link
         href="/auth/signup"
-        className="px-4 py-2 text-sm font-medium bg-uw-red text-white rounded-lg hover:bg-uw-dark transition-colors"
+        className="px-4 py-2 text-sm font-medium bg-wf-crimson text-white rounded-lg hover:bg-uw-dark transition-colors"
       >
         Sign Up
       </Link>

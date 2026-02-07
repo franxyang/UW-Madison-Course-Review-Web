@@ -187,28 +187,43 @@ function LeftSidebar({
   // Get official department code for display
   const officialDeptCode = getOfficialDeptPrefix(course.code)
   
-  // Filter related courses by search query
+  // Fuzzy filter: case-insensitive, space-insensitive, match code or name
   const filteredRelatedCourses = relatedCourses.filter(c => {
     if (!searchQuery.trim()) return true
-    const query = searchQuery.toLowerCase()
-    const code = toOfficialCode(c.code).toLowerCase()
-    const name = c.name.toLowerCase()
-    return code.includes(query) || name.includes(query)
+    // Normalize: lowercase, collapse spaces
+    const query = searchQuery.toLowerCase().replace(/\s+/g, '')
+    const code = toOfficialCode(c.code).toLowerCase().replace(/\s+/g, '')
+    const name = c.name.toLowerCase().replace(/\s+/g, '')
+    // Also try matching with original spacing for natural queries
+    const codeSpaced = toOfficialCode(c.code).toLowerCase()
+    const nameSpaced = c.name.toLowerCase()
+    return code.includes(query) || name.includes(query) 
+      || codeSpaced.includes(searchQuery.toLowerCase()) 
+      || nameSpaced.includes(searchQuery.toLowerCase())
   })
   
   return (
     <aside className="w-[320px] flex-shrink-0 space-y-5">
       {/* Search */}
-      <div className="relative">
-        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary" />
+      <div className="relative z-10">
+        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary pointer-events-none" />
         <input
           type="text"
           placeholder="Search courses..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full pl-9 pr-3 py-2 text-sm bg-surface-primary border border-surface-tertiary rounded-lg 
-                     focus:outline-none focus:border-wf-crimson focus:ring-1 focus:ring-wf-crimson/20"
+          className="w-full pl-9 pr-8 py-2 text-sm bg-surface-primary border border-surface-tertiary rounded-lg 
+                     focus:outline-none focus:border-wf-crimson focus:ring-1 focus:ring-wf-crimson/20
+                     placeholder:text-text-tertiary"
         />
+        {searchQuery && (
+          <button
+            onClick={() => setSearchQuery('')}
+            className="absolute right-2 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-primary p-0.5"
+          >
+            <X size={14} />
+          </button>
+        )}
       </div>
 
       {/* Prerequisites */}
@@ -325,7 +340,6 @@ function RightSidebar({
   totalGraded,
   isFiltered,
   filterType,
-  onWriteReview
 }: { 
   course: Course
   avgRatings: { content: number; teaching: number; grading: number; workload: number } | null
@@ -335,7 +349,6 @@ function RightSidebar({
   totalGraded: number
   isFiltered: boolean
   filterType: 'none' | 'term' | 'instructor' | 'term+instructor'
-  onWriteReview: () => void
 }) {
   const maxCount = Math.max(...gradeData.map(g => g.count), 1)
   
@@ -388,14 +401,6 @@ function RightSidebar({
             })}
           </div>
         </div>
-
-        {/* Write Review Button */}
-        <button
-          onClick={onWriteReview}
-          className="w-full py-3 bg-wf-crimson text-white font-semibold rounded-lg hover:bg-wf-crimson-dark transition-colors"
-        >
-          ✏️ Write a Review
-        </button>
 
         {/* Grade Distribution - Improved Design */}
         {gradeData.length > 0 && totalGraded > 0 && (
@@ -697,10 +702,6 @@ export function CoursePageLayout({
   }, [filteredDistributions])
 
   const latestDistribution = filteredDistributions[0]
-
-  const scrollToReviewForm = () => {
-    document.getElementById('review-form')?.scrollIntoView({ behavior: 'smooth' })
-  }
 
   return (
     <div className="min-h-screen bg-surface-secondary">
@@ -1038,7 +1039,6 @@ export function CoursePageLayout({
               selectedTerm !== 'all' ? 'term' :
               selectedInstructor !== 'all' ? 'instructor' : 'none'
             }
-            onWriteReview={scrollToReviewForm}
           />
         </div>
       </div>

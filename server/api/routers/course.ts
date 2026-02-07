@@ -528,20 +528,17 @@ export const courseRouter = router({
       z.object({
         codePrefix: z.string().min(1),
         excludeId: z.string().optional(),
-        currentLevel: z.string().optional(), // e.g., "500" for 500-level courses
+        currentLevel: z.string().optional(), // e.g., "Advanced", "Elementary", "Intermediate"
         limit: z.number().min(1).max(20).default(12),
       })
     )
     .query(async ({ ctx, input }) => {
-      // Extract level range (e.g., "500" -> 500-599)
-      const levelPrefix = input.currentLevel?.substring(0, 1) || ''
-      
-      // First, try to get same-level courses
+      // First, try to get same-level courses (using the text level field)
       let courses = await ctx.prisma.course.findMany({
         where: {
           code: { startsWith: input.codePrefix },
           ...(input.excludeId ? { id: { not: input.excludeId } } : {}),
-          ...(levelPrefix ? { level: { startsWith: levelPrefix } } : {}),
+          ...(input.currentLevel ? { level: input.currentLevel } : {}),
         },
         select: {
           id: true,
@@ -556,13 +553,13 @@ export const courseRouter = router({
       })
       
       // If not enough same-level courses, fill with other courses from same department
-      if (courses.length < input.limit && levelPrefix) {
+      if (courses.length < input.limit && input.currentLevel) {
         const existingIds = courses.map(c => c.id)
         const additionalCourses = await ctx.prisma.course.findMany({
           where: {
             code: { startsWith: input.codePrefix },
             id: { notIn: [input.excludeId || '', ...existingIds].filter(Boolean) },
-            level: { not: { startsWith: levelPrefix } },
+            level: { not: input.currentLevel },
           },
           select: {
             id: true,

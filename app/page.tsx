@@ -7,7 +7,7 @@ import { AcademicCalendar } from '@/components/AcademicCalendar'
 import { toOfficialCode } from '@/lib/courseCodeDisplay'
 import { HomeSearch } from '@/components/HomeSearch'
 import { ContributorProgress } from '@/components/ContributorProgress'
-import { ThemeToggle } from '@/components/ThemeToggle'
+import { Header } from '@/components/Header'
 
 async function getStats() {
   const [courseCount, reviewCount, instructorCount, departmentCount, schoolCount] = await Promise.all([
@@ -66,33 +66,7 @@ export default async function Home() {
   return (
     <div className="min-h-screen bg-surface-secondary">
       {/* Header */}
-      <header className="bg-surface-primary border-b border-surface-tertiary sticky top-0 z-20">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="flex items-center justify-between h-16">
-            <Link href="/" className="flex items-center gap-2">
-              <Logo size={32} />
-            </Link>
-            <nav className="flex items-center gap-6">
-              <Link href="/courses" className="text-text-secondary hover:text-text-primary transition-colors">
-                Courses
-              </Link>
-              <Link href="/instructors" className="text-text-secondary hover:text-text-primary transition-colors">
-                Instructors
-              </Link>
-              <ThemeToggle />
-              {session?.user ? (
-                <Link href="/profile" className="px-4 py-2 bg-wf-crimson text-white rounded-lg hover:bg-wf-crimson-dark transition-colors font-medium">
-                  Profile
-                </Link>
-              ) : (
-                <Link href="/auth/signin" className="px-4 py-2 bg-wf-crimson text-white rounded-lg hover:bg-wf-crimson-dark transition-colors font-medium">
-                  Sign In
-                </Link>
-              )}
-            </nav>
-          </div>
-        </div>
-      </header>
+      <Header currentPath="/" />
 
       {/* Main Content */}
       <main className="max-w-6xl mx-auto px-6 py-8">
@@ -272,14 +246,14 @@ export default async function Home() {
       {/* Footer */}
       <footer className="border-t border-surface-tertiary bg-surface-primary mt-8">
         <div className="max-w-6xl mx-auto px-6 py-6">
-          <div className="flex items-center justify-between text-sm">
+          <div className="flex flex-col items-center gap-3 text-sm">
             <div className="flex items-center gap-2 text-text-secondary">
               <Logo size={20} />
               <span className="text-text-tertiary">• By students, for students</span>
             </div>
-            <div className="text-text-tertiary">
-              Made with ❤️ at UW-Madison
-            </div>
+            <p className="text-xs text-text-tertiary text-center max-w-xl">
+              MadSpace is an independent student project and is not affiliated with, endorsed by, or officially connected to the University of Wisconsin-Madison.
+            </p>
           </div>
         </div>
       </footer>

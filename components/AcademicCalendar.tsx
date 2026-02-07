@@ -4,34 +4,39 @@ import { useState } from 'react'
 import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react'
 
 // Key academic dates for UW-Madison (simplified - you can expand this)
+// Spring 2026 dates from UW-Madison Registrar
+// https://registrar.wisc.edu/academic-calendar/
 const ACADEMIC_EVENTS: Record<string, { date: number; label: string; color: string }[]> = {
   '2026-01': [
-    { date: 21, label: 'Spring Classes Begin', color: 'bg-emerald-400' }
+    { date: 21, label: 'Spring Classes Begin', color: 'bg-emerald-400' },
+    { date: 28, label: 'Drop w/o Transcript Notation', color: 'bg-amber-400' },
+    { date: 30, label: 'Add/Wait List Deadline', color: 'bg-red-400' }
   ],
   '2026-02': [
-    { date: 7, label: 'Add/Drop Deadline', color: 'bg-amber-400' }
+    { date: 13, label: 'Edit Class Deadline', color: 'bg-amber-400' }
   ],
   '2026-03': [
-    { date: 15, label: 'Spring Break Begins', color: 'bg-blue-400' },
-    { date: 23, label: 'Spring Break Ends', color: 'bg-blue-400' }
+    { date: 21, label: 'Spring Break Begins', color: 'bg-blue-400' },
+    { date: 29, label: 'Spring Break Ends', color: 'bg-blue-400' }
+  ],
+  '2026-04': [
+    { date: 20, label: 'P/F, Audit & Drop Deadline', color: 'bg-red-400' }
   ],
   '2026-05': [
-    { date: 1, label: 'Last Day of Classes', color: 'bg-orange-400' },
-    { date: 4, label: 'Finals Begin', color: 'bg-red-400' },
-    { date: 10, label: 'Commencement', color: 'bg-wf-crimson' }
-  ],
-  '2026-08': [
-    { date: 31, label: 'Fall Classes Begin', color: 'bg-emerald-400' }
+    { date: 6, label: 'Last Day of Classes', color: 'bg-orange-400' },
+    { date: 8, label: 'Finals Begin', color: 'bg-red-400' },
+    { date: 15, label: 'Finals End', color: 'bg-red-400' },
+    { date: 17, label: 'Commencement', color: 'bg-wf-crimson' }
   ],
   '2026-09': [
-    { date: 11, label: 'Add/Drop Deadline', color: 'bg-amber-400' }
+    { date: 2, label: 'Fall Classes Begin', color: 'bg-emerald-400' }
   ],
   '2026-11': [
-    { date: 25, label: 'Thanksgiving Break', color: 'bg-orange-400' }
+    { date: 26, label: 'Thanksgiving Break', color: 'bg-orange-400' }
   ],
   '2026-12': [
-    { date: 11, label: 'Last Day of Classes', color: 'bg-orange-400' },
-    { date: 14, label: 'Finals Begin', color: 'bg-red-400' }
+    { date: 16, label: 'Last Day of Classes', color: 'bg-orange-400' },
+    { date: 18, label: 'Finals Begin', color: 'bg-red-400' }
   ]
 }
 

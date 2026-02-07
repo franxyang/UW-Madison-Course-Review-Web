@@ -2,7 +2,7 @@
 
 import { notFound, useParams } from 'next/navigation'
 import Link from 'next/link'
-import { Logo } from '@/components/Logo'
+import { Header } from '@/components/Header'
 import { BookOpen, MessageSquare, Star, ChevronRight, Calendar, TrendingUp } from 'lucide-react'
 import { trpc } from '@/lib/trpc/client'
 import { useSession } from 'next-auth/react'
@@ -148,15 +148,7 @@ export default function InstructorPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-surface-secondary">
-        <header className="bg-surface-primary border-b border-surface-tertiary">
-          <div className="max-w-6xl mx-auto px-6">
-            <div className="flex items-center h-16">
-              <Link href="/" className="flex items-center gap-2">
-                <Logo size={32} />
-              </Link>
-            </div>
-          </div>
-        </header>
+        <Header currentPath="/instructors" />
         <div className="max-w-6xl mx-auto px-6 py-8">
           <div className="animate-pulse space-y-6">
             <div className="h-8 w-48 bg-surface-tertiary rounded" />
@@ -182,20 +174,7 @@ export default function InstructorPage() {
   return (
     <div className="min-h-screen bg-surface-secondary">
       {/* Header */}
-      <header className="bg-surface-primary border-b border-surface-tertiary sticky top-0 z-20">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="flex items-center justify-between h-16">
-            <Link href="/" className="flex items-center gap-2">
-              <Logo size={32} />
-            </Link>
-            <nav className="flex items-center gap-6">
-              <Link href="/courses" className="text-text-secondary hover:text-text-primary transition-colors">Courses</Link>
-              <Link href="/instructors" className="text-wf-crimson font-medium">Instructors</Link>
-              <Link href="/about" className="text-text-secondary hover:text-text-primary transition-colors">About</Link>
-            </nav>
-          </div>
-        </div>
-      </header>
+      <Header currentPath="/instructors" />
 
       <div className="max-w-6xl mx-auto px-6 py-8">
         {/* Breadcrumb */}

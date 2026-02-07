@@ -28,7 +28,11 @@ function getRatingColor(rating: string) {
   return colors[rating] || 'text-text-secondary'
 }
 
-export function FeaturedContent() {
+interface FeaturedContentProps {
+  onLevelSelect?: (level: string) => void
+}
+
+export function FeaturedContent({ onLevelSelect }: FeaturedContentProps = {}) {
   const { data, isLoading, error } = trpc.course.getFeatured.useQuery()
 
   if (isLoading) {
@@ -124,27 +128,20 @@ export function FeaturedContent() {
       <div>
         <h2 className="font-semibold text-text-primary mb-4">Browse by Level</h2>
         <div className="flex gap-2">
-          <Link
-            href="/courses?level=Elementary"
-            className="flex-1 p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-center hover:bg-emerald-100 transition-colors"
-          >
-            <div className="font-semibold text-emerald-700">Elementary</div>
-            <div className="text-xs text-emerald-600">100-200 level</div>
-          </Link>
-          <Link
-            href="/courses?level=Intermediate"
-            className="flex-1 p-3 bg-amber-50 border border-amber-200 rounded-lg text-center hover:bg-amber-100 transition-colors"
-          >
-            <div className="font-semibold text-amber-700">Intermediate</div>
-            <div className="text-xs text-amber-600">300-400 level</div>
-          </Link>
-          <Link
-            href="/courses?level=Advanced"
-            className="flex-1 p-3 bg-orange-50 border border-orange-200 rounded-lg text-center hover:bg-orange-100 transition-colors"
-          >
-            <div className="font-semibold text-orange-700">Advanced</div>
-            <div className="text-xs text-orange-600">500+ level</div>
-          </Link>
+          {[
+            { level: 'Elementary', label: '100-200 level', bgColor: 'bg-emerald-50 dark:bg-emerald-900/20', borderColor: 'border-emerald-200 dark:border-emerald-800', hoverColor: 'hover:bg-emerald-100 dark:hover:bg-emerald-900/30', textColor: 'text-emerald-700 dark:text-emerald-300', subColor: 'text-emerald-600 dark:text-emerald-400' },
+            { level: 'Intermediate', label: '300-400 level', bgColor: 'bg-amber-50 dark:bg-amber-900/20', borderColor: 'border-amber-200 dark:border-amber-800', hoverColor: 'hover:bg-amber-100 dark:hover:bg-amber-900/30', textColor: 'text-amber-700 dark:text-amber-300', subColor: 'text-amber-600 dark:text-amber-400' },
+            { level: 'Advanced', label: '500+ level', bgColor: 'bg-orange-50 dark:bg-orange-900/20', borderColor: 'border-orange-200 dark:border-orange-800', hoverColor: 'hover:bg-orange-100 dark:hover:bg-orange-900/30', textColor: 'text-orange-700 dark:text-orange-300', subColor: 'text-orange-600 dark:text-orange-400' },
+          ].map(({ level, label, bgColor, borderColor, hoverColor, textColor, subColor }) => (
+            <button
+              key={level}
+              onClick={() => onLevelSelect?.(level)}
+              className={`flex-1 p-3 ${bgColor} border ${borderColor} rounded-lg text-center ${hoverColor} transition-colors cursor-pointer`}
+            >
+              <div className={`font-semibold ${textColor}`}>{level}</div>
+              <div className={`text-xs ${subColor}`}>{label}</div>
+            </button>
+          ))}
         </div>
       </div>
     </div>

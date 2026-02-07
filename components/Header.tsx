@@ -18,7 +18,7 @@ export function Header({ currentPath = '' }: HeaderProps) {
 
   return (
     <header className="bg-surface-primary border-b border-surface-tertiary sticky top-0 z-20">
-      <div className="max-w-6xl mx-auto px-6">
+      <div className="max-w-7xl mx-auto px-6">
         <div className="flex items-center justify-between h-16">
           <Link href="/" className="flex items-center gap-2">
             <Logo size={32} />

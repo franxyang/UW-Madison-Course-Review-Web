@@ -7,6 +7,7 @@ import { useSession } from 'next-auth/react'
 import { trpc } from '@/lib/trpc/client'
 import { useDebounce } from '@/lib/hooks/useDebounce'
 import { Logo } from '@/components/Logo'
+import { Header } from '@/components/Header'
 import { VoteButton } from '@/components/VoteButton'
 import { ContributorBadge } from '@/components/ContributorBadge'
 import { ReviewActions } from '@/components/ReviewActions'
@@ -34,10 +35,8 @@ import {
   Filter,
   ChevronDown,
   X,
-  Moon,
-  Sun
 } from 'lucide-react'
-import { ThemeToggle } from '@/components/ThemeToggle'
+// ThemeToggle now handled by Header component
 
 // Types
 interface Course {
@@ -609,10 +608,14 @@ export function CoursePageLayout({
   relatedCourses?: RelatedCourse[]
 }) {
   const { data: session } = useSession()
+  const utils = trpc.useUtils()
   
   // Filter state
   const [selectedTerm, setSelectedTerm] = useState('all')
   const [selectedInstructor, setSelectedInstructor] = useState('all')
+  
+  // Edit review state
+  const [editingReviewId, setEditingReviewId] = useState<string | null>(null)
 
   // Parse JSON fields
   const breadths = course.breadths ? (typeof course.breadths === 'string' ? JSON.parse(course.breadths) : course.breadths) : []
@@ -762,27 +765,7 @@ export function CoursePageLayout({
   return (
     <div className="min-h-screen bg-surface-secondary">
       {/* Header */}
-      <header className="bg-surface-primary border-b border-surface-tertiary sticky top-0 z-20">
-        <div className="max-w-[1400px] mx-auto px-6">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-3">
-              <Link href="/" className="flex items-center gap-2">
-                <Logo size={32} />
-              </Link>
-            </div>
-            <nav className="hidden sm:flex items-center gap-6">
-              <Link href="/courses" className="text-wf-crimson font-medium">Courses</Link>
-              <Link href="/instructors" className="text-text-secondary hover:text-text-primary transition-colors">Instructors</Link>
-              <Link href="/about" className="text-text-secondary hover:text-text-primary transition-colors">About</Link>
-              <ThemeToggle />
-            </nav>
-            <div className="sm:hidden flex items-center gap-3">
-              <ThemeToggle />
-              <Link href="/courses" className="text-sm text-wf-crimson font-medium">Courses</Link>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header currentPath="/courses" />
 
       {/* Main Content - 3 Column Layout (responsive: stack on mobile) */}
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
@@ -949,6 +932,41 @@ export function CoursePageLayout({
                   {filteredReviews.map((review, index) => {
                     const isGated = !course.reviewAccess.hasFullAccess && index > 0
 
+                    // Show edit form instead of review card when editing
+                    if (editingReviewId === review.id) {
+                      const existingReview = {
+                        id: review.id,
+                        term: review.term,
+                        title: review.title,
+                        gradeReceived: review.gradeReceived,
+                        contentRating: review.contentRating,
+                        teachingRating: review.teachingRating,
+                        gradingRating: review.gradingRating,
+                        workloadRating: review.workloadRating,
+                        contentComment: review.contentComment,
+                        teachingComment: review.teachingComment,
+                        gradingComment: review.gradingComment,
+                        workloadComment: review.workloadComment,
+                        assessments: review.assessments,
+                        resourceLink: review.resourceLink,
+                        recommendInstructor: review.recommendInstructor,
+                        instructor: review.instructor,
+                      }
+                      return (
+                        <div key={review.id} className="bg-surface-primary rounded-xl border-2 border-wf-crimson/30 p-1">
+                          <ReviewForm
+                            courseId={course.id}
+                            courseName={`${toOfficialCode(course.code)}: ${course.name}`}
+                            gradeDistributions={course.gradeDistributions}
+                            courseInstructors={course.instructors}
+                            existingReview={existingReview}
+                            onEditComplete={() => setEditingReviewId(null)}
+                            onEditCancel={() => setEditingReviewId(null)}
+                          />
+                        </div>
+                      )
+                    }
+
                     const reviewCardClass = getReviewCardClass(review)
                     const reviewCard = (
                       <div 
@@ -987,6 +1005,8 @@ export function CoursePageLayout({
                             <ReviewActions
                               reviewId={review.id}
                               isOwner={session?.user?.id === review.authorId}
+                              onEditStart={() => setEditingReviewId(review.id)}
+                              onDeleted={() => utils.course.byId.invalidate({ id: course.id })}
                             />
                           </div>
                         </div>

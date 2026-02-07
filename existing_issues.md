@@ -69,11 +69,22 @@ Last Updated: 2026-02-06 21:10 CST
 
 ---
 
-## ⚠️ 待处理
-
-### DB Migration Drift
+### DB Migration Drift — ✅ FIXED
 - **问题:** Prisma migrations 与实际 schema 不同步
-- **建议:** 考虑 `prisma migrate reset` 或手动同步
+- **修复:**
+  - `20260207103000_add_review_unique_constraint` - Review 唯一约束
+  - `20260207130000_reconcile_schema_drift` - 同步所有漂移变更
+    - CrossListGroup + Course.crossListGroupId
+    - GradeDistribution.instructorId (替代旧 GradeDistributionInstructor 表)
+    - Review.recommendInstructor
+    - Review.gradeReceived 改为可空
+- **注意:** 现有环境需执行 `prisma migrate resolve --applied` 登记迁移
+
+---
+
+## ✅ 审计完成
+
+所有 P0/P1/P2 问题已修复，工程质量门禁已建立
 
 ---
 

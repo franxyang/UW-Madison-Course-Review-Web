@@ -46,6 +46,7 @@ model User {
   email         String                 @unique
   emailVerified DateTime?
   name          String?
+  nickname      String?
   image         String?
   role          UserRole               @default(STUDENT)
   createdAt     DateTime               @default(now())

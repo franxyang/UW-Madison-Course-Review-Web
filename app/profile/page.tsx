@@ -3,10 +3,11 @@ import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { Logo } from '@/components/Logo'
 import Link from 'next/link'
-import { Mail, Calendar, LogOut, BookOpen, Star, MessageSquare, ThumbsUp, Trophy, Zap } from 'lucide-react'
+import { Calendar, LogOut, BookOpen, Star, MessageSquare, ThumbsUp, Trophy, Zap } from 'lucide-react'
 import { signOut } from '@/auth'
 import { computeContributorLevel, getAllLevels } from '@/lib/contributorLevel'
 import { toOfficialCode } from '@/lib/courseCodeDisplay'
+import { NicknameEditor } from '@/components/NicknameEditor'
 
 export default async function ProfilePage() {
   const session = await auth()
@@ -85,21 +86,20 @@ export default async function ProfilePage() {
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-4">
               <div className="w-20 h-20 bg-uw-red rounded-full flex items-center justify-center text-white text-2xl font-bold">
-                {user.name?.charAt(0) || user.email.charAt(0).toUpperCase()}
+                {(user.nickname || user.name || user.email.charAt(0)).charAt(0).toUpperCase()}
               </div>
               <div>
                 <div className="flex items-center gap-3">
-                  <h1 className="text-2xl font-bold text-slate-900">{user.name || 'Anonymous Badger'}</h1>
+                  <NicknameEditor
+                    currentNickname={user.nickname || user.name || 'Anonymous Badger'}
+                    initial={(user.nickname || user.name || user.email.charAt(0)).charAt(0).toUpperCase()}
+                  />
                   {contributorInfo.level > 0 && (
                     <span className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-full ${contributorInfo.color}`}>
                       {contributorInfo.badge} {contributorInfo.title}
                     </span>
                   )}
                 </div>
-                <p className="text-slate-600 flex items-center gap-2 mt-1">
-                  <Mail size={16} />
-                  {user.email}
-                </p>
                 <p className="text-sm text-slate-500 flex items-center gap-2 mt-1">
                   <Calendar size={14} />
                   Joined {new Date(user.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}
@@ -262,21 +262,24 @@ export default async function ProfilePage() {
                       key={levelDef.level}
                       className={`flex items-center gap-3 p-2 rounded-lg ${
                         isCurrent
-                          ? 'bg-uw-red/5 border border-uw-red/20'
+                          ? 'bg-uw-red/10 border border-uw-red/30 shadow-sm'
                           : isReached
-                          ? 'opacity-60'
-                          : 'opacity-30'
+                          ? 'bg-green-50/50'
+                          : 'bg-slate-50'
                       }`}
                     >
                       <span className="text-lg">{levelDef.badge || '⚪'}</span>
                       <div className="flex-1">
-                        <div className="text-sm font-medium text-slate-800">{levelDef.title}</div>
-                        <div className="text-[10px] text-slate-500">
-                          {levelDef.minReviews > 0 && `${levelDef.minReviews} reviews`}
+                        <div className={`text-sm font-medium ${isCurrent ? 'text-uw-red' : isReached ? 'text-slate-700' : 'text-slate-600'}`}>
+                          {levelDef.title}
+                        </div>
+                        <div className={`text-[11px] ${isCurrent || isReached ? 'text-slate-500' : 'text-slate-400'}`}>
+                          {levelDef.minReviews > 0 ? `${levelDef.minReviews} reviews` : 'Start here'}
                           {levelDef.minUpvotes > 0 && ` + ${levelDef.minUpvotes} upvotes`}
                         </div>
                       </div>
-                      {isReached && <span className="text-green-600 text-xs font-medium">✓</span>}
+                      {isReached && !isCurrent && <span className="text-green-600 text-xs font-medium">✓</span>}
+                      {isCurrent && <span className="text-uw-red text-xs font-bold">◄</span>}
                     </div>
                   )
                 })}

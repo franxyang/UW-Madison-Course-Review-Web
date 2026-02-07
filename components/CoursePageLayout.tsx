@@ -346,19 +346,25 @@ function RightSidebar({
           <div className="text-sm text-text-secondary">Reviews</div>
         </div>
 
-        {/* Rating Circles */}
-        {avgRatings && (
+        {/* Rating Averages - 4 Dimensions (Always shown, NA if no reviews) */}
+        <div className="bg-surface-primary border border-surface-tertiary rounded-xl p-4">
+          <h4 className="text-sm font-semibold text-text-primary mb-3">Average Ratings</h4>
           <div className="grid grid-cols-2 gap-3">
             {[
-              { label: 'Content', value: avgRatings.content },
-              { label: 'Teaching', value: avgRatings.teaching },
-              { label: 'Grading', value: avgRatings.grading },
-              { label: 'Workload', value: avgRatings.workload },
+              { label: 'Content', value: avgRatings?.content },
+              { label: 'Teaching', value: avgRatings?.teaching },
+              { label: 'Grading', value: avgRatings?.grading },
+              { label: 'Workload', value: avgRatings?.workload },
             ].map(({ label, value }) => {
-              const grade = getRatingLabel(value)
+              const grade = value !== undefined ? getRatingLabel(value) : 'NA'
+              const hasData = value !== undefined
               return (
                 <div key={label} className="text-center">
-                  <div className={`w-12 h-12 mx-auto rounded-full flex items-center justify-center text-white font-bold ${getRatingCircleColor(grade)}`}>
+                  <div className={`w-12 h-12 mx-auto rounded-full flex items-center justify-center font-bold ${
+                    hasData 
+                      ? `text-white ${getRatingCircleColor(grade)}` 
+                      : 'bg-surface-secondary text-text-tertiary border-2 border-dashed border-surface-tertiary'
+                  }`}>
                     {grade}
                   </div>
                   <div className="text-xs text-text-tertiary mt-2">{label}</div>
@@ -366,7 +372,7 @@ function RightSidebar({
               )
             })}
           </div>
-        )}
+        </div>
 
         {/* Write Review Button */}
         <button
@@ -376,50 +382,59 @@ function RightSidebar({
           ✏️ Write a Review
         </button>
 
-        {/* Grade Flow */}
+        {/* Grade Distribution - Improved Design */}
         {gradeData.length > 0 && totalGraded > 0 && (
           <div className="bg-surface-primary border border-surface-tertiary rounded-xl p-4">
             <h4 className="text-sm font-semibold text-text-primary mb-3">
-              Grade Flow
+              Grade Distribution
               {isFiltered && (
                 <span className="text-xs font-normal text-wf-crimson ml-2">
                   ({filterLabel})
                 </span>
               )}
             </h4>
-            <div className="space-y-2">
-              {gradeData.map(({ grade, count }) => (
-                <div key={grade} className="flex items-center gap-2">
-                  <span className="w-6 text-xs font-medium text-text-secondary">{grade}</span>
-                  <div className="flex-1 bg-surface-secondary rounded-full h-2 overflow-hidden">
-                    <div
-                      className={`h-full ${getBarColor(grade)} transition-all duration-500`}
-                      style={{ width: `${(count / maxCount) * 100}%` }}
-                    />
+            <div className="space-y-2.5">
+              {gradeData.map(({ grade, count }) => {
+                const percentage = ((count / totalGraded) * 100).toFixed(1)
+                return (
+                  <div key={grade} className="group">
+                    <div className="flex items-center justify-between text-xs mb-1">
+                      <span className="font-medium text-text-secondary">{grade}</span>
+                      <span className="text-text-tertiary">{percentage}%</span>
+                    </div>
+                    <div className="relative bg-surface-secondary rounded-full h-2.5 overflow-hidden shadow-inner">
+                      <div
+                        className={`h-full ${getBarColor(grade)} transition-all duration-500 ease-out rounded-full shadow-sm`}
+                        style={{ width: `${(count / maxCount) * 100}%` }}
+                      />
+                    </div>
                   </div>
-                  <span className="w-10 text-xs text-text-tertiary text-right">
-                    {((count / totalGraded) * 100).toFixed(0)}%
-                  </span>
-                </div>
-              ))}
+                )
+              })}
             </div>
-            <div className="mt-3 pt-3 border-t border-surface-tertiary text-center">
-              <span className={`text-lg font-bold ${
-                displayGPA !== null
-                  ? displayGPA >= 3.5 ? 'text-emerald-500' :
-                    displayGPA >= 3.0 ? 'text-emerald-400' :
-                    displayGPA >= 2.5 ? 'text-amber-500' :
-                    displayGPA >= 2.0 ? 'text-orange-500' : 'text-red-500'
-                  : 'text-text-primary'
-              }`}>
-                {displayGPA?.toFixed(2) || 'N/A'}
-              </span>
-              <div className="text-xs text-text-secondary">
-                {isFiltered ? (
-                  <span className="text-wf-crimson">{filterLabel} avg</span>
-                ) : (
-                  'Overall Avg GPA'
-                )}
+            {/* GPA Summary Card */}
+            <div className="mt-4 pt-4 border-t border-surface-tertiary">
+              <div className="flex items-center justify-between bg-surface-secondary/50 rounded-lg p-3">
+                <div className="text-xs text-text-secondary font-medium">
+                  {isFiltered ? (
+                    <span className="text-wf-crimson capitalize">{filterLabel} Avg</span>
+                  ) : (
+                    'Overall Avg'
+                  )}
+                </div>
+                <div className={`text-2xl font-bold ${
+                  displayGPA !== null
+                    ? displayGPA >= 3.5 ? 'text-emerald-500' :
+                      displayGPA >= 3.0 ? 'text-emerald-400' :
+                      displayGPA >= 2.5 ? 'text-amber-500' :
+                      displayGPA >= 2.0 ? 'text-orange-500' : 'text-red-500'
+                    : 'text-text-tertiary'
+                }`}>
+                  {displayGPA?.toFixed(2) || 'N/A'}
+                </div>
+              </div>
+              <div className="text-center text-xs text-text-tertiary mt-2">
+                {totalGraded.toLocaleString()} total grades
               </div>
             </div>
           </div>

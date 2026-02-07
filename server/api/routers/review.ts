@@ -270,6 +270,7 @@ export const reviewRouter = router({
         instructorUpdate = { instructorId: instructor.id }
       }
 
+      // P2 Fix: Include recommendInstructor and handle empty assessments array
       const updated = await ctx.prisma.review.update({
         where: { id: input.reviewId },
         data: {
@@ -284,8 +285,11 @@ export const reviewRouter = router({
           ...(input.teachingComment !== undefined && { teachingComment: input.teachingComment || null }),
           ...(input.gradingComment !== undefined && { gradingComment: input.gradingComment || null }),
           ...(input.workloadComment !== undefined && { workloadComment: input.workloadComment || null }),
-          ...(input.assessments && { assessments: JSON.stringify(input.assessments) }),
+          // Fix: use !== undefined to allow empty array (clearing assessments)
+          ...(input.assessments !== undefined && { assessments: JSON.stringify(input.assessments) }),
           ...(input.resourceLink !== undefined && { resourceLink: input.resourceLink || null }),
+          // Fix: include recommendInstructor update
+          ...(input.recommendInstructor !== undefined && { recommendInstructor: input.recommendInstructor }),
           ...instructorUpdate,
         },
         include: {

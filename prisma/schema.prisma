@@ -189,6 +189,8 @@ model Review {
   instructor      Instructor @relation(fields: [instructorId], references: [id])
   votes           Vote[]
 
+  // P1 Fix: Prevent duplicate reviews via DB constraint (one review per user per course+instructor)
+  @@unique([authorId, courseId, instructorId])
   @@index([courseId])
   @@index([authorId])
   @@index([createdAt])

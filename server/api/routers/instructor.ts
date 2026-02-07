@@ -88,12 +88,24 @@ export const instructorRouter = router({
       }
 
       // Calculate average ratings across all reviews
+      // P1 Fix: Include all 7 grade levels (A, AB, B, BC, C, D, F)
+      const gradeToScore: Record<string, number> = {
+        'F': 1,
+        'D': 2,
+        'C': 3,
+        'BC': 3.5,
+        'B': 4,
+        'AB': 4.5,
+        'A': 5,
+      }
+      const getRatingScore = (rating: string): number => gradeToScore[rating] ?? 3 // Default to C if unknown
+
       const reviews = instructor.reviews
       const avgRatings = reviews.length > 0 ? {
-        content: reviews.reduce((sum, r) => sum + (['F', 'D', 'C', 'B', 'A'].indexOf(r.contentRating) + 1), 0) / reviews.length,
-        teaching: reviews.reduce((sum, r) => sum + (['F', 'D', 'C', 'B', 'A'].indexOf(r.teachingRating) + 1), 0) / reviews.length,
-        grading: reviews.reduce((sum, r) => sum + (['F', 'D', 'C', 'B', 'A'].indexOf(r.gradingRating) + 1), 0) / reviews.length,
-        workload: reviews.reduce((sum, r) => sum + (['F', 'D', 'C', 'B', 'A'].indexOf(r.workloadRating) + 1), 0) / reviews.length,
+        content: reviews.reduce((sum, r) => sum + getRatingScore(r.contentRating), 0) / reviews.length,
+        teaching: reviews.reduce((sum, r) => sum + getRatingScore(r.teachingRating), 0) / reviews.length,
+        grading: reviews.reduce((sum, r) => sum + getRatingScore(r.gradingRating), 0) / reviews.length,
+        workload: reviews.reduce((sum, r) => sum + getRatingScore(r.workloadRating), 0) / reviews.length,
       } : null
 
       return {

@@ -1,30 +1,20 @@
-import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 
+// P0 Security Fix: Disable debug endpoint in production
+// This endpoint should ONLY be used during development
 export async function GET() {
-  try {
-    // Test database connection
-    await prisma.$connect()
-    
-    // Try to query user table
-    const userCount = await prisma.user.count()
-    
-    return NextResponse.json({
-      success: true,
-      message: 'Database connection OK',
-      userCount,
-      env: {
-        hasClientId: !!process.env.GOOGLE_CLIENT_ID,
-        hasClientSecret: !!process.env.GOOGLE_CLIENT_SECRET,
-        hasAuthSecret: !!process.env.AUTH_SECRET,
-        nextAuthUrl: process.env.NEXTAUTH_URL,
-      }
-    })
-  } catch (error: any) {
-    return NextResponse.json({
-      success: false,
-      error: error.message,
-      stack: error.stack
-    }, { status: 500 })
+  // Block in production
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json(
+      { error: 'Not available' },
+      { status: 404 }
+    )
   }
+
+  // In development, return minimal health check (no sensitive data)
+  return NextResponse.json({
+    status: 'ok',
+    environment: 'development',
+    timestamp: new Date().toISOString(),
+  })
 }

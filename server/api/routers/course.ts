@@ -251,7 +251,38 @@ export const courseRouter = router({
       })
     )
     .query(async ({ ctx, input }) => {
-      const searchTerm = input.query.trim()
+      const rawTerm = input.query.trim()
+      
+      // P2 Fix: Sanitize search term for tsquery (remove special chars that break syntax)
+      // Keep only alphanumeric, spaces, and common course code chars
+      const searchTerm = rawTerm
+        .replace(/[^\w\s\-]/g, ' ')  // Replace special chars with space
+        .replace(/\s+/g, ' ')         // Collapse multiple spaces
+        .trim()
+      
+      // If sanitized term is empty, fall back to ILIKE only
+      if (!searchTerm) {
+        const results = await ctx.prisma.course.findMany({
+          where: { code: { contains: rawTerm, mode: 'insensitive' } },
+          select: {
+            id: true,
+            code: true,
+            name: true,
+            credits: true,
+            level: true,
+            school: { select: { name: true } },
+          },
+          take: input.limit,
+        })
+        return results.map(r => ({
+          id: r.id,
+          code: r.code,
+          name: r.name,
+          credits: r.credits,
+          level: r.level,
+          schoolName: r.school.name,
+        }))
+      }
 
       // Use prefix matching for partial queries (autocomplete)
       const results = await ctx.prisma.$queryRaw<any[]>`
@@ -262,9 +293,9 @@ export const courseRouter = router({
         FROM "Course" c
         JOIN "School" s ON c."schoolId" = s."id"
         WHERE c."searchVector" @@ to_tsquery('english', ${searchTerm + ':*'})
-           OR c."code" ILIKE ${`%${searchTerm}%`}
+           OR c."code" ILIKE ${`%${rawTerm}%`}
         ORDER BY 
-          CASE WHEN c."code" ILIKE ${`${searchTerm}%`} THEN 0 ELSE 1 END,
+          CASE WHEN c."code" ILIKE ${`${rawTerm}%`} THEN 0 ELSE 1 END,
           rank DESC
         LIMIT ${input.limit}
       `
@@ -400,14 +431,81 @@ export const courseRouter = router({
         ])
       )
 
-      const reviewsWithLevel = sortedReviews.map(review => ({
-        ...review,
-        authorLevel: authorLevelMap.get(review.authorId) || computeContributorLevel(0, 0),
-      }))
+      // P0 Security Fix: Server-side review filtering based on access level
+      // Only return full review data if user has access, otherwise return limited preview
+      const sanitizedReviews = sortedReviews.map((review, index) => {
+        // Strip sensitive fields from author (never expose email)
+        const safeAuthor = review.author ? {
+          id: review.author.id,
+          name: review.author.name,
+          image: review.author.image,
+          // Never include: email, emailVerified
+        } : null
+
+        // Strip sensitive fields from comment authors
+        const safeComments = review.comments?.map(comment => ({
+          ...comment,
+          author: comment.author ? {
+            id: comment.author.id,
+            name: comment.author.name,
+            image: comment.author.image,
+          } : null,
+        })) || []
+
+        // Strip user info from votes (only need count)
+        const safeVotes = review.votes?.map(vote => ({
+          id: vote.id,
+          reviewId: vote.reviewId,
+          // Don't include: userId, user
+        })) || []
+
+        // If user has full access OR this is the first (preview) review, return full content
+        if (hasFullAccess || index === 0) {
+          return {
+            ...review,
+            author: safeAuthor,
+            comments: safeComments,
+            votes: safeVotes,
+            authorLevel: authorLevelMap.get(review.authorId) || computeContributorLevel(0, 0),
+          }
+        }
+
+        // For non-contributors: return redacted review (no content, just metadata)
+        return {
+          id: review.id,
+          courseId: review.courseId,
+          instructorId: review.instructorId,
+          authorId: review.authorId,
+          term: review.term,
+          createdAt: review.createdAt,
+          // Redact actual content
+          title: null,
+          gradeReceived: null,
+          contentRating: review.contentRating, // Keep ratings for aggregate stats
+          teachingRating: review.teachingRating,
+          gradingRating: review.gradingRating,
+          workloadRating: review.workloadRating,
+          contentComment: null, // Redacted
+          teachingComment: null,
+          gradingComment: null,
+          workloadComment: null,
+          pros: null,
+          cons: null,
+          tips: null,
+          assessments: [],
+          recommendInstructor: null,
+          instructor: review.instructor,
+          author: safeAuthor,
+          comments: [], // Hide comments for non-contributors
+          votes: safeVotes,
+          authorLevel: authorLevelMap.get(review.authorId) || computeContributorLevel(0, 0),
+          _redacted: true, // Flag for frontend
+        }
+      })
 
       return {
         ...course,
-        reviews: reviewsWithLevel,
+        reviews: sanitizedReviews,
         reviewAccess: {
           hasFullAccess,
           userReviewCount,

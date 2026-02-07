@@ -83,8 +83,9 @@ export function UserMenu({ user }: UserMenuProps) {
               <span>My Profile</span>
             </Link>
 
+            {/* P2 Fix: Link to profile page sections instead of non-existent routes */}
             <Link
-              href="/profile/reviews"
+              href="/profile#reviews"
               className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
               onClick={() => setIsOpen(false)}
             >
@@ -93,21 +94,12 @@ export function UserMenu({ user }: UserMenuProps) {
             </Link>
 
             <Link
-              href="/profile/saved"
+              href="/profile#saved"
               className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
               onClick={() => setIsOpen(false)}
             >
               <BookMarked size={16} />
               <span>Saved Courses</span>
-            </Link>
-
-            <Link
-              href="/profile/settings"
-              className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
-              onClick={() => setIsOpen(false)}
-            >
-              <Settings size={16} />
-              <span>Settings</span>
             </Link>
           </div>
 

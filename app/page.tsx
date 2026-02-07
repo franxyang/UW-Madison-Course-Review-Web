@@ -193,17 +193,54 @@ export default async function Home() {
               </div>
             </div>
 
+            {/* Browse by Level */}
+            <div className="bg-surface-primary rounded-xl border border-surface-tertiary p-5">
+              <h2 className="font-semibold text-text-primary mb-4">Browse by Level</h2>
+              <div className="grid grid-cols-3 gap-3">
+                <Link
+                  href="/courses?levels=Elementary"
+                  className="p-4 rounded-lg border-2 border-blue-200 bg-blue-50 hover:bg-blue-100 transition-colors text-center group"
+                >
+                  <div className="font-semibold text-blue-700 mb-1">Elementary</div>
+                  <div className="text-xs text-blue-600/80">100-200 level</div>
+                </Link>
+                <Link
+                  href="/courses?levels=Intermediate"
+                  className="p-4 rounded-lg border-2 border-purple-200 bg-purple-50 hover:bg-purple-100 transition-colors text-center group"
+                >
+                  <div className="font-semibold text-purple-700 mb-1">Intermediate</div>
+                  <div className="text-xs text-purple-600/80">300-400 level</div>
+                </Link>
+                <Link
+                  href="/courses?levels=Advanced"
+                  className="p-4 rounded-lg border-2 border-slate-300 bg-slate-50 hover:bg-slate-100 transition-colors text-center group"
+                >
+                  <div className="font-semibold text-slate-700 mb-1">Advanced</div>
+                  <div className="text-xs text-slate-600/80">500+ level</div>
+                </Link>
+              </div>
+            </div>
+
             {/* Quick Links */}
             <div className="bg-surface-primary rounded-xl border border-surface-tertiary p-5">
               <h2 className="font-semibold text-text-primary mb-4">Popular Departments</h2>
               <div className="flex flex-wrap gap-2">
-                {['Computer Sciences', 'Mathematics', 'Economics', 'Psychology', 'Biology', 'Chemistry', 'Physics', 'Statistics'].map(dept => (
+                {[
+                  { name: 'Computer Sciences', id: 'cml7q3gdh0497nafqn4oqpdrv' },
+                  { name: 'Mathematics', id: 'cml7q3gdg045ynafqouzdoac6' },
+                  { name: 'Economics', id: 'cml7q3gdh049enafqlqhzh1vz' },
+                  { name: 'Psychology', id: 'cml7q3gdh0476nafqi7zki53m' },
+                  { name: 'Biology', id: 'cml7q3gdh0489nafqcias0n30' },
+                  { name: 'Chemistry', id: 'cml7q3gdh048dnafqdxr0rl89' },
+                  { name: 'Physics', id: 'cml7q3gdh04asnafqemjns6ds' },
+                  { name: 'Statistics', id: 'cml7q3gdh04bjnafqkb3mm5zz' }
+                ].map(dept => (
                   <Link
-                    key={dept}
-                    href={`/courses?search=${encodeURIComponent(dept)}`}
+                    key={dept.id}
+                    href={`/courses?departments=${dept.id}`}
                     className="px-3 py-1.5 bg-surface-secondary hover:bg-hover-bg rounded-lg text-sm text-text-secondary hover:text-text-primary transition-colors"
                   >
-                    {dept}
+                    {dept.name}
                   </Link>
                 ))}
               </div>

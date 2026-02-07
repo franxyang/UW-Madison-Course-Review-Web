@@ -120,7 +120,7 @@ export default async function Home() {
           {/* Left Column - Stats & Featured */}
           <div className="lg:col-span-2 space-y-6">
             {/* Quick Stats */}
-            <div className="grid grid-cols-5 gap-3">
+            <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
               <div className="bg-surface-primary rounded-xl border border-surface-tertiary p-3 text-center">
                 <BookOpen className="mx-auto mb-1.5 text-wf-crimson" size={20} />
                 <div className="text-xl font-bold text-text-primary">{stats.courseCount.toLocaleString()}</div>

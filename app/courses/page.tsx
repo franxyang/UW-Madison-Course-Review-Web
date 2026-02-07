@@ -31,10 +31,10 @@ function CoursesPageSkeleton() {
       <div className="max-w-7xl mx-auto px-6 py-8">
         <div className="animate-pulse">
           <div className="h-10 w-64 bg-surface-tertiary rounded mb-6" />
-          <div className="grid grid-cols-4 gap-6">
-            <div className="h-96 bg-surface-tertiary rounded-xl" />
-            <div className="col-span-2 h-96 bg-surface-tertiary rounded-xl" />
-            <div className="h-96 bg-surface-tertiary rounded-xl" />
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <div className="hidden lg:block h-96 bg-surface-tertiary rounded-xl" />
+            <div className="lg:col-span-2 h-96 bg-surface-tertiary rounded-xl" />
+            <div className="hidden lg:block h-96 bg-surface-tertiary rounded-xl" />
           </div>
         </div>
       </div>
@@ -172,9 +172,9 @@ function CoursesPageContent() {
         </div>
 
         {/* Three Column Layout */}
-        <div className="grid grid-cols-[220px_1fr_260px] gap-6">
-          {/* Left Column - Navigation */}
-          <aside className="space-y-4">
+        <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr_260px] gap-6">
+          {/* Left Column - Navigation (hidden on mobile) */}
+          <aside className="hidden lg:block space-y-4">
             {selectedDept && deptStats ? (
               // Show course number grid when dept selected
               <div className="bg-surface-primary border border-surface-tertiary rounded-xl p-3">
@@ -225,8 +225,8 @@ function CoursesPageContent() {
             )}
           </div>
 
-          {/* Right Column - Stats & Filters */}
-          <aside className="space-y-4">
+          {/* Right Column - Stats & Filters (hidden on mobile) */}
+          <aside className="hidden lg:block space-y-4">
             {selectedDept ? (
               <DepartmentStats deptCode={selectedDept} />
             ) : null}

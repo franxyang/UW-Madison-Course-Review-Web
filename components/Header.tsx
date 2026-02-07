@@ -50,6 +50,16 @@ export function Header({ currentPath = '' }: HeaderProps) {
             >
               About
             </Link>
+            {session?.user && ((session.user as any).role === 'ADMIN' || (session.user as any).role === 'MODERATOR') && (
+              <Link
+                href="/admin"
+                className={isActive('/admin')
+                  ? 'text-wf-crimson font-medium'
+                  : 'text-text-secondary hover:text-text-primary transition-colors'}
+              >
+                Admin
+              </Link>
+            )}
             <ThemeToggle />
             {session?.user ? <UserMenu user={session.user} /> : <GuestMenu />}
           </nav>

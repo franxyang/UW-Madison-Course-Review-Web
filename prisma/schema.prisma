@@ -61,6 +61,10 @@ model User {
   sessions      Session[]
   transcript    StudentCourseHistory[]
   votes         Vote[]
+  auditLogs     AuditLog[]             @relation("AuditActor")
+  bans          UserBan[]              @relation("BannedUser")
+  bansIssued    UserBan[]              @relation("BanIssuer")
+  resolvedReports Report[]             @relation("ResolvedBy")
 }
 
 model School {
@@ -248,19 +252,24 @@ model SavedCourse {
 }
 
 model Report {
-  id         String   @id @default(cuid())
-  reason     String
-  details    String?
-  status     String   @default("pending")
-  reporterId String
-  reviewId   String
-  createdAt  DateTime @default(now())
-  reporter   User     @relation("ReportedBy", fields: [reporterId], references: [id])
-  review     Review   @relation(fields: [reviewId], references: [id])
+  id           String    @id @default(cuid())
+  reason       String
+  details      String?
+  status       String    @default("pending")
+  reporterId   String
+  reviewId     String
+  createdAt    DateTime  @default(now())
+  resolvedById String?
+  resolvedAt   DateTime?
+  resolution   String?   // "approved" | "rejected" | "escalated"
+  reporter     User      @relation("ReportedBy", fields: [reporterId], references: [id])
+  review       Review    @relation(fields: [reviewId], references: [id])
+  resolvedBy   User?     @relation("ResolvedBy", fields: [resolvedById], references: [id])
 
   @@unique([reporterId, reviewId])
   @@index([status])
   @@index([reviewId])
+  @@index([resolvedById])
 }
 
 model StudentCourseHistory {
@@ -275,7 +284,37 @@ model StudentCourseHistory {
 
 enum UserRole {
   STUDENT
+  MODERATOR
   ADMIN
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  action     String   // e.g. "RESOLVE_REPORT", "DELETE_REVIEW", "BAN_USER", "CHANGE_ROLE"
+  targetType String   // e.g. "Report", "Review", "User"
+  targetId   String
+  details    Json?
+  actorId    String
+  createdAt  DateTime @default(now())
+  actor      User     @relation("AuditActor", fields: [actorId], references: [id])
+
+  @@index([actorId])
+  @@index([targetType, targetId])
+  @@index([createdAt])
+}
+
+model UserBan {
+  id        String    @id @default(cuid())
+  userId    String
+  reason    String
+  bannedById String
+  expiresAt DateTime?
+  active    Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  user      User      @relation("BannedUser", fields: [userId], references: [id])
+  bannedBy  User      @relation("BanIssuer", fields: [bannedById], references: [id])
+
+  @@index([userId, active])
 }
 
 enum Grade {

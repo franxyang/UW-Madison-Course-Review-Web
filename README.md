@@ -1,8 +1,17 @@
-# MadSpace
+# MadSpace 🏫
 
-A student-driven course review community for UW-Madison. Real reviews, real data, real decisions.
+**A modern course review platform built by and for UW-Madison students.**
+
+[![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=next.js)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Neon-4169E1?logo=postgresql&logoColor=white)](https://neon.tech/)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+
+> Make smarter course decisions with real reviews from fellow Badgers 🦡
 
 **[madspace.app](https://madspace.app)**
+
+---
 
 ## Why MadSpace?
 

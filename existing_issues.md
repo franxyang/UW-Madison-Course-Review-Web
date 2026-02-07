@@ -58,17 +58,18 @@ Last Updated: 2026-02-06 21:10 CST
   - 移除 Settings 链接（功能未实现）
 - **Commit:** `5074ce3`
 
+### P2 工程质量门禁未成型 — ✅ FIXED
+- **问题:** lint 交互式初始化；tsc --noEmit 失败
+- **修复:**
+  - 创建 `.eslintrc.json` (extends next/core-web-vitals + next/typescript)
+  - tsconfig 移除 `.next/types` (Next.js 自动添加)
+  - 忽略 `next-env.d.ts` (生成文件)
+- **结果:** 0 errors, 59 warnings
+- **Commit:** `38aa766`
+
 ---
 
 ## ⚠️ 待处理
-
-### P2 工程质量门禁未成型
-- **问题:** 
-  - `npm run lint` 进入交互式初始化
-  - `npx tsc --noEmit` 因 `.next/types` 引用失败
-- **建议:** 
-  - 落地 ESLint 配置 (`eslint.config.mjs`)
-  - tsconfig 不直接 include `.next/types`
 
 ### DB Migration Drift
 - **问题:** Prisma migrations 与实际 schema 不同步

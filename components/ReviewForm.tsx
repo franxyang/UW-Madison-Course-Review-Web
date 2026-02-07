@@ -5,11 +5,33 @@ import { MessageSquare, X, AlertCircle, ThumbsUp, ThumbsDown, Meh } from 'lucide
 import { toast } from 'sonner'
 import { trpc } from '@/lib/trpc/client'
 
+interface ExistingReview {
+  id: string
+  term: string
+  title?: string | null
+  gradeReceived?: string | null
+  contentRating: string
+  teachingRating: string
+  gradingRating: string
+  workloadRating: string
+  contentComment?: string | null
+  teachingComment?: string | null
+  gradingComment?: string | null
+  workloadComment?: string | null
+  assessments?: string[] | null
+  resourceLink?: string | null
+  recommendInstructor?: string | null
+  instructor?: { id: string; name: string } | null
+}
+
 interface ReviewFormProps {
   courseId: string
   courseName: string
   courseInstructors?: { instructor: { id: string; name: string } }[]
   gradeDistributions?: { term: string; instructor?: { id: string; name: string } | null }[]
+  existingReview?: ExistingReview | null
+  onEditComplete?: () => void
+  onEditCancel?: () => void
 }
 
 type ReviewFormData = {
@@ -142,9 +164,13 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
   courseId, 
   courseName, 
   courseInstructors = [],
-  gradeDistributions = []
+  gradeDistributions = [],
+  existingReview = null,
+  onEditComplete,
+  onEditCancel,
 }) => {
-  const [isOpen, setIsOpen] = useState(false)
+  const isEditMode = !!existingReview
+  const [isOpen, setIsOpen] = useState(isEditMode)
   const [error, setError] = useState<string | null>(null)
   
   const availableTerms = useMemo(() => generateTerms(), [])
@@ -171,17 +197,23 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
 
   const [formData, setFormData] = useState<Partial<ReviewFormData>>({
     courseId,
-    term: availableTerms[0] || '',
+    term: existingReview?.term || availableTerms[0] || '',
     customTerm: '',
-    gradeReceived: '',
-    contentRating: '',
-    teachingRating: '',
-    gradingRating: '',
-    workloadRating: '',
-    assessments: [],
-    instructorName: '',
+    gradeReceived: existingReview?.gradeReceived || '',
+    contentRating: existingReview?.contentRating || '',
+    teachingRating: existingReview?.teachingRating || '',
+    gradingRating: existingReview?.gradingRating || '',
+    workloadRating: existingReview?.workloadRating || '',
+    contentComment: existingReview?.contentComment || '',
+    teachingComment: existingReview?.teachingComment || '',
+    gradingComment: existingReview?.gradingComment || '',
+    workloadComment: existingReview?.workloadComment || '',
+    title: existingReview?.title || '',
+    assessments: existingReview?.assessments || [],
+    resourceLink: existingReview?.resourceLink || '',
+    instructorName: existingReview?.instructor?.name || '',
     isCustomInstructor: false,
-    recommendInstructor: ''
+    recommendInstructor: (existingReview?.recommendInstructor as any) || ''
   })
   
   // Check if selected term has data in database
@@ -229,6 +261,24 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
       toast.error('Failed to submit review', { description: error.message })
     }
   })
+
+  const updateReviewMutation = trpc.review.update.useMutation({
+    onSuccess: () => {
+      toast.success('Review updated successfully! ✏️', {
+        description: 'Your changes have been saved.'
+      })
+      utils.course.byId.invalidate({ id: courseId })
+      setTimeout(() => {
+        onEditComplete?.()
+      }, 1000)
+    },
+    onError: (error) => {
+      setError(error.message)
+      toast.error('Failed to update review', { description: error.message })
+    }
+  })
+
+  const activeMutation = isEditMode ? updateReviewMutation : createReviewMutation
 
   const handleTermChange = (term: string) => {
     const hasData = termsWithData.has(term)
@@ -279,24 +329,45 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
       return
     }
 
-    createReviewMutation.mutate({
-      courseId: formData.courseId!,
-      term: formData.term!,
-      title: formData.title,
-      gradeReceived: (formData.gradeReceived || undefined) as 'A' | 'AB' | 'B' | 'BC' | 'C' | 'D' | 'F' | undefined,
-      contentRating: formData.contentRating as 'A' | 'AB' | 'B' | 'BC' | 'C' | 'D' | 'F',
-      teachingRating: formData.teachingRating as 'A' | 'AB' | 'B' | 'BC' | 'C' | 'D' | 'F',
-      gradingRating: formData.gradingRating as 'A' | 'AB' | 'B' | 'BC' | 'C' | 'D' | 'F',
-      workloadRating: formData.workloadRating as 'A' | 'AB' | 'B' | 'BC' | 'C' | 'D' | 'F',
-      contentComment: formData.contentComment,
-      teachingComment: formData.teachingComment,
-      gradingComment: formData.gradingComment,
-      workloadComment: formData.workloadComment,
-      assessments: formData.assessments,
-      resourceLink: formData.resourceLink,
-      recommendInstructor: formData.recommendInstructor as 'yes' | 'no' | 'neutral' | undefined,
-      instructorName: formData.instructorName!,
-    })
+    if (isEditMode && existingReview) {
+      updateReviewMutation.mutate({
+        reviewId: existingReview.id,
+        term: formData.term,
+        title: formData.title,
+        gradeReceived: (formData.gradeReceived || undefined) as 'A' | 'AB' | 'B' | 'BC' | 'C' | 'D' | 'F' | undefined,
+        contentRating: formData.contentRating as 'A' | 'AB' | 'B' | 'BC' | 'C' | 'D' | 'F',
+        teachingRating: formData.teachingRating as 'A' | 'AB' | 'B' | 'BC' | 'C' | 'D' | 'F',
+        gradingRating: formData.gradingRating as 'A' | 'AB' | 'B' | 'BC' | 'C' | 'D' | 'F',
+        workloadRating: formData.workloadRating as 'A' | 'AB' | 'B' | 'BC' | 'C' | 'D' | 'F',
+        contentComment: formData.contentComment,
+        teachingComment: formData.teachingComment,
+        gradingComment: formData.gradingComment,
+        workloadComment: formData.workloadComment,
+        assessments: formData.assessments,
+        resourceLink: formData.resourceLink,
+        recommendInstructor: formData.recommendInstructor as 'yes' | 'no' | 'neutral' | undefined,
+        instructorName: formData.instructorName,
+      })
+    } else {
+      createReviewMutation.mutate({
+        courseId: formData.courseId!,
+        term: formData.term!,
+        title: formData.title,
+        gradeReceived: (formData.gradeReceived || undefined) as 'A' | 'AB' | 'B' | 'BC' | 'C' | 'D' | 'F' | undefined,
+        contentRating: formData.contentRating as 'A' | 'AB' | 'B' | 'BC' | 'C' | 'D' | 'F',
+        teachingRating: formData.teachingRating as 'A' | 'AB' | 'B' | 'BC' | 'C' | 'D' | 'F',
+        gradingRating: formData.gradingRating as 'A' | 'AB' | 'B' | 'BC' | 'C' | 'D' | 'F',
+        workloadRating: formData.workloadRating as 'A' | 'AB' | 'B' | 'BC' | 'C' | 'D' | 'F',
+        contentComment: formData.contentComment,
+        teachingComment: formData.teachingComment,
+        gradingComment: formData.gradingComment,
+        workloadComment: formData.workloadComment,
+        assessments: formData.assessments,
+        resourceLink: formData.resourceLink,
+        recommendInstructor: formData.recommendInstructor as 'yes' | 'no' | 'neutral' | undefined,
+        instructorName: formData.instructorName!,
+      })
+    }
   }
 
   const toggleAssessment = (assessment: string) => {
@@ -308,7 +379,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
     }))
   }
 
-  if (!isOpen) {
+  if (!isOpen && !isEditMode) {
     return (
       <button
         onClick={() => setIsOpen(true)}
@@ -324,7 +395,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
         {/* Background overlay */}
-        <div className="fixed inset-0 transition-opacity" onClick={() => !createReviewMutation.isPending && setIsOpen(false)}>
+        <div className="fixed inset-0 transition-opacity" onClick={() => { if (!activeMutation.isPending) { isEditMode ? onEditCancel?.() : setIsOpen(false) } }}>
           <div className="absolute inset-0 bg-black/50 dark:bg-black/70"></div>
         </div>
 
@@ -340,13 +411,13 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
           <div className="bg-surface-primary px-6 pt-6 pb-4 border-b border-surface-tertiary">
             <div className="flex items-start justify-between">
               <div>
-                <h3 className="text-xl font-semibold text-text-primary">Write a Review</h3>
+                <h3 className="text-xl font-semibold text-text-primary">{isEditMode ? 'Edit Review' : 'Write a Review'}</h3>
                 <p className="mt-1 text-sm text-text-secondary">{courseName}</p>
               </div>
               <button
-                onClick={() => !createReviewMutation.isPending && setIsOpen(false)}
+                onClick={() => { if (!activeMutation.isPending) { isEditMode ? onEditCancel?.() : setIsOpen(false) } }}
                 className="text-text-tertiary hover:text-text-primary transition-colors disabled:opacity-50"
-                disabled={createReviewMutation.isPending}
+                disabled={activeMutation.isPending}
               >
                 <X size={24} />
               </button>
@@ -362,7 +433,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
               </div>
             )}
 
-            {createReviewMutation.isSuccess && (
+            {activeMutation.isSuccess && (
               <div className="mb-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
                 <span className="text-sm text-green-700 dark:text-green-300">Review submitted successfully!</span>
               </div>
@@ -379,7 +450,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
                     value={formData.term}
                     onChange={(e) => handleTermChange(e.target.value)}
                     className="w-full px-3 py-2 bg-surface-secondary border border-surface-tertiary rounded-lg focus:outline-none focus:ring-2 focus:ring-wf-crimson/20 focus:border-wf-crimson text-text-primary"
-                    disabled={createReviewMutation.isPending}
+                    disabled={activeMutation.isPending}
                   >
                     {availableTerms.map(term => (
                       <option key={term} value={term}>
@@ -403,7 +474,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
                       value={formData.instructorName}
                       onChange={(e) => setFormData({ ...formData, instructorName: e.target.value })}
                       className="w-full px-3 py-2 bg-surface-secondary border border-surface-tertiary rounded-lg focus:outline-none focus:ring-2 focus:ring-wf-crimson/20 focus:border-wf-crimson text-text-primary"
-                      disabled={createReviewMutation.isPending}
+                      disabled={activeMutation.isPending}
                     >
                       <option value="">Select instructor...</option>
                       {instructorsForTerm.map(inst => (
@@ -417,7 +488,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
                       onChange={(e) => setFormData({ ...formData, instructorName: e.target.value })}
                       placeholder="Professor name"
                       className="w-full px-3 py-2 bg-surface-secondary border border-surface-tertiary rounded-lg focus:outline-none focus:ring-2 focus:ring-wf-crimson/20 focus:border-wf-crimson text-text-primary"
-                      disabled={createReviewMutation.isPending}
+                      disabled={activeMutation.isPending}
                     />
                   )}
                 </div>
@@ -443,7 +514,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
                           ? `bg-${color}-100 dark:bg-${color}-900/30 border-${color}-400 text-${color}-700 dark:text-${color}-300`
                           : 'bg-surface-secondary border-surface-tertiary text-text-secondary hover:border-text-tertiary'
                       }`}
-                      disabled={createReviewMutation.isPending}
+                      disabled={activeMutation.isPending}
                     >
                       <Icon size={18} />
                       <span className="font-medium">{label}</span>
@@ -464,7 +535,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
                       type="button"
                       onClick={() => setFormData({ ...formData, gradeReceived: formData.gradeReceived === grade ? '' : grade })}
                       className={`px-4 py-2 rounded-lg border-2 font-medium transition-all ${getGradeButtonColor(grade, formData.gradeReceived === grade)}`}
-                      disabled={createReviewMutation.isPending}
+                      disabled={activeMutation.isPending}
                     >
                       {grade}
                     </button>
@@ -499,7 +570,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
                                   ? 'bg-white/80 dark:bg-black/30 shadow-sm'
                                   : 'hover:bg-white/40 dark:hover:bg-black/20'
                               }`}
-                              disabled={createReviewMutation.isPending}
+                              disabled={activeMutation.isPending}
                             >
                               {rating}
                             </button>
@@ -514,7 +585,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
                           maxLength={3000}
                           className="w-full px-3 py-2 text-sm bg-surface-secondary border border-surface-tertiary rounded-lg focus:outline-none focus:ring-2 focus:ring-wf-crimson/20 focus:border-wf-crimson resize-y text-text-primary placeholder:text-text-tertiary/70 min-h-[120px]"
                           rows={5}
-                          disabled={createReviewMutation.isPending}
+                          disabled={activeMutation.isPending}
                         />
                         <div className="text-xs text-text-tertiary mt-1 flex justify-between">
                           <span>{required ? 'Required (min 20 chars)' : 'Optional'}</span>
@@ -537,7 +608,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   placeholder="Summarize your experience"
                   className="w-full px-3 py-2 bg-surface-secondary border border-surface-tertiary rounded-lg focus:outline-none focus:ring-2 focus:ring-wf-crimson/20 focus:border-wf-crimson text-text-primary"
-                  disabled={createReviewMutation.isPending}
+                  disabled={activeMutation.isPending}
                 />
               </div>
 
@@ -557,7 +628,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
                           ? 'bg-wf-crimson/10 border-wf-crimson text-wf-crimson font-medium'
                           : 'bg-surface-secondary border-surface-tertiary text-text-secondary hover:border-text-tertiary'
                       }`}
-                      disabled={createReviewMutation.isPending}
+                      disabled={activeMutation.isPending}
                     >
                       {assessment}
                     </button>
@@ -576,7 +647,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
                   onChange={(e) => setFormData({ ...formData, resourceLink: e.target.value })}
                   placeholder="Google Drive or Box link to notes/resources"
                   className="w-full px-3 py-2 bg-surface-secondary border border-surface-tertiary rounded-lg focus:outline-none focus:ring-2 focus:ring-wf-crimson/20 focus:border-wf-crimson text-text-primary"
-                  disabled={createReviewMutation.isPending}
+                  disabled={activeMutation.isPending}
                 />
               </div>
             </div>
@@ -585,18 +656,18 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
             <div className="flex gap-3 mt-6 pt-4 border-t border-surface-tertiary">
               <button
                 type="button"
-                onClick={() => setIsOpen(false)}
+                onClick={() => { isEditMode ? onEditCancel?.() : setIsOpen(false) }}
                 className="flex-1 px-4 py-2 bg-surface-secondary border border-surface-tertiary text-text-primary rounded-lg hover:bg-hover-bg transition-colors"
-                disabled={createReviewMutation.isPending}
+                disabled={activeMutation.isPending}
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 className="flex-1 px-4 py-2 bg-wf-crimson text-white rounded-lg hover:bg-wf-crimson-dark transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={createReviewMutation.isPending}
+                disabled={activeMutation.isPending}
               >
-                {createReviewMutation.isPending ? 'Submitting...' : 'Submit Review'}
+                {activeMutation.isPending ? (isEditMode ? 'Saving...' : 'Submitting...') : (isEditMode ? 'Save Changes' : 'Submit Review')}
               </button>
             </div>
           </form>

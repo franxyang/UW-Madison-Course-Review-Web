@@ -2,11 +2,10 @@
 
 import { Suspense, useState } from 'react'
 import Link from 'next/link'
-import { Logo } from '@/components/Logo'
-import { UserMenu, GuestMenu } from '@/components/UserMenu'
+import { Header } from '@/components/Header'
 import { Search, Users, BookOpen, MessageSquare, ChevronRight } from 'lucide-react'
 import { trpc } from '@/lib/trpc/client'
-import { useSession } from 'next-auth/react'
+// Header handles session/auth internally
 
 export default function InstructorsPage() {
   return (
@@ -21,7 +20,6 @@ export default function InstructorsPage() {
 }
 
 function InstructorsPageContent() {
-  const { data: session } = useSession()
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(0)
   const [sortBy, setSortBy] = useState<'name' | 'reviews' | 'courses'>('name')
@@ -41,25 +39,7 @@ function InstructorsPageContent() {
   return (
     <div className="min-h-screen bg-surface-primary">
       {/* Header */}
-      <header className="bg-surface-primary border-b border-surface-tertiary sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-3">
-              <Link href="/" className="flex items-center gap-2">
-                <Logo size={32} />
-              </Link>
-            </div>
-            <div className="flex items-center gap-6">
-              <nav className="flex items-center gap-6">
-                <Link href="/courses" className="text-text-secondary hover:text-text-primary transition-colors">Courses</Link>
-                <Link href="/instructors" className="text-wf-crimson font-medium">Instructors</Link>
-                <Link href="/about" className="text-text-secondary hover:text-text-primary transition-colors">About</Link>
-              </nav>
-              {session?.user ? <UserMenu user={session.user} /> : <GuestMenu />}
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header currentPath="/instructors" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Page Title */}

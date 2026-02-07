@@ -94,17 +94,18 @@ function getGradeColor(grade: string) {
   return gradeColors[grade] || 'bg-surface-secondary text-text-secondary border border-surface-tertiary'
 }
 
+// Phase 3 Unification: Use preset classes from globals.css
 function getRatingColor(rating: string) {
-  const colors: Record<string, string> = {
-    'A': 'bg-emerald-50 border-emerald-200 text-emerald-700',
-    'AB': 'bg-emerald-50 border-emerald-100 text-emerald-600',
-    'B': 'bg-amber-50 border-amber-200 text-amber-700',
-    'BC': 'bg-amber-50 border-amber-100 text-amber-600',
-    'C': 'bg-orange-50 border-orange-200 text-orange-700',
-    'D': 'bg-red-50 border-red-200 text-red-600',
-    'F': 'bg-red-50 border-red-300 text-red-700'
+  const classes: Record<string, string> = {
+    'A': 'grade-badge-a',
+    'AB': 'grade-badge-ab',
+    'B': 'grade-badge-b',
+    'BC': 'grade-badge-bc',
+    'C': 'grade-badge-c',
+    'D': 'grade-badge-d',
+    'F': 'grade-badge-f'
   }
-  return colors[rating] || 'bg-surface-secondary border-surface-tertiary text-text-secondary'
+  return classes[rating] || 'bg-surface-secondary border-surface-tertiary text-text-secondary'
 }
 
 function getRatingCircleColor(rating: string) {
@@ -155,9 +156,8 @@ function gradeToNumeric(grade: string): number {
   return grades[grade] ?? 2.0
 }
 
-// Get continuous color for review card based on average rating
-// Returns HSL values: red (0°) → yellow (45°) → green (120°)
-function getReviewCardStyle(review: { contentRating: string; teachingRating: string; gradingRating: string; workloadRating: string }) {
+// Phase 3 Unification: Return preset class based on average rating
+function getReviewCardClass(review: { contentRating: string; teachingRating: string; gradingRating: string; workloadRating: string }) {
   const avgNumeric = (
     gradeToNumeric(review.contentRating) +
     gradeToNumeric(review.teachingRating) +
@@ -165,13 +165,13 @@ function getReviewCardStyle(review: { contentRating: string; teachingRating: str
     gradeToNumeric(review.workloadRating)
   ) / 4
   
-  // Map 0-4 to hue 0-120 (red to green)
-  const hue = (avgNumeric / 4) * 120
-  
-  return {
-    backgroundColor: `hsl(${hue}, 70%, 97%)`,
-    borderColor: `hsl(${hue}, 60%, 75%)`,
-  }
+  // Map average to preset classes
+  if (avgNumeric >= 3.7) return 'review-card-excellent'  // A/AB average
+  if (avgNumeric >= 3.3) return 'review-card-great'      // AB/B+ average
+  if (avgNumeric >= 3.0) return 'review-card-good'       // B average
+  if (avgNumeric >= 2.5) return 'review-card-average'    // B-/BC average
+  if (avgNumeric >= 2.0) return 'review-card-below'      // BC/C average
+  return 'review-card-poor'                               // C- or below
 }
 
 // Left Sidebar Component
@@ -857,15 +857,11 @@ export function CoursePageLayout({
                   {filteredReviews.map((review, index) => {
                     const isGated = !course.reviewAccess.hasFullAccess && index > 0
 
-                    const reviewCardStyle = getReviewCardStyle(review)
+                    const reviewCardClass = getReviewCardClass(review)
                     const reviewCard = (
                       <div 
                         key={review.id} 
-                        className="rounded-xl border p-6 transition-colors"
-                        style={{ 
-                          backgroundColor: reviewCardStyle.backgroundColor,
-                          borderColor: reviewCardStyle.borderColor 
-                        }}
+                        className={reviewCardClass}
                       >
                         <div className="flex items-start justify-between mb-4">
                           <div>

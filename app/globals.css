@@ -164,4 +164,12 @@
   .grade-badge-f {
     @apply bg-red-50 text-red-700 border border-red-200;
   }
+
+  /* Review card gradient backgrounds (based on average rating) */
+  .review-card-excellent { @apply rounded-xl border p-6 transition-colors bg-emerald-50/30 border-emerald-200/50; }
+  .review-card-great { @apply rounded-xl border p-6 transition-colors bg-emerald-50/20 border-emerald-100/50; }
+  .review-card-good { @apply rounded-xl border p-6 transition-colors bg-lime-50/30 border-lime-200/50; }
+  .review-card-average { @apply rounded-xl border p-6 transition-colors bg-amber-50/30 border-amber-200/50; }
+  .review-card-below { @apply rounded-xl border p-6 transition-colors bg-orange-50/30 border-orange-200/50; }
+  .review-card-poor { @apply rounded-xl border p-6 transition-colors bg-red-50/30 border-red-200/50; }
 }

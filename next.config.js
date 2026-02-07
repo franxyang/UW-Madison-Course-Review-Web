@@ -7,7 +7,16 @@ const nextConfig = {
     },
   },
   images: {
-    domains: ['guide.wisc.edu'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'guide.wisc.edu',
+      },
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+      },
+    ],
   },
 }
 

@@ -97,22 +97,25 @@ export function AcademicCalendar() {
   
   return (
     <div className="bg-surface-primary rounded-xl border border-surface-tertiary overflow-hidden">
-      {/* Header with navigation */}
-      <div className="px-4 py-3 border-b border-surface-tertiary bg-wf-crimson text-white">
+      {/* Header with navigation - softer design */}
+      <div className="px-4 py-3 border-b border-surface-tertiary bg-surface-secondary">
         <div className="flex items-center justify-between">
           <button 
             onClick={goToPrevMonth}
-            className="p-1 hover:bg-white/20 rounded transition-colors"
+            className="p-1 hover:bg-hover-bg rounded transition-colors text-text-secondary"
             aria-label="Previous month"
           >
             <ChevronLeft size={16} />
           </button>
-          <span className="font-semibold">
-            {MONTH_NAMES[currentMonth]} {currentYear}
-          </span>
+          <div className="flex items-center gap-2">
+            <Calendar size={16} className="text-wf-crimson" />
+            <span className="font-semibold text-text-primary">
+              {MONTH_NAMES[currentMonth]} {currentYear}
+            </span>
+          </div>
           <button 
             onClick={goToNextMonth}
-            className="p-1 hover:bg-white/20 rounded transition-colors"
+            className="p-1 hover:bg-hover-bg rounded transition-colors text-text-secondary"
             aria-label="Next month"
           >
             <ChevronRight size={16} />
@@ -138,7 +141,7 @@ export function AcademicCalendar() {
             
             const event = getEventForDay(day)
             const todayClass = isToday(day) 
-              ? 'bg-wf-crimson text-white font-bold' 
+              ? 'bg-wf-crimson/10 border border-wf-crimson text-wf-crimson font-bold' 
               : ''
             const eventClass = event && !isToday(day)
               ? `${event.color.replace('bg-', 'bg-').replace('-400', '-100')} dark:${event.color.replace('bg-', 'bg-').replace('-400', '-900/30')} text-text-primary font-medium`

@@ -39,13 +39,13 @@ export default async function AuthErrorPage({
           </div>
 
           {error === 'AccessDenied' && (
-            <p className="text-slate-600 mb-6">
+            <p className="text-slate-700 dark:text-slate-300 mb-6">
               MadSpace is only available to UW-Madison students. Please sign in with your @wisc.edu email address.
             </p>
           )}
 
           {error === 'Configuration' && (
-            <p className="text-slate-600 mb-6">
+            <p className="text-slate-700 dark:text-slate-300 mb-6">
               The database is not properly configured. Please check the server logs and ensure all environment variables are set correctly.
             </p>
           )}

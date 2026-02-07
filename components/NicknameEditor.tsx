@@ -24,10 +24,10 @@ export function NicknameEditor({ currentNickname, initial }: NicknameEditorProps
   if (!editing) {
     return (
       <div className="flex items-center gap-2">
-        <h1 className="text-2xl font-bold text-slate-900">{displayName}</h1>
+        <h1 className="text-2xl font-bold text-text-primary">{displayName}</h1>
         <button
           onClick={() => { setNickname(displayName); setEditing(true) }}
-          className="text-slate-400 hover:text-slate-600 transition-colors p-1"
+          className="text-text-tertiary hover:text-text-primary transition-colors p-1"
           title="Edit nickname"
         >
           <Pencil size={14} />
@@ -43,7 +43,7 @@ export function NicknameEditor({ currentNickname, initial }: NicknameEditorProps
         value={nickname}
         onChange={(e) => setNickname(e.target.value)}
         maxLength={30}
-        className="text-2xl font-bold text-slate-900 border-b-2 border-uw-red outline-none bg-transparent w-48"
+        className="text-2xl font-bold text-text-primary border-b-2 border-uw-red outline-none bg-transparent w-48"
         autoFocus
         onKeyDown={(e) => {
           if (e.key === 'Enter' && nickname.trim()) {
@@ -67,7 +67,7 @@ export function NicknameEditor({ currentNickname, initial }: NicknameEditorProps
       </button>
       <button
         onClick={() => setEditing(false)}
-        className="text-slate-400 hover:text-slate-600 p-1"
+        className="text-text-tertiary hover:text-text-primary p-1"
       >
         <X size={16} />
       </button>

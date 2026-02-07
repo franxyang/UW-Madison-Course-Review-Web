@@ -99,7 +99,7 @@ export default async function ProfilePage() {
                     </span>
                   )}
                 </div>
-                <p className="text-sm text-slate-500 flex items-center gap-2 mt-1">
+                <p className="text-sm text-slate-600 dark:text-slate-400 flex items-center gap-2 mt-1">
                   <Calendar size={14} />
                   Joined {new Date(user.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}
                 </p>
@@ -129,7 +129,7 @@ export default async function ProfilePage() {
                   <Trophy size={14} />
                   <span className="font-medium">Level {contributorInfo.level}: {contributorInfo.title}</span>
                 </div>
-                <span className="text-slate-500">
+                <span className="text-slate-600 dark:text-slate-400">
                   Next: {contributorInfo.nextLevel.title}
                   {contributorInfo.nextLevel.reviewsNeeded > 0 && ` (${contributorInfo.nextLevel.reviewsNeeded} more reviews)`}
                   {contributorInfo.nextLevel.upvotesNeeded > 0 && ` (${contributorInfo.nextLevel.upvotesNeeded} more upvotes)`}
@@ -141,7 +141,7 @@ export default async function ProfilePage() {
                   style={{ width: `${xpProgress}%` }}
                 />
               </div>
-              <div className="flex items-center gap-1 mt-2 text-xs text-slate-500">
+              <div className="flex items-center gap-1 mt-2 text-xs text-slate-600 dark:text-slate-400">
                 <Zap size={12} />
                 {user.xp} XP earned
               </div>
@@ -153,28 +153,28 @@ export default async function ProfilePage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 text-center">
             <div className="text-2xl font-bold text-uw-red">{totalReviews}</div>
-            <div className="text-xs text-slate-600 mt-1 flex items-center justify-center gap-1">
+            <div className="text-xs text-slate-700 dark:text-slate-300 mt-1 flex items-center justify-center gap-1">
               <MessageSquare size={12} />
               Reviews
             </div>
           </div>
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 text-center">
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-5 text-center">
             <div className="text-2xl font-bold text-uw-red">{totalUpvotes}</div>
-            <div className="text-xs text-slate-600 mt-1 flex items-center justify-center gap-1">
+            <div className="text-xs text-slate-700 dark:text-slate-300 mt-1 flex items-center justify-center gap-1">
               <ThumbsUp size={12} />
               Upvotes
             </div>
           </div>
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 text-center">
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-5 text-center">
             <div className="text-2xl font-bold text-uw-red">{totalComments}</div>
-            <div className="text-xs text-slate-600 mt-1 flex items-center justify-center gap-1">
+            <div className="text-xs text-slate-700 dark:text-slate-300 mt-1 flex items-center justify-center gap-1">
               <MessageSquare size={12} />
               Comments
             </div>
           </div>
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 text-center">
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-5 text-center">
             <div className="text-2xl font-bold text-uw-red">{user.savedCourses.length}</div>
-            <div className="text-xs text-slate-600 mt-1 flex items-center justify-center gap-1">
+            <div className="text-xs text-slate-700 dark:text-slate-300 mt-1 flex items-center justify-center gap-1">
               <BookOpen size={12} />
               Saved
             </div>
@@ -197,13 +197,13 @@ export default async function ProfilePage() {
                       <div className="flex items-start justify-between mb-2">
                         <div>
                           <h3 className="font-semibold text-slate-900">{toOfficialCode(review.course.code)}: {review.course.name}</h3>
-                          <p className="text-sm text-slate-600">{review.instructor.name} · {review.term}</p>
+                          <p className="text-sm text-slate-600 dark:text-slate-400">{review.instructor.name} · {review.term}</p>
                         </div>
                         <div className="flex items-center gap-2">
                           <span className="px-2 py-1 bg-slate-100 rounded text-xs font-medium text-slate-700">
                             {review.gradeReceived}
                           </span>
-                          <span className="text-xs text-slate-500 flex items-center gap-0.5">
+                          <span className="text-xs text-slate-600 dark:text-slate-400 flex items-center gap-0.5">
                             <ThumbsUp size={10} /> {review.votes.length}
                           </span>
                         </div>
@@ -224,7 +224,7 @@ export default async function ProfilePage() {
                       {review.title && (
                         <p className="text-sm text-slate-600 line-clamp-1">{review.title}</p>
                       )}
-                      <div className="text-xs text-slate-400 mt-2">
+                      <div className="text-xs text-slate-500 dark:text-slate-400 mt-2">
                         {new Date(review.createdAt).toLocaleDateString()}
                       </div>
                     </Link>
@@ -232,8 +232,8 @@ export default async function ProfilePage() {
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <MessageSquare className="mx-auto h-10 w-10 text-slate-300 mb-3" />
-                  <p className="text-slate-500">
+                  <MessageSquare className="mx-auto h-10 w-10 text-slate-400 dark:text-slate-500 mb-3" />
+                  <p className="text-slate-600 dark:text-slate-400">
                     No reviews yet.{' '}
                     <Link href="/courses" className="text-uw-red hover:text-uw-dark font-medium">
                       Browse courses to get started!
@@ -272,7 +272,7 @@ export default async function ProfilePage() {
                         <div className={`text-sm font-medium ${isCurrent ? 'text-uw-red' : isReached ? 'text-slate-700' : 'text-slate-600'}`}>
                           {levelDef.title}
                         </div>
-                        <div className={`text-[11px] ${isCurrent || isReached ? 'text-slate-500' : 'text-slate-400'}`}>
+                        <div className={`text-[11px] ${isCurrent || isReached ? 'text-slate-600 dark:text-slate-400' : 'text-slate-500 dark:text-slate-400'}`}>
                           {levelDef.minReviews > 0 ? `${levelDef.minReviews} reviews` : 'Start here'}
                           {levelDef.minUpvotes > 0 && ` + ${levelDef.minUpvotes} upvotes`}
                         </div>
@@ -301,7 +301,7 @@ export default async function ProfilePage() {
                     >
                       <div className="font-medium text-sm text-slate-900">{toOfficialCode(saved.course.code)}</div>
                       <div className="text-xs text-slate-600 mt-0.5 line-clamp-1">{saved.course.name}</div>
-                      <div className="flex items-center gap-2 mt-1 text-xs text-slate-500">
+                      <div className="flex items-center gap-2 mt-1 text-xs text-slate-600 dark:text-slate-400">
                         <span>{saved.course.credits} cr</span>
                         {saved.course.avgGPA != null && saved.course.avgGPA > 0 && (
                           <span className="flex items-center gap-0.5">
@@ -313,7 +313,7 @@ export default async function ProfilePage() {
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-slate-500 text-center py-4">
+                <p className="text-sm text-slate-600 dark:text-slate-400 text-center py-4">
                   No saved courses yet.
                 </p>
               )}

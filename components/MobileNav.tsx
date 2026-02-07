@@ -25,7 +25,7 @@ export function MobileNav({ user, currentPath }: MobileNavProps) {
       {/* Mobile hamburger button */}
       <button
         onClick={() => setIsOpen(true)}
-        className="lg:hidden p-2 text-slate-600 hover:text-slate-900"
+        className="lg:hidden p-2 text-text-secondary hover:text-text-primary"
         aria-label="Open menu"
       >
         <Menu size={24} />
@@ -40,14 +40,14 @@ export function MobileNav({ user, currentPath }: MobileNavProps) {
             onClick={() => setIsOpen(false)}
           />
           {/* Panel */}
-          <div className="fixed inset-y-0 right-0 z-50 w-72 bg-white shadow-xl lg:hidden">
-            <div className="flex items-center justify-between p-4 border-b border-slate-200">
+          <div className="fixed inset-y-0 right-0 z-50 w-72 bg-surface-primary shadow-xl lg:hidden">
+            <div className="flex items-center justify-between p-4 border-b border-surface-tertiary">
               <Link href="/" className="flex items-center gap-2" onClick={() => setIsOpen(false)}>
                 <Logo size={28} />
               </Link>
               <button
                 onClick={() => setIsOpen(false)}
-                className="p-2 text-slate-600 hover:text-slate-900"
+                className="p-2 text-text-secondary hover:text-text-primary"
               >
                 <X size={20} />
               </button>
@@ -62,7 +62,7 @@ export function MobileNav({ user, currentPath }: MobileNavProps) {
                   className={`block px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
                     currentPath === link.href
                       ? 'bg-uw-red/5 text-uw-red'
-                      : 'text-slate-700 hover:bg-slate-50'
+                      : 'text-text-secondary hover:bg-hover-bg'
                   }`}
                 >
                   {link.label}
@@ -74,21 +74,21 @@ export function MobileNav({ user, currentPath }: MobileNavProps) {
                 className={`block px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
                   currentPath === '/profile'
                     ? 'bg-uw-red/5 text-uw-red'
-                    : 'text-slate-700 hover:bg-slate-50'
+                    : 'text-text-secondary hover:bg-hover-bg'
                 }`}
               >
                 Profile
               </Link>
             </nav>
 
-            <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-200">
+            <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-surface-tertiary">
               {user ? (
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 bg-uw-red rounded-full flex items-center justify-center text-white text-sm font-bold">
                     {(user as any).nickname?.charAt(0) || user.name?.charAt(0) || user.email?.charAt(0)?.toUpperCase() || '?'}
                   </div>
                   <div className="text-sm">
-                    <div className="font-medium text-slate-900">{(user as any).nickname || user.name || 'Anonymous Badger'}</div>
+                    <div className="font-medium text-text-primary">{(user as any).nickname || user.name || 'Anonymous Badger'}</div>
                   </div>
                 </div>
               ) : (

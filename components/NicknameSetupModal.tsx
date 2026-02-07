@@ -56,20 +56,20 @@ export function NicknameSetupModal({ show, onComplete }: NicknameSetupModalProps
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 p-8 animate-in fade-in zoom-in-95">
+      <div className="bg-surface-primary rounded-2xl shadow-2xl max-w-md w-full mx-4 p-8 animate-in fade-in zoom-in-95 border border-surface-tertiary">
         <div className="text-center mb-6">
           <div className="w-16 h-16 bg-uw-red/10 rounded-full flex items-center justify-center mx-auto mb-4">
             <UserCircle className="w-8 h-8 text-uw-red" />
           </div>
-          <h2 className="text-2xl font-bold text-slate-900">Welcome to MadSpace!</h2>
-          <p className="text-slate-600 mt-2">
+          <h2 className="text-2xl font-bold text-text-primary">Welcome to MadSpace!</h2>
+          <p className="text-text-secondary mt-2">
             Choose a nickname for your account. This is what other students will see — your real name will stay private.
           </p>
         </div>
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">
+            <label className="block text-sm font-medium text-text-secondary mb-1.5">
               Your Nickname
             </label>
             <input
@@ -78,14 +78,14 @@ export function NicknameSetupModal({ show, onComplete }: NicknameSetupModalProps
               onChange={(e) => setNickname(e.target.value)}
               placeholder={suggestion}
               maxLength={30}
-              className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:border-uw-red focus:ring-2 focus:ring-uw-red/20 outline-none text-lg"
+              className="w-full px-4 py-3 rounded-lg border border-surface-tertiary focus:border-uw-red focus:ring-2 focus:ring-uw-red/20 outline-none text-lg bg-surface-primary text-text-primary"
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleSubmit()
               }}
               autoFocus
             />
             <div className="flex items-center justify-between mt-1.5">
-              <span className="text-xs text-slate-500">
+              <span className="text-xs text-text-tertiary">
                 {nickname.length}/30 characters
               </span>
               <button
@@ -117,7 +117,7 @@ export function NicknameSetupModal({ show, onComplete }: NicknameSetupModalProps
             {updateNickname.isPending ? 'Saving...' : 'Set Nickname & Continue'}
           </button>
 
-          <p className="text-xs text-center text-slate-500">
+          <p className="text-xs text-center text-text-tertiary">
             You can change your nickname anytime in your profile settings.
           </p>
         </div>

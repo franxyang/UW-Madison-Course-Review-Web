@@ -6,7 +6,7 @@ import { trpc } from '@/lib/trpc/client'
 import { Star, TrendingUp, Award } from 'lucide-react'
 
 const LEVELS = [
-  { name: 'Newcomer', minXP: 0, color: 'text-slate-500', bg: 'bg-slate-100' },
+  { name: 'Newcomer', minXP: 0, color: 'text-slate-600 dark:text-slate-400', bg: 'bg-slate-100 dark:bg-slate-800' },
   { name: 'Contributor', minXP: 50, color: 'text-emerald-600', bg: 'bg-emerald-100' },
   { name: 'Regular', minXP: 150, color: 'text-blue-600', bg: 'bg-blue-100' },
   { name: 'Veteran', minXP: 400, color: 'text-purple-600', bg: 'bg-purple-100' },

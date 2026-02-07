@@ -13,7 +13,7 @@ export default function SignInPage() {
             <Logo size={48} />
           </div>
           <h1 className="text-3xl font-bold text-slate-900 mb-2">Welcome to MadSpace</h1>
-          <p className="text-slate-600">Sign in with your @wisc.edu Google account</p>
+          <p className="text-slate-700 dark:text-slate-300">Sign in with your @wisc.edu Google account</p>
         </div>
 
         {/* Sign In Card */}
@@ -48,13 +48,13 @@ export default function SignInPage() {
           </form>
 
           {/* Help Text */}
-          <p className="mt-6 text-center text-sm text-slate-600">
+          <p className="mt-6 text-center text-sm text-slate-700 dark:text-slate-300">
             New to MadSpace? Just sign in with your UW Madison Google account to get started.
           </p>
         </div>
 
         {/* Footer */}
-        <div className="mt-6 text-center text-xs text-slate-500">
+        <div className="mt-6 text-center text-xs text-slate-600 dark:text-slate-400">
           <p>
             By continuing, you agree to MadSpace's{' '}
             <Link href="/terms" className="underline hover:text-slate-700">

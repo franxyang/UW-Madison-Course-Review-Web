@@ -24,16 +24,16 @@ export function ReviewGateOverlay({ totalReviews, userReviewCount, isLoggedIn, c
   return (
     <div className="relative my-4">
       {/* Frosted glass card */}
-      <div className="bg-white/80 backdrop-blur-sm border-2 border-dashed border-slate-300 rounded-xl p-8 text-center">
-        <div className="inline-flex items-center justify-center w-14 h-14 bg-slate-100 rounded-full mb-4">
-          <Lock size={24} className="text-slate-500" />
+      <div className="bg-white/80 dark:bg-surface-primary/80 backdrop-blur-sm border-2 border-dashed border-surface-tertiary rounded-xl p-8 text-center">
+        <div className="inline-flex items-center justify-center w-14 h-14 bg-surface-secondary rounded-full mb-4">
+          <Lock size={24} className="text-text-tertiary" />
         </div>
 
-        <h3 className="text-lg font-semibold text-slate-900 mb-2">
+        <h3 className="text-lg font-semibold text-text-primary mb-2">
           {hiddenCount} more review{hiddenCount !== 1 ? 's' : ''} available
         </h3>
 
-        <p className="text-sm text-slate-600 max-w-md mx-auto mb-6">
+        <p className="text-sm text-text-secondary max-w-md mx-auto mb-6">
           {isLoggedIn
             ? 'Share your experience with any course to unlock all reviews across the entire platform.'
             : 'Sign in with your @wisc.edu email and write one review to unlock full access.'}
@@ -56,7 +56,7 @@ export function ReviewGateOverlay({ totalReviews, userReviewCount, isLoggedIn, c
           </Link>
         )}
 
-        <div className="mt-4 flex items-center justify-center gap-1.5 text-xs text-slate-500">
+        <div className="mt-4 flex items-center justify-center gap-1.5 text-xs text-text-tertiary">
           <Eye size={14} />
           <span>One review unlocks access to all reviews on every course</span>
         </div>

@@ -19,8 +19,8 @@
     
     /* 文字色 - Light Mode */
     --text-primary: #212529;
-    --text-secondary: #6C757D;
-    --text-tertiary: #ADB5BD;
+    --text-secondary: #4B5563;
+    --text-tertiary: #6B7280;
     
     /* 数据可视化 */
     --grade-excellent: #10B981;
@@ -48,8 +48,8 @@
     --surface-tertiary: #333333;
     
     --text-primary: #F5F5F5;
-    --text-secondary: #A0A0A0;
-    --text-tertiary: #6B6B6B;
+    --text-secondary: #D1D5DB;
+    --text-tertiary: #9CA3AF;
     
     --hover-bg: #2A2A2A;
     --active-bg: #3D1A1A;
@@ -58,7 +58,7 @@
     --input-bg: #242424;
     --input-border: #444444;
     --input-text: #F5F5F5;
-    --input-placeholder: #6B6B6B;
+    --input-placeholder: #737373;
   }
   
   :root {

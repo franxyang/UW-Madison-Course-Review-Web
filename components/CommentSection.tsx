@@ -124,7 +124,7 @@ export function CommentSection({ reviewId, comments, userId }: CommentSectionPro
           )}
 
           {!userId && (
-            <div className="text-sm text-text-secondary bg-surface-secondary border border-slate-200 rounded-lg p-3">
+            <div className="text-sm text-text-secondary bg-surface-secondary border border-surface-tertiary rounded-lg p-3">
               Please sign in to comment
             </div>
           )}

@@ -1,8 +1,10 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
+import { trpc } from '@/lib/trpc/client'
+import { useDebounce } from '@/lib/hooks/useDebounce'
 import { Logo } from '@/components/Logo'
 import { VoteButton } from '@/components/VoteButton'
 import { ReviewForm } from '@/components/ReviewForm'
@@ -183,46 +185,91 @@ function LeftSidebar({
   relatedCourses: RelatedCourse[]
 }) {
   const [searchQuery, setSearchQuery] = useState('')
+  const [isFocused, setIsFocused] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const debouncedQuery = useDebounce(searchQuery, 300)
   
   // Get official department code for display
   const officialDeptCode = getOfficialDeptPrefix(course.code)
-  
-  // Fuzzy filter: case-insensitive, space-insensitive, match code or name
-  const filteredRelatedCourses = relatedCourses.filter(c => {
-    if (!searchQuery.trim()) return true
-    // Normalize: lowercase, collapse spaces
-    const query = searchQuery.toLowerCase().replace(/\s+/g, '')
-    const code = toOfficialCode(c.code).toLowerCase().replace(/\s+/g, '')
-    const name = c.name.toLowerCase().replace(/\s+/g, '')
-    // Also try matching with original spacing for natural queries
-    const codeSpaced = toOfficialCode(c.code).toLowerCase()
-    const nameSpaced = c.name.toLowerCase()
-    return code.includes(query) || name.includes(query) 
-      || codeSpaced.includes(searchQuery.toLowerCase()) 
-      || nameSpaced.includes(searchQuery.toLowerCase())
-  })
+
+  // Global search via tRPC (same as main search bar)
+  const { data: searchResults, isLoading: isSearching } = trpc.course.list.useQuery(
+    { search: debouncedQuery, limit: 6 },
+    { enabled: debouncedQuery.trim().length >= 2, staleTime: 30000 }
+  )
+  const previewCourses = searchResults?.courses || []
+  const showDropdown = isFocused && debouncedQuery.trim().length >= 2
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsFocused(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
   
   return (
     <aside className="w-[320px] flex-shrink-0 space-y-5">
-      {/* Search */}
-      <div className="relative z-10">
+      {/* Search - global, with live preview */}
+      <div className="relative z-30" ref={containerRef}>
         <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary pointer-events-none" />
         <input
           type="text"
           placeholder="Search courses..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
+          onFocus={() => setIsFocused(true)}
           className="w-full pl-9 pr-8 py-2 text-sm bg-surface-primary border border-surface-tertiary rounded-lg 
                      focus:outline-none focus:border-wf-crimson focus:ring-1 focus:ring-wf-crimson/20
                      placeholder:text-text-tertiary"
         />
         {searchQuery && (
           <button
-            onClick={() => setSearchQuery('')}
+            onClick={() => { setSearchQuery(''); setIsFocused(false) }}
             className="absolute right-2 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-primary p-0.5"
           >
             <X size={14} />
           </button>
+        )}
+
+        {/* Search Preview Dropdown */}
+        {showDropdown && (
+          <div className="absolute top-full left-0 right-0 mt-1 bg-surface-primary border border-surface-tertiary rounded-lg shadow-lg overflow-hidden">
+            {isSearching ? (
+              <div className="px-4 py-3 text-xs text-text-tertiary text-center">Searching...</div>
+            ) : previewCourses.length > 0 ? (
+              <div className="max-h-64 overflow-y-auto">
+                {previewCourses.map((c: any) => (
+                  <Link
+                    key={c.id}
+                    href={`/courses/${c.id}`}
+                    onClick={() => { setSearchQuery(''); setIsFocused(false) }}
+                    className="block px-3 py-2.5 hover:bg-hover-bg transition-colors border-b border-surface-tertiary last:border-0"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium text-sm text-text-primary">{toOfficialCode(c.code)}</span>
+                      {c.avgGPA != null && c.avgGPA > 0 && (
+                        <span className="text-xs text-wf-crimson font-medium">{c.avgGPA.toFixed(2)}</span>
+                      )}
+                    </div>
+                    <div className="text-xs text-text-tertiary line-clamp-1 mt-0.5">{c.name}</div>
+                  </Link>
+                ))}
+                {searchResults && searchResults.total > 6 && (
+                  <div className="px-3 py-2 text-xs text-text-tertiary text-center bg-surface-secondary">
+                    +{searchResults.total - 6} more results
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="px-4 py-3 text-xs text-text-tertiary text-center">
+                No courses found for &ldquo;{debouncedQuery}&rdquo;
+              </div>
+            )}
+          </div>
         )}
       </div>
 
@@ -287,13 +334,13 @@ function LeftSidebar({
           <h3 className="flex items-center gap-1.5 text-xs font-semibold text-text-tertiary uppercase tracking-wider mb-2">
             <span>📚</span> {officialDeptCode} (Same Level)
           </h3>
-          {filteredRelatedCourses.length === 0 ? (
+          {relatedCourses.length === 0 ? (
             <div className="text-xs text-text-tertiary text-center py-4">
-              No courses match "{searchQuery}"
+              No related courses found
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-1.5">
-              {filteredRelatedCourses.map(c => {
+              {relatedCourses.map(c => {
               const isActive = c.id === course.id
               const officialCode = toOfficialCode(c.code)
               return (

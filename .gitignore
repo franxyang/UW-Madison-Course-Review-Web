@@ -39,3 +39,16 @@ prisma/dev.db-journal
 
 # Data pipeline output (downloaded from UW Courses API)
 data-pipeline/output/
+
+# AI coding context
+CLAUDE.md
+.ai-context/
+.claude/
+
+# Data files
+madgrades-data/
+madgrades-extractor-master/
+data-pipeline/
+
+# Backups
+backup/

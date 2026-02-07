@@ -1,18 +1,27 @@
 'use client'
 
-import { useState, useMemo, useRef, useEffect } from 'react'
+import { useState, useMemo, useRef, useEffect, lazy, Suspense } from 'react'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import { useSession } from 'next-auth/react'
 import { trpc } from '@/lib/trpc/client'
 import { useDebounce } from '@/lib/hooks/useDebounce'
 import { Logo } from '@/components/Logo'
 import { VoteButton } from '@/components/VoteButton'
-import { ReviewForm } from '@/components/ReviewForm'
-import { CommentSection } from '@/components/CommentSection'
-import { ReviewGateOverlay, FrostedReview } from '@/components/ReviewGate'
 import { ContributorBadge } from '@/components/ContributorBadge'
 import { ReviewActions } from '@/components/ReviewActions'
-import { ReportButton } from '@/components/ReportButton'
+
+// Lazy load heavier components (not needed on initial render)
+const ReviewForm = dynamic(() => import('@/components/ReviewForm').then(m => ({ default: m.ReviewForm })), {
+  loading: () => <div className="h-12 bg-surface-secondary rounded-lg animate-pulse" />,
+})
+const CommentSection = dynamic(() => import('@/components/CommentSection').then(m => ({ default: m.CommentSection })), {
+  loading: () => <div className="h-8 bg-surface-secondary rounded animate-pulse" />,
+})
+const ReportButton = dynamic(() => import('@/components/ReportButton').then(m => ({ default: m.ReportButton })), {
+  ssr: false,
+})
+import { ReviewGateOverlay, FrostedReview } from '@/components/ReviewGate'
 import { toOfficialCode, getOfficialDeptPrefix, getCourseNumber } from '@/lib/courseCodeDisplay'
 import {
   ChevronRight,
@@ -413,7 +422,7 @@ function RightSidebar({
   }[filterType]
   
   return (
-    <aside className="w-[280px] flex-shrink-0">
+    <aside className="w-full lg:w-[280px] lg:flex-shrink-0">
       <div className="sticky top-24 space-y-6">
         {/* Review Count */}
         <div className="text-center">
@@ -762,21 +771,27 @@ export function CoursePageLayout({
                 <span className="text-xl font-bold text-text-primary">WiscFlow</span>
               </Link>
             </div>
-            <nav className="flex items-center gap-6">
+            <nav className="hidden sm:flex items-center gap-6">
               <Link href="/courses" className="text-wf-crimson font-medium">Courses</Link>
               <Link href="/instructors" className="text-text-secondary hover:text-text-primary transition-colors">Instructors</Link>
               <Link href="/about" className="text-text-secondary hover:text-text-primary transition-colors">About</Link>
               <ThemeToggle />
             </nav>
+            <div className="sm:hidden flex items-center gap-3">
+              <ThemeToggle />
+              <Link href="/courses" className="text-sm text-wf-crimson font-medium">Courses</Link>
+            </div>
           </div>
         </div>
       </header>
 
-      {/* Main Content - 3 Column Layout */}
-      <div className="max-w-[1400px] mx-auto px-6 py-8">
-        <div className="flex gap-8">
-          {/* Left Sidebar */}
-          <LeftSidebar course={course} relatedCourses={relatedCourses} />
+      {/* Main Content - 3 Column Layout (responsive: stack on mobile) */}
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
+          {/* Left Sidebar - hidden on mobile, shown on lg+ */}
+          <div className="hidden lg:block">
+            <LeftSidebar course={course} relatedCourses={relatedCourses} />
+          </div>
 
           {/* Main Content */}
           <main className="flex-1 min-w-0">
@@ -1079,21 +1094,23 @@ export function CoursePageLayout({
             </div>
           </main>
 
-          {/* Right Sidebar */}
-          <RightSidebar
-            course={course}
-            avgRatings={avgRatings}
-            gradeData={gradeData}
-            latestDistribution={latestDistribution}
-            filteredAvgGPA={filteredAvgGPA}
-            totalGraded={totalGraded}
-            isFiltered={selectedTerm !== 'all' || selectedInstructor !== 'all'}
-            filterType={
-              selectedTerm !== 'all' && selectedInstructor !== 'all' ? 'term+instructor' :
-              selectedTerm !== 'all' ? 'term' :
-              selectedInstructor !== 'all' ? 'instructor' : 'none'
-            }
-          />
+          {/* Right Sidebar - below main on mobile, side on lg+ */}
+          <div className="w-full lg:w-auto">
+            <RightSidebar
+              course={course}
+              avgRatings={avgRatings}
+              gradeData={gradeData}
+              latestDistribution={latestDistribution}
+              filteredAvgGPA={filteredAvgGPA}
+              totalGraded={totalGraded}
+              isFiltered={selectedTerm !== 'all' || selectedInstructor !== 'all'}
+              filterType={
+                selectedTerm !== 'all' && selectedInstructor !== 'all' ? 'term+instructor' :
+                selectedTerm !== 'all' ? 'term' :
+                selectedInstructor !== 'all' ? 'instructor' : 'none'
+              }
+            />
+          </div>
         </div>
       </div>
     </div>

@@ -37,6 +37,7 @@ const RATINGS = ['A', 'B', 'C', 'D', 'F']
 const ASSESSMENTS = ['Midterm', 'Final', 'Project', 'Homework', 'Quiz', 'Lab', 'Essay', 'Presentation', 'Participation']
 
 // Generate available terms (current + past 3 years)
+// Format: "YYYY-Season" to match database format
 function generateTerms() {
   const terms: string[] = []
   const now = new Date()
@@ -47,16 +48,25 @@ function generateTerms() {
   for (let year = currentYear; year >= currentYear - 3; year--) {
     if (year === currentYear) {
       // Only add terms that have passed or are current
-      if (currentMonth >= 8) terms.push(`Fall ${year}`)
-      if (currentMonth >= 5) terms.push(`Summer ${year}`)
-      terms.push(`Spring ${year}`)
+      if (currentMonth >= 8) terms.push(`${year}-Fall`)
+      if (currentMonth >= 5) terms.push(`${year}-Summer`)
+      terms.push(`${year}-Spring`)
     } else {
-      terms.push(`Fall ${year}`)
-      terms.push(`Summer ${year}`)
-      terms.push(`Spring ${year}`)
+      terms.push(`${year}-Fall`)
+      terms.push(`${year}-Summer`)
+      terms.push(`${year}-Spring`)
     }
   }
   return terms.slice(0, 12) // Limit to 12 terms
+}
+
+// Format term for display (e.g., "2024-Fall" -> "Fall 2024")
+function formatTermForDisplay(term: string): string {
+  const match = term.match(/^(\d{4})-(\w+)$/)
+  if (match) {
+    return `${match[2]} ${match[1]}`
+  }
+  return term
 }
 
 function getRatingColor(rating: string) {
@@ -287,7 +297,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
                   >
                     {availableTerms.map(term => (
                       <option key={term} value={term}>
-                        {term} {termsWithData.has(term) ? '' : '(manual entry)'}
+                        {formatTermForDisplay(term)} {termsWithData.has(term) ? '' : '(manual entry)'}
                       </option>
                     ))}
                   </select>

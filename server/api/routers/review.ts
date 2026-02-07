@@ -24,6 +24,7 @@ export const reviewRouter = router({
         workloadComment: z.string().max(3000).optional(),
         assessments: z.array(z.string()).optional(),
         resourceLink: z.string().url().optional().or(z.literal('')),
+        recommendInstructor: z.enum(['yes', 'no', 'neutral']).optional(),
         instructorName: z.string().min(1, 'Instructor name is required'),
       })
     )
@@ -106,6 +107,7 @@ export const reviewRouter = router({
           // Convert arrays to JSON strings for storage
           assessments: input.assessments ? JSON.stringify(input.assessments) : null,
           resourceLink: input.resourceLink || null,
+          recommendInstructor: input.recommendInstructor || null,
         },
         include: {
           author: true,
@@ -233,6 +235,7 @@ export const reviewRouter = router({
         workloadComment: z.string().max(3000).optional(),
         assessments: z.array(z.string()).optional(),
         resourceLink: z.string().url().optional().or(z.literal('')),
+        recommendInstructor: z.enum(['yes', 'no', 'neutral']).optional(),
         instructorName: z.string().min(1).optional(),
       })
     )

@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useMemo } from 'react'
-import { MessageSquare, X, AlertCircle, ChevronDown } from 'lucide-react'
+import { MessageSquare, X, AlertCircle, ThumbsUp, ThumbsDown, Meh } from 'lucide-react'
 import { toast } from 'sonner'
 import { trpc } from '@/lib/trpc/client'
 
@@ -30,11 +30,20 @@ type ReviewFormData = {
   resourceLink?: string
   instructorName: string
   isCustomInstructor: boolean
+  recommendInstructor: 'yes' | 'no' | 'neutral' | ''
 }
 
 const GRADES = ['A', 'AB', 'B', 'BC', 'C', 'D', 'F']
 const RATINGS = ['A', 'B', 'C', 'D', 'F']
 const ASSESSMENTS = ['Midterm', 'Final', 'Project', 'Homework', 'Quiz', 'Lab', 'Essay', 'Presentation', 'Participation']
+
+// Comment examples for each dimension
+const COMMENT_EXAMPLES = {
+  content: "e.g., Chapter 1: Introduction to... Midterm covers Ch 1-5, Final covers Ch 6-12. Key topics include...",
+  teaching: "e.g., Professor explains concepts clearly, very open to questions. Office hours are helpful. Uses real-world examples...",
+  grading: "e.g., Midterm 30%, Final 40%, HW 20%, Participation 10%. Exams are multiple choice. Grading curve applied...",
+  workload: "e.g., Light workload with 2 problem sets per week (~3 hours). Reading is optional. No group projects..."
+}
 
 // Generate available terms (current + past 3 years)
 // Format: "YYYY-Season" to match database format
@@ -44,10 +53,8 @@ function generateTerms() {
   const currentYear = now.getFullYear()
   const currentMonth = now.getMonth()
   
-  // Determine current/upcoming term
   for (let year = currentYear; year >= currentYear - 3; year--) {
     if (year === currentYear) {
-      // Only add terms that have passed or are current
       if (currentMonth >= 8) terms.push(`${year}-Fall`)
       if (currentMonth >= 5) terms.push(`${year}-Summer`)
       terms.push(`${year}-Spring`)
@@ -57,7 +64,7 @@ function generateTerms() {
       terms.push(`${year}-Spring`)
     }
   }
-  return terms.slice(0, 12) // Limit to 12 terms
+  return terms.slice(0, 12)
 }
 
 // Format term for display (e.g., "2024-Fall" -> "Fall 2024")
@@ -69,14 +76,32 @@ function formatTermForDisplay(term: string): string {
   return term
 }
 
+// Get grade-specific color for Grade Received
+function getGradeButtonColor(grade: string, isSelected: boolean) {
+  if (!isSelected) {
+    return 'bg-surface-secondary border-surface-tertiary text-text-secondary hover:border-text-tertiary'
+  }
+  const colors: Record<string, string> = {
+    'A': 'bg-emerald-500 border-emerald-500 text-white',
+    'AB': 'bg-emerald-400 border-emerald-400 text-white',
+    'B': 'bg-blue-500 border-blue-500 text-white',
+    'BC': 'bg-blue-400 border-blue-400 text-white',
+    'C': 'bg-amber-500 border-amber-500 text-white',
+    'D': 'bg-orange-500 border-orange-500 text-white',
+    'F': 'bg-red-500 border-red-500 text-white',
+  }
+  return colors[grade] || 'bg-wf-crimson border-wf-crimson text-white'
+}
+
+// Get rating color for the 4-dimension cards
 function getRatingColor(rating: string) {
   const colors: Record<string, string> = {
-    'A': 'bg-emerald-100 dark:bg-emerald-900/30 border-emerald-300 dark:border-emerald-700 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-200 dark:hover:bg-emerald-900/50',
-    'B': 'bg-blue-100 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/50',
-    'C': 'bg-yellow-100 dark:bg-yellow-900/30 border-yellow-300 dark:border-yellow-700 text-yellow-700 dark:text-yellow-300 hover:bg-yellow-200 dark:hover:bg-yellow-900/50',
-    'D': 'bg-orange-100 dark:bg-orange-900/30 border-orange-300 dark:border-orange-700 text-orange-700 dark:text-orange-300 hover:bg-orange-200 dark:hover:bg-orange-900/50',
-    'F': 'bg-red-100 dark:bg-red-900/30 border-red-300 dark:border-red-700 text-red-700 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-900/50',
-    '': 'bg-surface-secondary border-surface-tertiary text-text-secondary hover:bg-hover-bg'
+    'A': 'bg-emerald-100 dark:bg-emerald-900/30 border-emerald-300 dark:border-emerald-700 text-emerald-700 dark:text-emerald-300',
+    'B': 'bg-blue-100 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300',
+    'C': 'bg-amber-100 dark:bg-amber-900/30 border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-300',
+    'D': 'bg-orange-100 dark:bg-orange-900/30 border-orange-300 dark:border-orange-700 text-orange-700 dark:text-orange-300',
+    'F': 'bg-red-100 dark:bg-red-900/30 border-red-300 dark:border-red-700 text-red-700 dark:text-red-300',
+    '': 'bg-surface-secondary border-surface-tertiary text-text-secondary'
   }
   return colors[rating] || colors['']
 }
@@ -116,14 +141,15 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
     courseId,
     term: availableTerms[0] || '',
     customTerm: '',
-    gradeReceived: '', // Now optional
+    gradeReceived: '',
     contentRating: '',
     teachingRating: '',
     gradingRating: '',
     workloadRating: '',
     assessments: [],
     instructorName: '',
-    isCustomInstructor: false
+    isCustomInstructor: false,
+    recommendInstructor: ''
   })
   
   // Check if selected term has data in database
@@ -153,7 +179,8 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
           workloadRating: '',
           assessments: [],
           instructorName: '',
-          isCustomInstructor: false
+          isCustomInstructor: false,
+          recommendInstructor: ''
         })
       }, 1500)
     },
@@ -177,10 +204,18 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
     e.preventDefault()
     setError(null)
 
-    // Validate required fields (grade is now optional)
+    // Validate required fields
     if (!formData.contentRating || !formData.teachingRating ||
         !formData.gradingRating || !formData.workloadRating || !formData.instructorName) {
       setError('Please fill in all required fields (ratings and instructor)')
+      return
+    }
+
+    // Validate at least one comment is filled (Content or Teaching required)
+    const hasContentComment = formData.contentComment && formData.contentComment.trim().length >= 20
+    const hasTeachingComment = formData.teachingComment && formData.teachingComment.trim().length >= 20
+    if (!hasContentComment && !hasTeachingComment) {
+      setError('Please fill in at least Content or Teaching comment (minimum 20 characters)')
       return
     }
 
@@ -194,7 +229,6 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
       return
     }
 
-    // Grade is optional now
     if (formData.gradeReceived && !validRatings.includes(formData.gradeReceived)) {
       setError('Invalid grade value')
       return
@@ -215,6 +249,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
       workloadComment: formData.workloadComment,
       assessments: formData.assessments,
       resourceLink: formData.resourceLink,
+      recommendInstructor: formData.recommendInstructor as 'yes' | 'no' | 'neutral' | undefined,
       instructorName: formData.instructorName!,
     })
   }
@@ -337,7 +372,36 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
                 </div>
               </div>
 
-              {/* Grade Received - Now Optional */}
+              {/* Recommend Instructor */}
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-2">
+                  Would you recommend this instructor?
+                </label>
+                <div className="flex gap-3">
+                  {[
+                    { value: 'yes', icon: ThumbsUp, label: 'Yes', color: 'emerald' },
+                    { value: 'neutral', icon: Meh, label: 'Neutral', color: 'amber' },
+                    { value: 'no', icon: ThumbsDown, label: 'No', color: 'red' },
+                  ].map(({ value, icon: Icon, label, color }) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setFormData({ ...formData, recommendInstructor: formData.recommendInstructor === value ? '' : value as any })}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 transition-all ${
+                        formData.recommendInstructor === value
+                          ? `bg-${color}-100 dark:bg-${color}-900/30 border-${color}-400 text-${color}-700 dark:text-${color}-300`
+                          : 'bg-surface-secondary border-surface-tertiary text-text-secondary hover:border-text-tertiary'
+                      }`}
+                      disabled={createReviewMutation.isPending}
+                    >
+                      <Icon size={18} />
+                      <span className="font-medium">{label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Grade Received - Now with grade-specific colors */}
               <div>
                 <label className="block text-sm font-medium text-text-primary mb-2">
                   Grade Received <span className="text-text-tertiary text-xs">(optional)</span>
@@ -348,11 +412,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
                       key={grade}
                       type="button"
                       onClick={() => setFormData({ ...formData, gradeReceived: formData.gradeReceived === grade ? '' : grade })}
-                      className={`px-4 py-2 rounded-lg border-2 font-medium transition-all ${
-                        formData.gradeReceived === grade
-                          ? 'bg-wf-crimson border-wf-crimson text-white'
-                          : 'bg-surface-secondary border-surface-tertiary text-text-secondary hover:border-text-tertiary'
-                      }`}
+                      className={`px-4 py-2 rounded-lg border-2 font-medium transition-all ${getGradeButtonColor(grade, formData.gradeReceived === grade)}`}
                       disabled={createReviewMutation.isPending}
                     >
                       {grade}
@@ -361,19 +421,22 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
                 </div>
               </div>
 
-              {/* 4-Grid Ratings */}
+              {/* 4-Grid Ratings with required comments */}
               <div>
-                <h4 className="text-sm font-medium text-text-primary mb-3">Course Ratings <span className="text-red-500">*</span></h4>
+                <h4 className="text-sm font-medium text-text-primary mb-1">Course Ratings <span className="text-red-500">*</span></h4>
+                <p className="text-xs text-text-tertiary mb-3">At least Content or Teaching comment is required (min 20 chars)</p>
                 <div className="grid grid-cols-2 gap-4">
                   {[
-                    { key: 'contentRating', label: 'Content', comment: 'contentComment' },
-                    { key: 'teachingRating', label: 'Teaching', comment: 'teachingComment' },
-                    { key: 'gradingRating', label: 'Grading', comment: 'gradingComment' },
-                    { key: 'workloadRating', label: 'Workload', comment: 'workloadComment' }
-                  ].map(({ key, label, comment }) => (
+                    { key: 'contentRating', label: 'Content', comment: 'contentComment', required: true },
+                    { key: 'teachingRating', label: 'Teaching', comment: 'teachingComment', required: true },
+                    { key: 'gradingRating', label: 'Grading', comment: 'gradingComment', required: false },
+                    { key: 'workloadRating', label: 'Workload', comment: 'workloadComment', required: false }
+                  ].map(({ key, label, comment, required }) => (
                     <div key={key} className="space-y-2">
                       <div className={`p-4 rounded-lg border-2 transition-all ${getRatingColor(formData[key as keyof typeof formData] as string)}`}>
-                        <div className="text-xs font-medium mb-2">{label}</div>
+                        <div className="text-xs font-medium mb-2">
+                          {label} {required && <span className="text-red-500">*</span>}
+                        </div>
                         <div className="flex gap-1">
                           {RATINGS.map(rating => (
                             <button
@@ -394,16 +457,17 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
                       </div>
                       <div className="relative">
                         <textarea
-                          placeholder={`Comments about ${label.toLowerCase()} (optional)`}
+                          placeholder={COMMENT_EXAMPLES[label.toLowerCase() as keyof typeof COMMENT_EXAMPLES]}
                           value={formData[comment as keyof typeof formData] as string || ''}
                           onChange={(e) => setFormData({ ...formData, [comment]: e.target.value })}
                           maxLength={3000}
-                          className="w-full px-3 py-2 text-sm bg-surface-secondary border border-surface-tertiary rounded-lg focus:outline-none focus:ring-2 focus:ring-wf-crimson/20 focus:border-wf-crimson resize-none text-text-primary"
-                          rows={2}
+                          className="w-full px-3 py-2 text-sm bg-surface-secondary border border-surface-tertiary rounded-lg focus:outline-none focus:ring-2 focus:ring-wf-crimson/20 focus:border-wf-crimson resize-none text-text-primary placeholder:text-text-tertiary/70"
+                          rows={3}
                           disabled={createReviewMutation.isPending}
                         />
-                        <div className="text-xs text-text-tertiary mt-1">
-                          {((formData[comment as keyof typeof formData] as string) || '').length}/3000
+                        <div className="text-xs text-text-tertiary mt-1 flex justify-between">
+                          <span>{required ? 'Recommended' : 'Optional'}</span>
+                          <span>{((formData[comment as keyof typeof formData] as string) || '').length}/3000</span>
                         </div>
                       </div>
                     </div>

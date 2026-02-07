@@ -147,6 +147,33 @@ function getGPAColor(gpa: number | null): string {
   return 'text-red-500'
 }
 
+// Convert letter grade to numeric value for averaging
+function gradeToNumeric(grade: string): number {
+  const grades: Record<string, number> = {
+    'A': 4.0, 'AB': 3.5, 'B': 3.0, 'BC': 2.5, 'C': 2.0, 'D': 1.0, 'F': 0.0
+  }
+  return grades[grade] ?? 2.0
+}
+
+// Get continuous color for review card based on average rating
+// Returns HSL values: red (0°) → yellow (45°) → green (120°)
+function getReviewCardStyle(review: { contentRating: string; teachingRating: string; gradingRating: string; workloadRating: string }) {
+  const avgNumeric = (
+    gradeToNumeric(review.contentRating) +
+    gradeToNumeric(review.teachingRating) +
+    gradeToNumeric(review.gradingRating) +
+    gradeToNumeric(review.workloadRating)
+  ) / 4
+  
+  // Map 0-4 to hue 0-120 (red to green)
+  const hue = (avgNumeric / 4) * 120
+  
+  return {
+    backgroundColor: `hsl(${hue}, 70%, 97%)`,
+    borderColor: `hsl(${hue}, 60%, 75%)`,
+  }
+}
+
 // Left Sidebar Component
 function LeftSidebar({ 
   course, 
@@ -830,19 +857,32 @@ export function CoursePageLayout({
                   {filteredReviews.map((review, index) => {
                     const isGated = !course.reviewAccess.hasFullAccess && index > 0
 
+                    const reviewCardStyle = getReviewCardStyle(review)
                     const reviewCard = (
-                      <div key={review.id} className="bg-surface-primary rounded-xl border border-surface-tertiary p-6">
+                      <div 
+                        key={review.id} 
+                        className="rounded-xl border p-6 transition-colors"
+                        style={{ 
+                          backgroundColor: reviewCardStyle.backgroundColor,
+                          borderColor: reviewCardStyle.borderColor 
+                        }}
+                      >
                         <div className="flex items-start justify-between mb-4">
                           <div>
                             <div className="flex items-center gap-2 flex-wrap">
                               <h4 className="font-semibold text-text-primary">{review.title || 'Untitled Review'}</h4>
-                              <span className={`px-2 py-0.5 text-xs font-medium rounded ${getGradeColor(review.gradeReceived)}`}>
-                                Grade: {review.gradeReceived}
-                              </span>
+                              {review.gradeReceived && (
+                                <span className={`px-2 py-0.5 text-xs font-medium rounded ${getGradeColor(review.gradeReceived)}`}>
+                                  Grade: {review.gradeReceived}
+                                </span>
+                              )}
                               {review.authorLevel && <ContributorBadge contributor={review.authorLevel} />}
                             </div>
-                            <div className="text-sm text-text-tertiary mt-1">
-                              {review.term} · {review.instructor?.name || 'Unknown Instructor'}
+                            <div className="text-sm text-text-tertiary mt-1 flex items-center gap-2">
+                              <span>{review.term} · {review.instructor?.name || 'Unknown Instructor'}</span>
+                              {review.recommendInstructor === 'yes' && <span title="Recommends instructor">👍</span>}
+                              {review.recommendInstructor === 'no' && <span title="Does not recommend instructor">👎</span>}
+                              {review.recommendInstructor === 'neutral' && <span title="Neutral about instructor">😐</span>}
                             </div>
                           </div>
                           <div className="flex items-center gap-2">

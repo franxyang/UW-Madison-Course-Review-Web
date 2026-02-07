@@ -173,8 +173,9 @@ model Review {
   contentComment  String?
   teachingComment String?
   gradingComment  String?
-  workloadComment String?
-  assessments     String?
+  workloadComment       String?
+  recommendInstructor   String?    // 'yes' | 'no' | 'neutral'
+  assessments           String?
   tags            String?
   resourceLink    String?
   instructorId    String

@@ -52,3 +52,7 @@ data-pipeline/
 
 # Backups
 backup/
+
+# Internal docs
+PROGRESS.md
+docs/ROADMAP.md

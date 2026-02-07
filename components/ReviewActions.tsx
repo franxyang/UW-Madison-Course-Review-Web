@@ -36,7 +36,7 @@ export function ReviewActions({ reviewId, isOwner, onDeleted, onEditStart }: Rev
     <div className="relative">
       <button
         onClick={() => setShowMenu(!showMenu)}
-        className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+        className="p-1.5 rounded-lg text-text-tertiary hover:text-text-primary hover:bg-hover-bg transition-colors"
         aria-label="Review actions"
       >
         <MoreVertical size={16} />
@@ -47,13 +47,13 @@ export function ReviewActions({ reviewId, isOwner, onDeleted, onEditStart }: Rev
         <>
           {/* Click-away backdrop */}
           <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)} />
-          <div className="absolute right-0 top-full mt-1 z-20 bg-white border border-slate-200 rounded-lg shadow-lg py-1 min-w-[140px]">
+          <div className="absolute right-0 top-full mt-1 z-20 bg-surface-primary border border-surface-tertiary rounded-lg shadow-lg py-1 min-w-[140px]">
             <button
               onClick={() => {
                 setShowMenu(false)
                 onEditStart?.()
               }}
-              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-text-secondary hover:bg-hover-bg transition-colors"
             >
               <Pencil size={14} />
               Edit Review
@@ -63,7 +63,7 @@ export function ReviewActions({ reviewId, isOwner, onDeleted, onEditStart }: Rev
                 setShowMenu(false)
                 setShowConfirm(true)
               }}
-              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
             >
               <Trash2 size={14} />
               Delete Review
@@ -75,20 +75,20 @@ export function ReviewActions({ reviewId, isOwner, onDeleted, onEditStart }: Rev
       {/* Delete confirmation modal */}
       {showConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-xl p-6 max-w-sm w-full mx-4 shadow-xl">
+          <div className="bg-surface-primary rounded-xl p-6 max-w-sm w-full mx-4 shadow-xl border border-surface-tertiary">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-slate-900">Delete Review?</h3>
-              <button onClick={() => setShowConfirm(false)} className="text-slate-400 hover:text-slate-600">
+              <h3 className="text-lg font-semibold text-text-primary">Delete Review?</h3>
+              <button onClick={() => setShowConfirm(false)} className="text-text-tertiary hover:text-text-primary">
                 <X size={20} />
               </button>
             </div>
-            <p className="text-sm text-slate-600 mb-6">
+            <p className="text-sm text-text-secondary mb-6">
               This will permanently delete your review, all its comments, and votes. This cannot be undone.
             </p>
             <div className="flex gap-3 justify-end">
               <button
                 onClick={() => setShowConfirm(false)}
-                className="px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors"
+                className="px-4 py-2 text-sm font-medium text-text-secondary bg-surface-secondary rounded-lg hover:bg-surface-tertiary transition-colors"
               >
                 Cancel
               </button>

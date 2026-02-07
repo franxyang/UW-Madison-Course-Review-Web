@@ -251,11 +251,16 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
       return
     }
 
-    // Validate at least one comment is filled (Content or Teaching required)
-    const hasContentComment = formData.contentComment && formData.contentComment.trim().length >= 20
-    const hasTeachingComment = formData.teachingComment && formData.teachingComment.trim().length >= 20
-    if (!hasContentComment && !hasTeachingComment) {
-      setError('Please fill in at least Content or Teaching comment (minimum 20 characters)')
+    // Validate all 4 comments are filled (minimum 20 characters each)
+    const comments = [
+      { name: 'Content', value: formData.contentComment },
+      { name: 'Teaching', value: formData.teachingComment },
+      { name: 'Grading', value: formData.gradingComment },
+      { name: 'Workload', value: formData.workloadComment },
+    ]
+    const missingComments = comments.filter(c => !c.value || c.value.trim().length < 20)
+    if (missingComments.length > 0) {
+      setError(`Please fill in all comments (minimum 20 characters each). Missing: ${missingComments.map(c => c.name).join(', ')}`)
       return
     }
 
@@ -470,13 +475,13 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
               {/* 4-Grid Ratings with required comments */}
               <div>
                 <h4 className="text-sm font-medium text-text-primary mb-1">Course Ratings <span className="text-red-500">*</span></h4>
-                <p className="text-xs text-text-tertiary mb-3">At least Content or Teaching comment is required (min 20 chars)</p>
+                <p className="text-xs text-text-tertiary mb-3">All 4 dimension ratings and comments are required (min 20 chars each)</p>
                 <div className="grid grid-cols-2 gap-4">
                   {[
                     { key: 'contentRating', label: 'Content', comment: 'contentComment', required: true },
                     { key: 'teachingRating', label: 'Teaching', comment: 'teachingComment', required: true },
-                    { key: 'gradingRating', label: 'Grading', comment: 'gradingComment', required: false },
-                    { key: 'workloadRating', label: 'Workload', comment: 'workloadComment', required: false }
+                    { key: 'gradingRating', label: 'Grading', comment: 'gradingComment', required: true },
+                    { key: 'workloadRating', label: 'Workload', comment: 'workloadComment', required: true }
                   ].map(({ key, label, comment, required }) => (
                     <div key={key} className="space-y-2">
                       <div className={`p-4 rounded-lg border-2 transition-all ${getRatingColor(formData[key as keyof typeof formData] as string)}`}>
@@ -507,12 +512,12 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
                           value={formData[comment as keyof typeof formData] as string || ''}
                           onChange={(e) => setFormData({ ...formData, [comment]: e.target.value })}
                           maxLength={3000}
-                          className="w-full px-3 py-2 text-sm bg-surface-secondary border border-surface-tertiary rounded-lg focus:outline-none focus:ring-2 focus:ring-wf-crimson/20 focus:border-wf-crimson resize-none text-text-primary placeholder:text-text-tertiary/70"
-                          rows={3}
+                          className="w-full px-3 py-2 text-sm bg-surface-secondary border border-surface-tertiary rounded-lg focus:outline-none focus:ring-2 focus:ring-wf-crimson/20 focus:border-wf-crimson resize-y text-text-primary placeholder:text-text-tertiary/70 min-h-[120px]"
+                          rows={5}
                           disabled={createReviewMutation.isPending}
                         />
                         <div className="text-xs text-text-tertiary mt-1 flex justify-between">
-                          <span>{required ? 'Recommended' : 'Optional'}</span>
+                          <span>{required ? 'Required (min 20 chars)' : 'Optional'}</span>
                           <span>{((formData[comment as keyof typeof formData] as string) || '').length}/3000</span>
                         </div>
                       </div>
@@ -549,7 +554,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
                       onClick={() => toggleAssessment(assessment)}
                       className={`px-3 py-2 text-sm rounded-lg border transition-all ${
                         formData.assessments?.includes(assessment)
-                          ? 'bg-wf-crimson border-wf-crimson text-white'
+                          ? 'bg-wf-crimson/10 border-wf-crimson text-wf-crimson font-medium'
                           : 'bg-surface-secondary border-surface-tertiary text-text-secondary hover:border-text-tertiary'
                       }`}
                       disabled={createReviewMutation.isPending}

@@ -13,7 +13,7 @@ export default function SignUpPage() {
             <Logo size={48} />
           </div>
           <h1 className="text-3xl font-bold text-slate-900 mb-2">Join MadSpace</h1>
-          <p className="text-slate-600">Create your account to start reviewing courses</p>
+          <p className="text-slate-700 dark:text-slate-300">Create your account to start reviewing courses</p>
         </div>
 
         {/* Sign Up Card */}
@@ -47,12 +47,12 @@ export default function SignUpPage() {
             </button>
           </form>
 
-          <p className="mt-3 text-center text-xs text-slate-500">
+          <p className="mt-3 text-center text-xs text-slate-600 dark:text-slate-400">
             Use your @wisc.edu email to create an account
           </p>
 
           {/* Help Text */}
-          <p className="mt-6 text-center text-sm text-slate-600">
+          <p className="mt-6 text-center text-sm text-slate-700 dark:text-slate-300">
             Already have an account?{' '}
             <Link href="/auth/signin" className="text-uw-red hover:text-uw-dark font-medium">
               Sign in
@@ -62,7 +62,7 @@ export default function SignUpPage() {
 
         {/* Community Guidelines */}
         <div className="mt-6 p-4 bg-white/50 rounded-lg border border-slate-200">
-          <p className="text-xs text-slate-600 text-center">
+          <p className="text-xs text-slate-700 dark:text-slate-300 text-center">
             <strong>Community Guidelines:</strong> Be respectful, honest, and constructive in your reviews. False or misleading information will result in account suspension.
           </p>
         </div>

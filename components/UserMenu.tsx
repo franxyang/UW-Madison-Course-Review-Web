@@ -69,7 +69,7 @@ export function UserMenu({ user }: UserMenuProps) {
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-surface-tertiary py-2 z-50">
+        <div className="absolute right-0 mt-2 w-64 bg-surface-primary rounded-lg shadow-lg border border-surface-tertiary py-2 z-50">
           {/* User Info */}
           <div className="px-4 py-3 border-b border-surface-tertiary">
             <p className="text-sm font-semibold text-text-primary">{displayName || 'Anonymous Badger'}</p>

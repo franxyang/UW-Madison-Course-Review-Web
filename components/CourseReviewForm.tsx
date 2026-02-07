@@ -25,12 +25,12 @@ export const CourseReviewForm: React.FC<CourseReviewFormProps> = ({ courseId }) 
   }
 
   return (
-    <div className="bg-white rounded-lg border border-slate-200 p-6">
-      <h4 className="font-medium text-slate-900 mb-4">Write a Review</h4>
-      <p className="text-slate-600 text-sm">Review submission form coming soon!</p>
+    <div className="bg-surface-primary rounded-lg border border-surface-tertiary p-6">
+      <h4 className="font-medium text-text-primary mb-4">Write a Review</h4>
+      <p className="text-text-secondary text-sm">Review submission form coming soon!</p>
       <button
         onClick={() => setIsOpen(false)}
-        className="mt-4 px-4 py-2 text-slate-600 hover:text-slate-900"
+        className="mt-4 px-4 py-2 text-text-secondary hover:text-text-primary"
       >
         Cancel
       </button>

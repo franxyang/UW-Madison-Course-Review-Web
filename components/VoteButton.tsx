@@ -66,7 +66,7 @@ export function VoteButton({
       className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all ${
         isVoted
           ? 'bg-uw-red text-white border-uw-red hover:bg-uw-dark'
-          : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50 hover:border-slate-400'
+          : 'bg-surface-primary text-text-secondary border-surface-tertiary hover:bg-hover-bg hover:border-text-tertiary'
       } ${voteMutation.isPending ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
     >
       <ThumbsUp size={16} className={isVoted ? 'fill-current' : ''} />

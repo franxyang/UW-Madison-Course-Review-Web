@@ -42,7 +42,7 @@ export function ReportButton({ reviewId, isOwner }: ReportButtonProps) {
     <>
       <button
         onClick={() => setShowModal(true)}
-        className="flex items-center gap-1 text-xs text-slate-400 hover:text-red-500 transition-colors"
+        className="flex items-center gap-1 text-xs text-text-tertiary hover:text-red-500 dark:hover:text-red-400 transition-colors"
         title="Report this review"
       >
         <Flag size={12} />
@@ -51,22 +51,22 @@ export function ReportButton({ reviewId, isOwner }: ReportButtonProps) {
 
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4 shadow-xl">
+          <div className="bg-surface-primary rounded-xl p-6 max-w-md w-full mx-4 shadow-xl border border-surface-tertiary">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-slate-900">Report Review</h3>
-              <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-slate-600">
+              <h3 className="text-lg font-semibold text-text-primary">Report Review</h3>
+              <button onClick={() => setShowModal(false)} className="text-text-tertiary hover:text-text-primary">
                 <X size={20} />
               </button>
             </div>
 
             {submitted ? (
               <div className="text-center py-6">
-                <div className="text-green-600 text-lg font-medium mb-2">✓ Report Submitted</div>
-                <p className="text-sm text-slate-600">Thank you. We'll review this shortly.</p>
+                <div className="text-green-600 dark:text-green-400 text-lg font-medium mb-2">✓ Report Submitted</div>
+                <p className="text-sm text-text-secondary">Thank you. We'll review this shortly.</p>
               </div>
             ) : (
               <>
-                <p className="text-sm text-slate-600 mb-4">
+                <p className="text-sm text-text-secondary mb-4">
                   Why are you reporting this review?
                 </p>
 
@@ -76,8 +76,8 @@ export function ReportButton({ reviewId, isOwner }: ReportButtonProps) {
                       key={r.value}
                       className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
                         reason === r.value
-                          ? 'border-uw-red bg-red-50'
-                          : 'border-slate-200 hover:bg-slate-50'
+                          ? 'border-uw-red bg-red-50 dark:bg-red-900/20'
+                          : 'border-surface-tertiary hover:bg-hover-bg'
                       }`}
                     >
                       <input
@@ -88,7 +88,7 @@ export function ReportButton({ reviewId, isOwner }: ReportButtonProps) {
                         onChange={() => setReason(r.value)}
                         className="text-uw-red focus:ring-uw-red"
                       />
-                      <span className="text-sm text-slate-700">{r.label}</span>
+                      <span className="text-sm text-text-secondary">{r.label}</span>
                     </label>
                   ))}
                 </div>
@@ -98,7 +98,7 @@ export function ReportButton({ reviewId, isOwner }: ReportButtonProps) {
                     value={details}
                     onChange={(e) => setDetails(e.target.value)}
                     placeholder="Please describe the issue..."
-                    className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-uw-red/20 focus:border-uw-red resize-none"
+                    className="w-full px-3 py-2 text-sm border border-surface-tertiary rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-uw-red/20 focus:border-uw-red resize-none bg-surface-primary text-text-primary"
                     rows={3}
                     maxLength={500}
                   />
@@ -107,7 +107,7 @@ export function ReportButton({ reviewId, isOwner }: ReportButtonProps) {
                 <div className="flex gap-3 justify-end">
                   <button
                     onClick={() => setShowModal(false)}
-                    className="px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors"
+                    className="px-4 py-2 text-sm font-medium text-text-secondary bg-surface-secondary rounded-lg hover:bg-surface-tertiary transition-colors"
                   >
                     Cancel
                   </button>

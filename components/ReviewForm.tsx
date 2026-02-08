@@ -61,6 +61,22 @@ type ReviewFormData = {
 
 const GRADES = ['A', 'AB', 'B', 'BC', 'C', 'D', 'F']
 const RATINGS = ['A', 'B', 'C', 'D', 'F']
+
+// Tooltips explaining what each rating means per dimension
+const RATING_HINTS: Record<string, Record<string, string>> = {
+  Content: { A: 'Excellent material', B: 'Good', C: 'Average', D: 'Below average', F: 'Poor' },
+  Teaching: { A: 'Outstanding teaching', B: 'Good', C: 'Average', D: 'Below average', F: 'Poor' },
+  Grading: { A: 'Very fair grading', B: 'Fair', C: 'Average', D: 'Harsh', F: 'Very harsh' },
+  Workload: { A: 'Very light', B: 'Light', C: 'Moderate', D: 'Heavy', F: 'Extremely heavy' },
+}
+
+// Short description shown below each rating section
+const DIMENSION_DESC: Record<string, string> = {
+  Content: 'How useful and well-organized is the course material?',
+  Teaching: 'How effective is the instructor at explaining concepts?',
+  Grading: 'How fair and transparent is the grading? A = very fair',
+  Workload: 'How manageable is the workload? A = very light, F = extremely heavy',
+}
 const ASSESSMENTS = ['Midterm', 'Final', 'Project', 'Homework', 'Quiz', 'Lab', 'Essay', 'Presentation', 'Participation']
 
 // Comment examples for each dimension
@@ -310,16 +326,16 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
       return
     }
 
-    // Validate all 4 comments are filled (minimum 20 characters each)
+    // Validate all 4 comments are filled (minimum 5 characters each)
     const comments = [
       { name: 'Content', value: formData.contentComment },
       { name: 'Teaching', value: formData.teachingComment },
       { name: 'Grading', value: formData.gradingComment },
       { name: 'Workload', value: formData.workloadComment },
     ]
-    const missingComments = comments.filter(c => !c.value || c.value.trim().length < 20)
+    const missingComments = comments.filter(c => !c.value || c.value.trim().length < 5)
     if (missingComments.length > 0) {
-      setError(`Please fill in all comments (minimum 20 characters each). Missing: ${missingComments.map(c => c.name).join(', ')}`)
+      setError(`Please fill in all comments (minimum 5 characters each). Missing: ${missingComments.map(c => c.name).join(', ')}`)
       return
     }
 
@@ -570,7 +586,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
               {/* 4-Grid Ratings with required comments */}
               <div>
                 <h4 className="text-sm font-medium text-text-primary mb-1">Course Ratings <span className="text-red-500">*</span></h4>
-                <p className="text-xs text-text-tertiary mb-3">All 4 dimension ratings and comments are required (min 20 chars each)</p>
+                <p className="text-xs text-text-tertiary mb-3">All 4 dimension ratings and comments are required (min 5 chars each)</p>
                 <div className="grid grid-cols-2 gap-4">
                   {[
                     { key: 'contentRating', label: 'Content', comment: 'contentComment', required: true },
@@ -580,8 +596,11 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
                   ].map(({ key, label, comment, required }) => (
                     <div key={key} className="space-y-2">
                       <div className={`p-4 rounded-lg border-2 transition-all ${getRatingColor(formData[key as keyof typeof formData] as string)}`}>
-                        <div className="text-xs font-medium mb-2">
+                        <div className="text-xs font-medium mb-1">
                           {label} {required && <span className="text-red-500">*</span>}
+                        </div>
+                        <div className="text-[10px] text-text-tertiary mb-2 leading-tight">
+                          {DIMENSION_DESC[label]}
                         </div>
                         <div className="flex gap-1">
                           {RATINGS.map(rating => (
@@ -589,6 +608,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
                               key={rating}
                               type="button"
                               onClick={() => setFormData({ ...formData, [key]: rating })}
+                              title={RATING_HINTS[label]?.[rating] || rating}
                               className={`px-2 py-1 text-sm font-bold rounded transition-all ${
                                 formData[key as keyof typeof formData] === rating
                                   ? 'bg-white/80 dark:bg-black/30 shadow-sm'
@@ -600,6 +620,11 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
                             </button>
                           ))}
                         </div>
+                        {formData[key as keyof typeof formData] && (
+                          <div className="text-[10px] text-text-secondary mt-1 font-medium">
+                            {RATING_HINTS[label]?.[formData[key as keyof typeof formData] as string]}
+                          </div>
+                        )}
                       </div>
                       <div className="relative">
                         <textarea
@@ -612,7 +637,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
                           disabled={activeMutation.isPending}
                         />
                         <div className="text-xs text-text-tertiary mt-1 flex justify-between">
-                          <span>{required ? 'Required (min 20 chars)' : 'Optional'}</span>
+                          <span>{required ? 'Required (min 5 chars)' : 'Optional'}</span>
                           <span>{((formData[comment as keyof typeof formData] as string) || '').length}/3000</span>
                         </div>
                       </div>

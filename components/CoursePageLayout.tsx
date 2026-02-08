@@ -220,7 +220,8 @@ function LeftSidebar({
   }, [])
   
   return (
-    <aside className="w-[320px] flex-shrink-0 space-y-5">
+    <aside className="w-[320px] flex-shrink-0 h-full overflow-y-auto scrollbar-hide">
+      <div className="space-y-5">
       {/* Search - global, with live preview */}
       <div className="relative z-30" ref={containerRef}>
         <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary pointer-events-none" />
@@ -381,6 +382,7 @@ function LeftSidebar({
           )}
         </div>
       )}
+      </div>
     </aside>
   )
 }
@@ -421,8 +423,8 @@ function RightSidebar({
   }[filterType]
   
   return (
-    <aside className="w-full lg:w-[280px] lg:flex-shrink-0">
-      <div className="sticky top-24 space-y-6">
+    <aside className="w-full lg:w-[280px] lg:flex-shrink-0 lg:h-full lg:overflow-y-auto scrollbar-hide">
+      <div className="space-y-6">
         {/* Review Count */}
         <div className="text-center">
           <div className="text-4xl font-bold text-text-primary">{course.reviews.length}</div>
@@ -616,9 +618,6 @@ export function CoursePageLayout({
   
   // Edit review state
   const [editingReviewId, setEditingReviewId] = useState<string | null>(null)
-  
-  // Collapsed/expanded reviews state
-  const [expandedReviews, setExpandedReviews] = useState<Set<string>>(new Set())
 
   // Parse JSON fields
   const breadths = course.breadths ? (typeof course.breadths === 'string' ? JSON.parse(course.breadths) : course.breadths) : []
@@ -766,20 +765,20 @@ export function CoursePageLayout({
   const latestDistribution = filteredDistributions[0]
 
   return (
-    <div className="min-h-screen bg-surface-secondary">
+    <div className="min-h-screen lg:h-screen lg:flex lg:flex-col bg-surface-secondary lg:overflow-hidden">
       {/* Header */}
       <Header currentPath="/courses" />
 
       {/* Main Content - 3 Column Layout (responsive: stack on mobile) */}
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
-        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
-          {/* Left Sidebar - hidden on mobile, shown on lg+ */}
-          <div className="hidden lg:block">
+      <div className="lg:flex-1 lg:min-h-0 max-w-[1400px] w-full mx-auto px-4 sm:px-6">
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 lg:h-full">
+          {/* Left Sidebar - hidden on mobile, fixed height with internal scroll */}
+          <div className="hidden lg:block py-6 lg:py-8">
             <LeftSidebar course={course} relatedCourses={relatedCourses} />
           </div>
 
-          {/* Main Content */}
-          <main className="flex-1 min-w-0">
+          {/* Main Content - only this column scrolls on desktop */}
+          <main className="flex-1 min-w-0 lg:overflow-y-auto lg:scrollbar-hide py-6 lg:py-8">
             {/* Breadcrumb */}
             <div className="flex items-center gap-2 text-sm text-text-secondary mb-4">
               <Link href="/courses" className="hover:text-text-primary transition-colors">Courses</Link>
@@ -900,299 +899,236 @@ export function CoursePageLayout({
             />
 
             {/* Reviews Section */}
-            {session?.user ? (
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-text-primary">
-                  Student Reviews ({filteredReviews.length})
-                  {(selectedTerm !== 'all' || selectedInstructor !== 'all') && (
-                    <span className="text-sm font-normal text-text-tertiary ml-2">
-                      (filtered from {reviewsWithParsedData.length})
-                    </span>
-                  )}
-                </h3>
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-text-primary">
+                Student Reviews ({filteredReviews.length})
+                {(selectedTerm !== 'all' || selectedInstructor !== 'all') && (
+                  <span className="text-sm font-normal text-text-tertiary ml-2">
+                    (filtered from {reviewsWithParsedData.length})
+                  </span>
+                )}
+              </h3>
 
-                {/* Review Form */}
-                <div id="review-form" className="bg-surface-primary rounded-xl border border-surface-tertiary p-6 scroll-mt-24">
-                  <ReviewForm 
-                    courseId={course.id} 
-                    courseName={`${toOfficialCode(course.code)}: ${course.name}`}
-                    gradeDistributions={course.gradeDistributions}
-                    courseInstructors={course.instructors}
-                    isLoggedIn={!!session?.user}
-                  />
+              {/* Review Form */}
+              <div id="review-form" className="bg-surface-primary rounded-xl border border-surface-tertiary p-6 scroll-mt-24">
+                <ReviewForm 
+                  courseId={course.id} 
+                  courseName={`${toOfficialCode(course.code)}: ${course.name}`}
+                  gradeDistributions={course.gradeDistributions}
+                  courseInstructors={course.instructors}
+                />
+              </div>
+
+              {/* Reviews List */}
+              {filteredReviews.length === 0 ? (
+                <div className="bg-surface-primary rounded-xl border border-surface-tertiary p-12 text-center">
+                  <MessageSquare className="mx-auto h-12 w-12 text-text-tertiary mb-4" />
+                  <p className="text-text-secondary">
+                    {reviewsWithParsedData.length === 0 
+                      ? 'No reviews yet. Be the first to review this course!'
+                      : 'No reviews match your filters.'}
+                  </p>
                 </div>
+              ) : (
+                <div className="space-y-4">
+                  {filteredReviews.map((review, index) => {
+                    const isGated = !course.reviewAccess.hasFullAccess && index > 0
 
-                {/* Reviews List */}
-                {filteredReviews.length === 0 ? (
-                  <div className="bg-surface-primary rounded-xl border border-surface-tertiary p-12 text-center">
-                    <MessageSquare className="mx-auto h-12 w-12 text-text-tertiary mb-4" />
-                    <p className="text-text-secondary">
-                      {reviewsWithParsedData.length === 0 
-                        ? 'No reviews yet. Be the first to review this course!'
-                        : 'No reviews match your filters.'}
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {filteredReviews.map((review, index) => {
-                      const isGated = !course.reviewAccess.hasFullAccess && index > 0
-                      const isExpanded = expandedReviews.has(review.id)
-
-                      const toggleExpanded = () => {
-                        setExpandedReviews(prev => {
-                          const next = new Set(prev)
-                          if (next.has(review.id)) {
-                            next.delete(review.id)
-                          } else {
-                            next.add(review.id)
-                          }
-                          return next
-                        })
+                    // Show edit form instead of review card when editing
+                    if (editingReviewId === review.id) {
+                      const existingReview = {
+                        id: review.id,
+                        term: review.term,
+                        title: review.title,
+                        gradeReceived: review.gradeReceived,
+                        contentRating: review.contentRating,
+                        teachingRating: review.teachingRating,
+                        gradingRating: review.gradingRating,
+                        workloadRating: review.workloadRating,
+                        contentComment: review.contentComment,
+                        teachingComment: review.teachingComment,
+                        gradingComment: review.gradingComment,
+                        workloadComment: review.workloadComment,
+                        assessments: review.assessments,
+                        resourceLink: review.resourceLink,
+                        recommendInstructor: review.recommendInstructor,
+                        instructor: review.instructor,
                       }
-
-                      // Show edit form instead of review card when editing
-                      if (editingReviewId === review.id) {
-                        const existingReview = {
-                          id: review.id,
-                          term: review.term,
-                          title: review.title,
-                          gradeReceived: review.gradeReceived,
-                          contentRating: review.contentRating,
-                          teachingRating: review.teachingRating,
-                          gradingRating: review.gradingRating,
-                          workloadRating: review.workloadRating,
-                          contentComment: review.contentComment,
-                          teachingComment: review.teachingComment,
-                          gradingComment: review.gradingComment,
-                          workloadComment: review.workloadComment,
-                          assessments: review.assessments,
-                          resourceLink: review.resourceLink,
-                          recommendInstructor: review.recommendInstructor,
-                          instructor: review.instructor,
-                        }
-                        return (
-                          <div key={review.id} className="bg-surface-primary rounded-xl border-2 border-wf-crimson/30 p-1">
-                            <ReviewForm
-                              courseId={course.id}
-                              courseName={`${toOfficialCode(course.code)}: ${course.name}`}
-                              gradeDistributions={course.gradeDistributions}
-                              courseInstructors={course.instructors}
-                              existingReview={existingReview}
-                              onEditComplete={() => setEditingReviewId(null)}
-                              onEditCancel={() => setEditingReviewId(null)}
-                              isLoggedIn={!!session?.user}
-                            />
-                          </div>
-                        )
-                      }
-
-                      const reviewCardClass = getReviewCardClass(review)
-                      const reviewCard = (
-                        <div 
-                          key={review.id} 
-                          className={reviewCardClass}
-                        >
-                          {/* Title row */}
-                          <div className="flex items-start justify-between mb-4">
-                            <div>
-                              <div className="flex items-center gap-2 flex-wrap">
-                                <h4 className="font-semibold text-text-primary">{review.title || 'Untitled Review'}</h4>
-                                {review.gradeReceived && (
-                                  <span className={`px-2 py-0.5 text-xs font-medium rounded ${getGradeColor(review.gradeReceived)}`}>
-                                    Grade: {review.gradeReceived}
-                                  </span>
-                                )}
-                                {review.authorLevel && review.authorLevel.level > 0 && <ContributorBadge contributor={review.authorLevel} />}
-                              </div>
-                              <div className="text-sm text-text-tertiary mt-1 flex items-center gap-2">
-                                {review.author && (
-                                  <span className="font-medium text-text-secondary">
-                                    {review.authorLevel?.badge && review.authorLevel.level > 0 && <span className="mr-0.5">{review.authorLevel.badge}</span>}
-                                    {review.author.name}
-                                  </span>
-                                )}
-                                {review.author && <span className="text-text-tertiary">·</span>}
-                                <span>{review.term} · {review.instructor?.name || 'Unknown Instructor'}</span>
-                                {review.recommendInstructor === 'yes' && <span title="Recommends instructor">👍</span>}
-                                {review.recommendInstructor === 'no' && <span title="Does not recommend instructor">👎</span>}
-                                {review.recommendInstructor === 'neutral' && <span title="Neutral about instructor">😐</span>}
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs text-text-tertiary">
-                                {new Date(review.createdAt).toLocaleDateString()}
-                              </span>
-                              <ReviewActions
-                                reviewId={review.id}
-                                isOwner={session?.user?.id === review.authorId}
-                                onEditStart={() => setEditingReviewId(review.id)}
-                                onDeleted={() => utils.course.byId.invalidate({ id: course.id })}
-                              />
-                            </div>
-                          </div>
-
-                          {/* Rating Cards */}
-                          <div className="grid grid-cols-4 gap-2 mb-4">
-                            {[
-                              { label: 'Content', value: review.contentRating },
-                              { label: 'Teaching', value: review.teachingRating },
-                              { label: 'Grading', value: review.gradingRating },
-                              { label: 'Workload', value: review.workloadRating },
-                            ].map(({ label, value }) => (
-                              <div key={label} className={`p-2 rounded-lg border text-center ${getRatingColor(value)}`}>
-                                <div className="text-xs opacity-75">{label}</div>
-                                <div className="text-sm font-bold">{value}</div>
-                              </div>
-                            ))}
-                          </div>
-
-                          {/* Assessments (moved above comments) */}
-                          {review.assessments && review.assessments.length > 0 && (
-                            <div className="flex flex-wrap gap-1.5 mb-3">
-                              {review.assessments.map((assessment: string) => (
-                                <span key={assessment} className="px-2 py-0.5 text-xs bg-surface-secondary text-text-tertiary rounded border border-surface-tertiary">
-                                  {assessment}
-                                </span>
-                              ))}
-                            </div>
-                          )}
-
-                          {/* Collapsed state: show only Content & Teaching comments (line-clamped) */}
-                          {!isExpanded && (
-                            <>
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                                {review.contentComment && (
-                                  <div className="p-3 rounded-lg border border-surface-tertiary bg-surface-secondary/50">
-                                    <div className="text-xs font-semibold text-text-tertiary uppercase tracking-wide mb-1.5">Content</div>
-                                    <p className="text-gray-800 dark:text-gray-200 whitespace-pre-line leading-relaxed line-clamp-3">{review.contentComment}</p>
-                                  </div>
-                                )}
-                                {review.teachingComment && (
-                                  <div className="p-3 rounded-lg border border-surface-tertiary bg-surface-secondary/50">
-                                    <div className="text-xs font-semibold text-text-tertiary uppercase tracking-wide mb-1.5">Teaching</div>
-                                    <p className="text-gray-800 dark:text-gray-200 whitespace-pre-line leading-relaxed line-clamp-3">{review.teachingComment}</p>
-                                  </div>
-                                )}
-                              </div>
-                              <button
-                                onClick={toggleExpanded}
-                                className="text-sm text-wf-crimson hover:underline cursor-pointer mt-3"
-                              >
-                                Read more ▾
-                              </button>
-
-                            </>
-                          )}
-
-                          {/* Expanded state: show all comments fully + vote/report/comments */}
-                          {isExpanded && (
-                            <>
-                              {/* Comments - each in its own card */}
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                                {review.contentComment && (
-                                  <div className="p-3 rounded-lg border border-surface-tertiary bg-surface-secondary/50">
-                                    <div className="text-xs font-semibold text-text-tertiary uppercase tracking-wide mb-1.5">Content</div>
-                                    <p className="text-gray-800 dark:text-gray-200 whitespace-pre-line leading-relaxed">{review.contentComment}</p>
-                                  </div>
-                                )}
-                                {review.teachingComment && (
-                                  <div className="p-3 rounded-lg border border-surface-tertiary bg-surface-secondary/50">
-                                    <div className="text-xs font-semibold text-text-tertiary uppercase tracking-wide mb-1.5">Teaching</div>
-                                    <p className="text-gray-800 dark:text-gray-200 whitespace-pre-line leading-relaxed">{review.teachingComment}</p>
-                                  </div>
-                                )}
-                                {review.gradingComment && (
-                                  <div className="p-3 rounded-lg border border-surface-tertiary bg-surface-secondary/50">
-                                    <div className="text-xs font-semibold text-text-tertiary uppercase tracking-wide mb-1.5">Grading</div>
-                                    <p className="text-gray-800 dark:text-gray-200 whitespace-pre-line leading-relaxed">{review.gradingComment}</p>
-                                  </div>
-                                )}
-                                {review.workloadComment && (
-                                  <div className="p-3 rounded-lg border border-surface-tertiary bg-surface-secondary/50">
-                                    <div className="text-xs font-semibold text-text-tertiary uppercase tracking-wide mb-1.5">Workload</div>
-                                    <p className="text-gray-800 dark:text-gray-200 whitespace-pre-line leading-relaxed">{review.workloadComment}</p>
-                                  </div>
-                                )}
-                              </div>
-
-                              {/* Actions */}
-                              <div className="flex items-center justify-between mt-4 pt-4 border-t border-surface-tertiary">
-                                <VoteButton
-                                  reviewId={review.id}
-                                  initialVoteCount={review.votes?.length || 0}
-                                  initialIsVoted={review.currentUserVoted || false}
-                                  userId={session?.user?.id || undefined}
-                                  compact
-                                />
-                                {session?.user && (
-                                  <ReportButton
-                                    reviewId={review.id}
-                                    isOwner={session?.user?.id === review.authorId}
-                                  />
-                                )}
-                              </div>
-
-                              {/* Comments Section */}
-                              <CommentSection
-                                reviewId={review.id}
-                                comments={review.comments}
-                                userId={session?.user?.id}
-                              />
-
-                              <button
-                                onClick={toggleExpanded}
-                                className="text-sm text-wf-crimson hover:underline cursor-pointer mt-2"
-                              >
-                                Show less ▴
-                              </button>
-                            </>
-                          )}
+                      return (
+                        <div key={review.id} className="bg-surface-primary rounded-xl border-2 border-wf-crimson/30 p-1">
+                          <ReviewForm
+                            courseId={course.id}
+                            courseName={`${toOfficialCode(course.code)}: ${course.name}`}
+                            gradeDistributions={course.gradeDistributions}
+                            courseInstructors={course.instructors}
+                            existingReview={existingReview}
+                            onEditComplete={() => setEditingReviewId(null)}
+                            onEditCancel={() => setEditingReviewId(null)}
+                          />
                         </div>
                       )
+                    }
 
-                      if (isGated) {
-                        return (
-                          <div key={review.id}>
-                            {index === 1 && (
-                              <ReviewGateOverlay
-                                totalReviews={course.reviewAccess.totalReviews}
-                                userReviewCount={course.reviewAccess.userReviewCount}
-                                isLoggedIn={!!session?.user}
-                                courseId={course.id}
+                    const reviewCardClass = getReviewCardClass(review)
+                    const reviewCard = (
+                      <div 
+                        key={review.id} 
+                        className={reviewCardClass}
+                      >
+                        {/* Header - responsive: stack on mobile */}
+                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-4">
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <h4 className="font-semibold text-text-primary">{review.title || 'Untitled Review'}</h4>
+                              <span className="text-xs text-text-tertiary sm:hidden">
+                                {new Date(review.createdAt).toLocaleDateString()}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                              {review.authorLevel && <ContributorBadge contributor={review.authorLevel} />}
+                              {review.author && (
+                                <span className="text-sm font-medium text-text-secondary">
+                                  {review.authorLevel?.badge && <span className="mr-0.5">{review.authorLevel.badge}</span>}
+                                  {review.author.name}
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-sm text-text-tertiary mt-1 flex items-center gap-2 flex-wrap">
+                              <span>{review.term} · {review.instructor?.name || 'Unknown Instructor'}</span>
+                              {review.recommendInstructor === 'yes' && <span title="Recommends instructor">👍</span>}
+                              {review.recommendInstructor === 'no' && <span title="Does not recommend instructor">👎</span>}
+                              {review.recommendInstructor === 'neutral' && <span title="Neutral about instructor">😐</span>}
+                            </div>
+                          </div>
+                          <div className="hidden sm:flex items-center gap-2 shrink-0">
+                            <span className="text-xs text-text-tertiary">
+                              {new Date(review.createdAt).toLocaleDateString()}
+                            </span>
+                            <ReviewActions
+                              reviewId={review.id}
+                              isOwner={session?.user?.id === review.authorId}
+                              onEditStart={() => setEditingReviewId(review.id)}
+                              onDeleted={() => utils.course.byId.invalidate({ id: course.id })}
+                            />
+                          </div>
+                          {/* Mobile-only actions row */}
+                          <div className="flex sm:hidden items-center justify-end -mt-1">
+                            <ReviewActions
+                              reviewId={review.id}
+                              isOwner={session?.user?.id === review.authorId}
+                              onEditStart={() => setEditingReviewId(review.id)}
+                              onDeleted={() => utils.course.byId.invalidate({ id: course.id })}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Rating Cards */}
+                        <div className="grid grid-cols-4 gap-1.5 sm:gap-2 mb-4">
+                          {[
+                            { label: 'Content', value: review.contentRating },
+                            { label: 'Teaching', value: review.teachingRating },
+                            { label: 'Grading', value: review.gradingRating },
+                            { label: 'Workload', value: review.workloadRating },
+                          ].map(({ label, value }) => (
+                            <div key={label} className={`p-1.5 sm:p-2 rounded-lg border text-center ${getRatingColor(value)}`}>
+                              <div className="text-[10px] sm:text-xs opacity-75">{label}</div>
+                              <div className="text-sm font-bold">{value}</div>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Comments - each in its own card */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 text-sm">
+                          {review.contentComment && (
+                            <div className="p-3 rounded-lg border border-surface-tertiary bg-surface-secondary/50">
+                              <div className="text-xs font-semibold text-text-tertiary uppercase tracking-wide mb-1.5">Content</div>
+                              <p className="text-gray-800 dark:text-gray-200 whitespace-pre-line leading-relaxed">{review.contentComment}</p>
+                            </div>
+                          )}
+                          {review.teachingComment && (
+                            <div className="p-3 rounded-lg border border-surface-tertiary bg-surface-secondary/50">
+                              <div className="text-xs font-semibold text-text-tertiary uppercase tracking-wide mb-1.5">Teaching</div>
+                              <p className="text-gray-800 dark:text-gray-200 whitespace-pre-line leading-relaxed">{review.teachingComment}</p>
+                            </div>
+                          )}
+                          {review.gradingComment && (
+                            <div className="p-3 rounded-lg border border-surface-tertiary bg-surface-secondary/50">
+                              <div className="text-xs font-semibold text-text-tertiary uppercase tracking-wide mb-1.5">Grading</div>
+                              <p className="text-gray-800 dark:text-gray-200 whitespace-pre-line leading-relaxed">{review.gradingComment}</p>
+                            </div>
+                          )}
+                          {review.workloadComment && (
+                            <div className="p-3 rounded-lg border border-surface-tertiary bg-surface-secondary/50">
+                              <div className="text-xs font-semibold text-text-tertiary uppercase tracking-wide mb-1.5">Workload</div>
+                              <p className="text-gray-800 dark:text-gray-200 whitespace-pre-line leading-relaxed">{review.workloadComment}</p>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Assessments */}
+                        {review.assessments && review.assessments.length > 0 && (
+                          <div className="flex items-center flex-wrap gap-1.5 mt-3">
+                            <span className="text-xs font-medium text-text-secondary">Including:</span>
+                            {review.assessments.map((assessment: string) => (
+                              <span key={assessment} className="px-2 py-0.5 text-xs bg-surface-secondary text-text-primary rounded border border-surface-tertiary">
+                                {assessment}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Actions + Comments - compact single row */}
+                        <div className="flex items-center gap-3 mt-3 pt-3 border-t border-surface-tertiary text-sm">
+                          <VoteButton
+                            reviewId={review.id}
+                            initialVoteCount={review.votes?.length || 0}
+                            initialIsVoted={review.currentUserVoted || false}
+                            userId={session?.user?.id || undefined}
+                            compact
+                          />
+                          <CommentSection
+                            reviewId={review.id}
+                            comments={review.comments}
+                            userId={session?.user?.id}
+                            compact
+                          />
+                          <div className="ml-auto">
+                            {session?.user && (
+                              <ReportButton
+                                reviewId={review.id}
+                                isOwner={session?.user?.id === review.authorId}
                               />
                             )}
-                            <FrostedReview>{reviewCard}</FrostedReview>
                           </div>
-                        )
-                      }
+                        </div>
+                      </div>
+                    )
 
-                      return reviewCard
-                    })}
-                  </div>
-                )}
-              </div>
-            ) : (
-              /* Login prompt for non-logged-in users */
-              <div className="bg-surface-primary rounded-xl border border-surface-tertiary p-8 text-center">
-                <div className="mx-auto w-16 h-16 bg-wf-crimson/10 rounded-full flex items-center justify-center mb-4">
-                  <MessageSquare className="h-8 w-8 text-wf-crimson" />
+                    if (isGated) {
+                      return (
+                        <div key={review.id}>
+                          {index === 1 && (
+                            <ReviewGateOverlay
+                              totalReviews={course.reviewAccess.totalReviews}
+                              userReviewCount={course.reviewAccess.userReviewCount}
+                              isLoggedIn={!!session?.user}
+                              courseId={course.id}
+                            />
+                          )}
+                          <FrostedReview>{reviewCard}</FrostedReview>
+                        </div>
+                      )
+                    }
+
+                    return reviewCard
+                  })}
                 </div>
-                <h3 className="text-lg font-semibold text-text-primary mb-2">Sign in to see student reviews</h3>
-                <p className="text-sm text-text-secondary max-w-md mx-auto mb-6">
-                  Reviews are only visible to verified UW-Madison students (@wisc.edu). Your reviews and identity are protected.
-                </p>
-                <Link
-                  href="/auth/signin"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-wf-crimson text-white rounded-lg hover:bg-wf-crimson-dark transition-colors font-medium"
-                >
-                  Sign in with Google
-                </Link>
-              </div>
-            )}
+              )}
+            </div>
           </main>
 
-          {/* Right Sidebar - below main on mobile, side on lg+ */}
-          <div className="w-full lg:w-auto">
+          {/* Right Sidebar - fixed height with internal scroll on desktop */}
+          <div className="w-full lg:w-auto py-6 lg:py-8">
             <RightSidebar
               course={course}
               avgRatings={avgRatings}

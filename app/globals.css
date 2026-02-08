@@ -177,4 +177,13 @@
   .level-badge-elementary { @apply bg-emerald-50 border border-emerald-300 text-emerald-700 font-medium; }
   .level-badge-intermediate { @apply bg-amber-50 border border-amber-300 text-amber-700 font-medium; }
   .level-badge-advanced { @apply bg-rose-50 border border-rose-300 text-rose-700 font-medium; }
+
+  /* Hide scrollbar but keep scroll functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }

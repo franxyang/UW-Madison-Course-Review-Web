@@ -18,7 +18,7 @@ export function VoteButton({
   initialVoteCount, 
   initialIsVoted,
   userId,
-  compact: _compact = false,
+  compact = false
 }: VoteButtonProps) {
   const [isVoted, setIsVoted] = useState(initialIsVoted)
   const [voteCount, setVoteCount] = useState(initialVoteCount)
@@ -65,15 +65,23 @@ export function VoteButton({
     <button
       onClick={handleVote}
       disabled={voteMutation.isPending}
-      className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all ${
-        isVoted
-          ? 'bg-uw-red text-white border-uw-red hover:bg-uw-dark'
-          : 'bg-surface-primary text-text-secondary border-surface-tertiary hover:bg-hover-bg hover:border-text-tertiary'
+      className={`flex items-center transition-all ${
+        compact
+          ? `gap-1 text-xs font-medium ${
+              isVoted
+                ? 'text-wf-crimson'
+                : 'text-text-tertiary hover:text-text-secondary'
+            }`
+          : `gap-2 px-4 py-2 rounded-lg border ${
+              isVoted
+                ? 'bg-uw-red text-white border-uw-red hover:bg-uw-dark'
+                : 'bg-surface-primary text-text-secondary border-surface-tertiary hover:bg-hover-bg hover:border-text-tertiary'
+            }`
       } ${voteMutation.isPending ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
     >
-      <ThumbsUp size={16} className={isVoted ? 'fill-current' : ''} />
-      <span className="text-sm font-medium">
-        Helpful {voteCount > 0 && `(${voteCount})`}
+      <ThumbsUp size={compact ? 14 : 16} className={isVoted ? 'fill-current' : ''} />
+      <span>
+        {compact ? (voteCount > 0 ? `Helpful (${voteCount})` : 'Helpful') : `Helpful ${voteCount > 0 ? `(${voteCount})` : ''}`}
       </span>
     </button>
   )

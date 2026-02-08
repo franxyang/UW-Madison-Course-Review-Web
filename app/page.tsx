@@ -2,7 +2,7 @@ import { auth } from '@/auth'
 import Link from 'next/link'
 import { Logo } from '@/components/Logo'
 import { prisma } from '@/lib/prisma'
-import { BookOpen, Users, Star, Building2, ArrowRight, MessageSquare, GraduationCap } from 'lucide-react'
+import { BookOpen, Users, Star, Building2, ArrowRight, MessageSquare, GraduationCap, Search, PenLine, Unlock, CheckCircle2 } from 'lucide-react'
 import { AcademicCalendar } from '@/components/AcademicCalendar'
 import { toOfficialCode } from '@/lib/courseCodeDisplay'
 import { HomeSearch } from '@/components/HomeSearch'
@@ -77,13 +77,63 @@ export default async function Home() {
               <h1 className="text-2xl font-bold text-text-primary mb-2">
                 Welcome to MadSpace 👋
               </h1>
+              <p className="text-text-secondary mb-2">
+                A nickname-based course review community built by UW-Madison students, for UW-Madison students. 
+                Search courses, check grade distributions, and read reviews from fellow Badgers before you register.
+              </p>
               <p className="text-text-secondary">
-                A community-driven platform by UW-Madison students, for UW-Madison students. 
-                Browse course reviews, check grade distributions, and make informed decisions about your classes.
+                Choosing classes shouldn&apos;t feel like a gamble. MadSpace runs on one simple idea: <strong className="text-text-primary">every Badger shares a little, 
+                and everyone benefits a lot.</strong> Your one honest review could save a fellow student from a rough semester — and theirs 
+                could save yours. No ads, no agenda — just real students helping each other navigate college, helping our community better 🙌
               </p>
             </div>
             <div className="lg:w-80">
               <HomeSearch />
+            </div>
+          </div>
+        </div>
+
+        {/* How It Works */}
+        <div className="bg-surface-primary rounded-xl border border-surface-tertiary px-6 py-4 mb-6">
+          <h2 className="font-semibold text-text-primary mb-3 text-center text-sm">How It Works</h2>
+          <div className="grid grid-cols-4 gap-3 relative">
+            {/* Connecting line */}
+            <div className="hidden sm:block absolute top-5 left-[calc(12.5%+16px)] right-[calc(12.5%+16px)] h-[2px] bg-surface-tertiary" />
+            
+            {/* Step 1 */}
+            <div className="flex flex-col items-center gap-1.5 text-center">
+              <div className="relative z-10 flex items-center justify-center w-10 h-10 rounded-full bg-wf-crimson/10 text-wf-crimson shrink-0">
+                <Search size={18} />
+              </div>
+              <div className="font-medium text-text-primary text-xs">Find a Course</div>
+              <p className="text-[11px] text-text-tertiary leading-tight hidden sm:block">Search by name, code, or department</p>
+            </div>
+
+            {/* Step 2 */}
+            <div className="flex flex-col items-center gap-1.5 text-center">
+              <div className="relative z-10 flex items-center justify-center w-10 h-10 rounded-full bg-emerald-500/10 text-emerald-600 shrink-0">
+                <PenLine size={18} />
+              </div>
+              <div className="font-medium text-text-primary text-xs">Write a Review</div>
+              <p className="text-[11px] text-text-tertiary leading-tight hidden sm:block">Rate, pick instructor & term, share your experience</p>
+            </div>
+
+            {/* Step 3 */}
+            <div className="flex flex-col items-center gap-1.5 text-center">
+              <div className="relative z-10 flex items-center justify-center w-10 h-10 rounded-full bg-amber-500/10 text-amber-600 shrink-0">
+                <Unlock size={18} />
+              </div>
+              <div className="font-medium text-text-primary text-xs">Unlock Access</div>
+              <p className="text-[11px] text-text-tertiary leading-tight hidden sm:block">One review unlocks all reviews platform-wide</p>
+            </div>
+
+            {/* Step 4 */}
+            <div className="flex flex-col items-center gap-1.5 text-center">
+              <div className="relative z-10 flex items-center justify-center w-10 h-10 rounded-full bg-blue-500/10 text-blue-600 shrink-0">
+                <CheckCircle2 size={18} />
+              </div>
+              <div className="font-medium text-text-primary text-xs">Choose Wisely</div>
+              <p className="text-[11px] text-text-tertiary leading-tight hidden sm:block">Compare grades & instructors with confidence</p>
             </div>
           </div>
         </div>
@@ -194,6 +244,9 @@ export default async function Home() {
 
           {/* Right Column - Sidebar */}
           <div className="space-y-6">
+            {/* Academic Calendar Mini */}
+            <AcademicCalendar />
+
             {/* Contributor Progress */}
             <ContributorProgress />
 
@@ -222,9 +275,6 @@ export default async function Home() {
                 ))}
               </div>
             </div>
-
-            {/* Academic Calendar Mini - Now with pagination */}
-            <AcademicCalendar />
 
             {/* How to Contribute */}
             <div className="bg-gradient-to-br from-wf-crimson to-wf-crimson-dark rounded-xl p-5 text-white">

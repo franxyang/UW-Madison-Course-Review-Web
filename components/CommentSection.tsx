@@ -20,9 +20,10 @@ interface CommentSectionProps {
   reviewId: string
   comments: Comment[]
   userId?: string | null
+  compact?: boolean
 }
 
-export function CommentSection({ reviewId, comments, userId }: CommentSectionProps) {
+export function CommentSection({ reviewId, comments, userId, compact = false }: CommentSectionProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [commentText, setCommentText] = useState('')
 
@@ -83,6 +84,20 @@ export function CommentSection({ reviewId, comments, userId }: CommentSectionPro
   }
 
   const isPending = createCommentMutation.isPending || deleteCommentMutation.isPending
+
+  if (compact) {
+    return (
+      <div>
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="flex items-center gap-1 text-xs font-medium text-text-tertiary hover:text-text-secondary transition-colors"
+        >
+          <MessageSquare size={14} />
+          <span>Comments{comments.length > 0 ? ` (${comments.length})` : ''}</span>
+        </button>
+      </div>
+    )
+  }
 
   return (
     <div className="mt-4 pt-4 border-t border-surface-tertiary">

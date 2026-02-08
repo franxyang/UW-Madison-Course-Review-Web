@@ -1067,37 +1067,40 @@ export function CoursePageLayout({
 
                         {/* Assessments */}
                         {review.assessments && review.assessments.length > 0 && (
-                          <div className="flex flex-wrap gap-1.5 mt-3">
+                          <div className="flex items-center flex-wrap gap-1.5 mt-3">
+                            <span className="text-xs font-medium text-text-secondary">Including:</span>
                             {review.assessments.map((assessment: string) => (
-                              <span key={assessment} className="px-2 py-0.5 text-xs bg-surface-secondary text-text-tertiary rounded border border-surface-tertiary">
+                              <span key={assessment} className="px-2 py-0.5 text-xs bg-surface-secondary text-text-primary rounded border border-surface-tertiary">
                                 {assessment}
                               </span>
                             ))}
                           </div>
                         )}
 
-                        {/* Actions */}
-                        <div className="flex items-center justify-between mt-4 pt-4 border-t border-surface-tertiary">
+                        {/* Actions + Comments - compact single row */}
+                        <div className="flex items-center gap-3 mt-3 pt-3 border-t border-surface-tertiary text-sm">
                           <VoteButton
                             reviewId={review.id}
                             initialVoteCount={review.votes?.length || 0}
                             initialIsVoted={review.currentUserVoted || false}
                             userId={session?.user?.id || undefined}
+                            compact
                           />
-                          {session?.user && (
-                            <ReportButton
-                              reviewId={review.id}
-                              isOwner={session?.user?.id === review.authorId}
-                            />
-                          )}
+                          <CommentSection
+                            reviewId={review.id}
+                            comments={review.comments}
+                            userId={session?.user?.id}
+                            compact
+                          />
+                          <div className="ml-auto">
+                            {session?.user && (
+                              <ReportButton
+                                reviewId={review.id}
+                                isOwner={session?.user?.id === review.authorId}
+                              />
+                            )}
+                          </div>
                         </div>
-
-                        {/* Comments Section */}
-                        <CommentSection
-                          reviewId={review.id}
-                          comments={review.comments}
-                          userId={session?.user?.id}
-                        />
                       </div>
                     )
 

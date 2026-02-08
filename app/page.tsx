@@ -78,8 +78,8 @@ export default async function Home() {
                 Welcome to MadSpace 👋
               </h1>
               <p className="text-text-secondary mb-2">
-                A course review community built by UW-Madison students, for UW-Madison students. 
-                Search courses, check real grade distributions, and read honest reviews from fellow Badgers before you register.
+                A nickname-based course review community built by UW-Madison students, for UW-Madison students. 
+                Search courses, check grade distributions, and read reviews from fellow Badgers before you register.
               </p>
               <p className="text-text-secondary">
                 Choosing classes shouldn&apos;t feel like a gamble. MadSpace runs on one simple idea: <strong className="text-text-primary">every Badger shares a little, 

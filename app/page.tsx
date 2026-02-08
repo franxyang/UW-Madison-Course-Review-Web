@@ -244,6 +244,9 @@ export default async function Home() {
 
           {/* Right Column - Sidebar */}
           <div className="space-y-6">
+            {/* Academic Calendar Mini */}
+            <AcademicCalendar />
+
             {/* Contributor Progress */}
             <ContributorProgress />
 
@@ -272,9 +275,6 @@ export default async function Home() {
                 ))}
               </div>
             </div>
-
-            {/* Academic Calendar Mini - Now with pagination */}
-            <AcademicCalendar />
 
             {/* How to Contribute */}
             <div className="bg-gradient-to-br from-wf-crimson to-wf-crimson-dark rounded-xl p-5 text-white">

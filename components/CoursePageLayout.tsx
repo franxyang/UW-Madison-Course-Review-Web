@@ -618,6 +618,9 @@ export function CoursePageLayout({
   
   // Edit review state
   const [editingReviewId, setEditingReviewId] = useState<string | null>(null)
+  
+  // Review expand/collapse state
+  const [expandedReviews, setExpandedReviews] = useState<Set<string>>(new Set())
 
   // Parse JSON fields
   const breadths = course.breadths ? (typeof course.breadths === 'string' ? JSON.parse(course.breadths) : course.breadths) : []
@@ -899,6 +902,7 @@ export function CoursePageLayout({
             />
 
             {/* Reviews Section */}
+            {session?.user ? (
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-text-primary">
                 Student Reviews ({filteredReviews.length})
@@ -916,6 +920,7 @@ export function CoursePageLayout({
                   courseName={`${toOfficialCode(course.code)}: ${course.name}`}
                   gradeDistributions={course.gradeDistributions}
                   courseInstructors={course.instructors}
+                  isLoggedIn={!!session?.user}
                 />
               </div>
 
@@ -953,6 +958,8 @@ export function CoursePageLayout({
                         resourceLink: review.resourceLink,
                         recommendInstructor: review.recommendInstructor,
                         instructor: review.instructor,
+                        isAnonymous: review.isAnonymous,
+                        showRankWhenAnonymous: review.showRankWhenAnonymous,
                       }
                       return (
                         <div key={review.id} className="bg-surface-primary rounded-xl border-2 border-wf-crimson/30 p-1">
@@ -967,6 +974,16 @@ export function CoursePageLayout({
                           />
                         </div>
                       )
+                    }
+
+                    const isExpanded = expandedReviews.has(review.id)
+                    const toggleExpanded = () => {
+                      setExpandedReviews(prev => {
+                        const next = new Set(prev)
+                        if (next.has(review.id)) next.delete(review.id)
+                        else next.add(review.id)
+                        return next
+                      })
                     }
 
                     const reviewCardClass = getReviewCardClass(review)
@@ -985,10 +1002,10 @@ export function CoursePageLayout({
                               </span>
                             </div>
                             <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-                              {review.authorLevel && <ContributorBadge contributor={review.authorLevel} />}
+                              {review.authorLevel && review.authorLevel.level > 0 && <ContributorBadge contributor={review.authorLevel} />}
                               {review.author && (
                                 <span className="text-sm font-medium text-text-secondary">
-                                  {review.authorLevel?.badge && <span className="mr-0.5">{review.authorLevel.badge}</span>}
+                                  {review.authorLevel?.badge && review.authorLevel.level > 0 && <span className="mr-0.5">{review.authorLevel.badge}</span>}
                                   {review.author.name}
                                 </span>
                               )}
@@ -1037,37 +1054,9 @@ export function CoursePageLayout({
                           ))}
                         </div>
 
-                        {/* Comments - each in its own card */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 text-sm">
-                          {review.contentComment && (
-                            <div className="p-3 rounded-lg border border-surface-tertiary bg-surface-secondary/50">
-                              <div className="text-xs font-semibold text-text-tertiary uppercase tracking-wide mb-1.5">Content</div>
-                              <p className="text-gray-800 dark:text-gray-200 whitespace-pre-line leading-relaxed">{review.contentComment}</p>
-                            </div>
-                          )}
-                          {review.teachingComment && (
-                            <div className="p-3 rounded-lg border border-surface-tertiary bg-surface-secondary/50">
-                              <div className="text-xs font-semibold text-text-tertiary uppercase tracking-wide mb-1.5">Teaching</div>
-                              <p className="text-gray-800 dark:text-gray-200 whitespace-pre-line leading-relaxed">{review.teachingComment}</p>
-                            </div>
-                          )}
-                          {review.gradingComment && (
-                            <div className="p-3 rounded-lg border border-surface-tertiary bg-surface-secondary/50">
-                              <div className="text-xs font-semibold text-text-tertiary uppercase tracking-wide mb-1.5">Grading</div>
-                              <p className="text-gray-800 dark:text-gray-200 whitespace-pre-line leading-relaxed">{review.gradingComment}</p>
-                            </div>
-                          )}
-                          {review.workloadComment && (
-                            <div className="p-3 rounded-lg border border-surface-tertiary bg-surface-secondary/50">
-                              <div className="text-xs font-semibold text-text-tertiary uppercase tracking-wide mb-1.5">Workload</div>
-                              <p className="text-gray-800 dark:text-gray-200 whitespace-pre-line leading-relaxed">{review.workloadComment}</p>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Assessments */}
+                        {/* Assessments (above comments) */}
                         {review.assessments && review.assessments.length > 0 && (
-                          <div className="flex items-center flex-wrap gap-1.5 mt-3">
+                          <div className="flex items-center flex-wrap gap-1.5 mb-3">
                             <span className="text-xs font-medium text-text-secondary">Including:</span>
                             {review.assessments.map((assessment: string) => (
                               <span key={assessment} className="px-2 py-0.5 text-xs bg-surface-secondary text-text-primary rounded border border-surface-tertiary">
@@ -1077,30 +1066,95 @@ export function CoursePageLayout({
                           </div>
                         )}
 
-                        {/* Actions + Comments - compact single row */}
-                        <div className="flex items-center gap-3 mt-3 pt-3 border-t border-surface-tertiary text-sm">
-                          <VoteButton
-                            reviewId={review.id}
-                            initialVoteCount={review.votes?.length || 0}
-                            initialIsVoted={review.currentUserVoted || false}
-                            userId={session?.user?.id || undefined}
-                            compact
-                          />
-                          <CommentSection
-                            reviewId={review.id}
-                            comments={review.comments}
-                            userId={session?.user?.id}
-                            compact
-                          />
-                          <div className="ml-auto">
-                            {session?.user && (
-                              <ReportButton
+                        {/* Collapsed: Content & Teaching only (line-clamped) */}
+                        {!isExpanded && (
+                          <>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 text-sm">
+                              {review.contentComment && (
+                                <div className="p-3 rounded-lg border border-surface-tertiary bg-surface-secondary/50">
+                                  <div className="text-xs font-semibold text-text-tertiary uppercase tracking-wide mb-1.5">Content</div>
+                                  <p className="text-gray-800 dark:text-gray-200 whitespace-pre-line leading-relaxed line-clamp-3">{review.contentComment}</p>
+                                </div>
+                              )}
+                              {review.teachingComment && (
+                                <div className="p-3 rounded-lg border border-surface-tertiary bg-surface-secondary/50">
+                                  <div className="text-xs font-semibold text-text-tertiary uppercase tracking-wide mb-1.5">Teaching</div>
+                                  <p className="text-gray-800 dark:text-gray-200 whitespace-pre-line leading-relaxed line-clamp-3">{review.teachingComment}</p>
+                                </div>
+                              )}
+                            </div>
+                            <button
+                              onClick={toggleExpanded}
+                              className="text-sm text-wf-crimson hover:underline cursor-pointer mt-3"
+                            >
+                              Read more ▾
+                            </button>
+                          </>
+                        )}
+
+                        {/* Expanded: all comments + actions */}
+                        {isExpanded && (
+                          <>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 text-sm">
+                              {review.contentComment && (
+                                <div className="p-3 rounded-lg border border-surface-tertiary bg-surface-secondary/50">
+                                  <div className="text-xs font-semibold text-text-tertiary uppercase tracking-wide mb-1.5">Content</div>
+                                  <p className="text-gray-800 dark:text-gray-200 whitespace-pre-line leading-relaxed">{review.contentComment}</p>
+                                </div>
+                              )}
+                              {review.teachingComment && (
+                                <div className="p-3 rounded-lg border border-surface-tertiary bg-surface-secondary/50">
+                                  <div className="text-xs font-semibold text-text-tertiary uppercase tracking-wide mb-1.5">Teaching</div>
+                                  <p className="text-gray-800 dark:text-gray-200 whitespace-pre-line leading-relaxed">{review.teachingComment}</p>
+                                </div>
+                              )}
+                              {review.gradingComment && (
+                                <div className="p-3 rounded-lg border border-surface-tertiary bg-surface-secondary/50">
+                                  <div className="text-xs font-semibold text-text-tertiary uppercase tracking-wide mb-1.5">Grading</div>
+                                  <p className="text-gray-800 dark:text-gray-200 whitespace-pre-line leading-relaxed">{review.gradingComment}</p>
+                                </div>
+                              )}
+                              {review.workloadComment && (
+                                <div className="p-3 rounded-lg border border-surface-tertiary bg-surface-secondary/50">
+                                  <div className="text-xs font-semibold text-text-tertiary uppercase tracking-wide mb-1.5">Workload</div>
+                                  <p className="text-gray-800 dark:text-gray-200 whitespace-pre-line leading-relaxed">{review.workloadComment}</p>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Actions + Comments - compact single row */}
+                            <div className="flex items-center gap-3 mt-3 pt-3 border-t border-surface-tertiary text-sm">
+                              <VoteButton
                                 reviewId={review.id}
-                                isOwner={session?.user?.id === review.authorId}
+                                initialVoteCount={review.votes?.length || 0}
+                                initialIsVoted={review.currentUserVoted || false}
+                                userId={session?.user?.id || undefined}
+                                compact
                               />
-                            )}
-                          </div>
-                        </div>
+                              <CommentSection
+                                reviewId={review.id}
+                                comments={review.comments}
+                                userId={session?.user?.id}
+                                compact
+                              />
+                              <div className="ml-auto">
+                                {session?.user && (
+                                  <ReportButton
+                                    reviewId={review.id}
+                                    isOwner={session?.user?.id === review.authorId}
+                                  />
+                                )}
+                              </div>
+                            </div>
+
+                            <button
+                              onClick={toggleExpanded}
+                              className="text-sm text-wf-crimson hover:underline cursor-pointer mt-2"
+                            >
+                              Show less ▴
+                            </button>
+                          </>
+                        )}
                       </div>
                     )
 
@@ -1125,6 +1179,24 @@ export function CoursePageLayout({
                 </div>
               )}
             </div>
+            ) : (
+              /* Login prompt for non-logged-in users */
+              <div className="bg-surface-primary rounded-xl border border-surface-tertiary p-8 text-center">
+                <div className="mx-auto w-16 h-16 bg-wf-crimson/10 rounded-full flex items-center justify-center mb-4">
+                  <MessageSquare className="h-8 w-8 text-wf-crimson" />
+                </div>
+                <h3 className="text-lg font-semibold text-text-primary mb-2">Sign in to see student reviews</h3>
+                <p className="text-sm text-text-secondary max-w-md mx-auto mb-6">
+                  Reviews are only visible to verified UW-Madison students (@wisc.edu). Your reviews and identity are protected.
+                </p>
+                <Link
+                  href="/auth/signin"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-wf-crimson text-white rounded-lg hover:bg-wf-crimson-dark transition-colors font-medium"
+                >
+                  Sign in with Google
+                </Link>
+              </div>
+            )}
           </main>
 
           {/* Right Sidebar - fixed height with internal scroll on desktop */}

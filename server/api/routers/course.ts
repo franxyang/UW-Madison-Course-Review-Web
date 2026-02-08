@@ -471,11 +471,8 @@ export const courseRouter = router({
           ? (review.votes?.some(vote => vote.userId === currentUserId) ?? false)
           : false
 
-        // Determine authorLevel visibility for anonymous reviews
-        const rawAuthorLevel = authorLevelMap.get(review.authorId) || computeContributorLevel(0, 0)
-        const authorLevel = isAnonymousToViewer && !review.showRankWhenAnonymous
-          ? null
-          : rawAuthorLevel
+        // Always show contributor rank (even for anonymous reviews)
+        const authorLevel = authorLevelMap.get(review.authorId) || computeContributorLevel(0, 0)
 
         // If user has full access OR this is the first (preview) review, return full content
         if (hasFullAccess || index === 0) {

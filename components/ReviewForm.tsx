@@ -239,7 +239,8 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
   })
 
   const [isAnonymous, setIsAnonymous] = useState(existingReview?.isAnonymous ?? false)
-  const [showRankWhenAnonymous, setShowRankWhenAnonymous] = useState(existingReview?.showRankWhenAnonymous ?? false)
+  // Always show rank when anonymous (no toggle needed)
+  const showRankWhenAnonymous = true
   
   // Check if selected term has data in database
   const termHasData = termsWithData.has(formData.term || '')
@@ -708,10 +709,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
                   <input
                     type="checkbox"
                     checked={isAnonymous}
-                    onChange={(e) => {
-                      setIsAnonymous(e.target.checked)
-                      if (!e.target.checked) setShowRankWhenAnonymous(false)
-                    }}
+                    onChange={(e) => setIsAnonymous(e.target.checked)}
                     className="sr-only peer"
                     disabled={activeMutation.isPending}
                   />
@@ -724,25 +722,6 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
                 </div>
               </label>
 
-              {isAnonymous && (
-                <label className="flex items-start gap-3 cursor-pointer group ml-6">
-                  <div className="relative mt-0.5">
-                    <input
-                      type="checkbox"
-                      checked={showRankWhenAnonymous}
-                      onChange={(e) => setShowRankWhenAnonymous(e.target.checked)}
-                      className="sr-only peer"
-                      disabled={activeMutation.isPending}
-                    />
-                    <div className="w-9 h-5 bg-surface-tertiary rounded-full peer-checked:bg-wf-crimson transition-colors" />
-                    <div className="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform peer-checked:translate-x-4" />
-                  </div>
-                  <div>
-                    <span className="text-sm font-medium text-text-primary">Show my contributor rank</span>
-                    <p className="text-xs text-text-tertiary mt-0.5">Your level badge will still be visible</p>
-                  </div>
-                </label>
-              )}
             </div>
 
             {/* Actions */}

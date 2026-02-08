@@ -2,7 +2,7 @@ import { auth } from '@/auth'
 import Link from 'next/link'
 import { Logo } from '@/components/Logo'
 import { prisma } from '@/lib/prisma'
-import { BookOpen, Users, Star, Building2, ArrowRight, MessageSquare, GraduationCap } from 'lucide-react'
+import { BookOpen, Users, Star, Building2, ArrowRight, MessageSquare, GraduationCap, Search, PenLine, Unlock, CheckCircle2 } from 'lucide-react'
 import { AcademicCalendar } from '@/components/AcademicCalendar'
 import { toOfficialCode } from '@/lib/courseCodeDisplay'
 import { HomeSearch } from '@/components/HomeSearch'
@@ -77,13 +77,71 @@ export default async function Home() {
               <h1 className="text-2xl font-bold text-text-primary mb-2">
                 Welcome to MadSpace 👋
               </h1>
-              <p className="text-text-secondary">
-                A community-driven platform by UW-Madison students, for UW-Madison students. 
-                Browse course reviews, check grade distributions, and make informed decisions about your classes.
+              <p className="text-text-secondary mb-2">
+                A course review community built by UW-Madison students, for UW-Madison students. 
+                Search courses, check real grade distributions, and read honest reviews from fellow Badgers before you register.
+              </p>
+              <p className="text-text-tertiary text-sm">
+                Choosing classes shouldn&apos;t feel like a gamble. MadSpace runs on one simple idea: every Badger shares a little, 
+                and everyone benefits a lot. Your one honest review could save a fellow student from a rough semester — and theirs 
+                could save yours. No ads, no agenda — just real students helping each other navigate college, one review at a time.
               </p>
             </div>
             <div className="lg:w-80">
               <HomeSearch />
+            </div>
+          </div>
+        </div>
+
+        {/* How It Works */}
+        <div className="bg-surface-primary rounded-xl border border-surface-tertiary p-6 mb-6">
+          <h2 className="font-semibold text-text-primary mb-5 text-center">How It Works</h2>
+          <div className="grid sm:grid-cols-4 gap-4 relative">
+            {/* Connecting line - hidden on mobile */}
+            <div className="hidden sm:block absolute top-8 left-[calc(12.5%+20px)] right-[calc(12.5%+20px)] h-[2px] bg-surface-tertiary" />
+            
+            {/* Step 1 */}
+            <div className="flex sm:flex-col items-start sm:items-center gap-3 sm:gap-2 text-center">
+              <div className="relative z-10 flex items-center justify-center w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-wf-crimson/10 text-wf-crimson shrink-0">
+                <Search size={20} />
+              </div>
+              <div className="sm:mt-1">
+                <div className="font-medium text-text-primary text-sm">Find a Course</div>
+                <p className="text-xs text-text-tertiary mt-0.5">Search by name, code, or browse by department</p>
+              </div>
+            </div>
+
+            {/* Step 2 */}
+            <div className="flex sm:flex-col items-start sm:items-center gap-3 sm:gap-2 text-center">
+              <div className="relative z-10 flex items-center justify-center w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-emerald-500/10 text-emerald-600 shrink-0">
+                <PenLine size={20} />
+              </div>
+              <div className="sm:mt-1">
+                <div className="font-medium text-text-primary text-sm">Write a Review</div>
+                <p className="text-xs text-text-tertiary mt-0.5">Rate the course, pick an instructor & term, and share your honest experience</p>
+              </div>
+            </div>
+
+            {/* Step 3 */}
+            <div className="flex sm:flex-col items-start sm:items-center gap-3 sm:gap-2 text-center">
+              <div className="relative z-10 flex items-center justify-center w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-amber-500/10 text-amber-600 shrink-0">
+                <Unlock size={20} />
+              </div>
+              <div className="sm:mt-1">
+                <div className="font-medium text-text-primary text-sm">Unlock Full Access</div>
+                <p className="text-xs text-text-tertiary mt-0.5">One review unlocks all reviews across the entire platform</p>
+              </div>
+            </div>
+
+            {/* Step 4 */}
+            <div className="flex sm:flex-col items-start sm:items-center gap-3 sm:gap-2 text-center">
+              <div className="relative z-10 flex items-center justify-center w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-blue-500/10 text-blue-600 shrink-0">
+                <CheckCircle2 size={20} />
+              </div>
+              <div className="sm:mt-1">
+                <div className="font-medium text-text-primary text-sm">Choose Wisely</div>
+                <p className="text-xs text-text-tertiary mt-0.5">Read reviews, compare grades & instructors — register with confidence</p>
+              </div>
             </div>
           </div>
         </div>

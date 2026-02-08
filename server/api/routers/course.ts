@@ -437,12 +437,18 @@ export const courseRouter = router({
       // Only return full review data if user has access, otherwise return limited preview
       const sanitizedReviews = sortedReviews.map((review, index) => {
         // Strip sensitive fields from author (never expose email or real name)
-        const safeAuthor = review.author ? {
-          id: review.author.id,
-          name: review.author.nickname || 'Anonymous Badger',
-          image: review.author.image,
-          // Never include: email, emailVerified, real name
-        } : null
+        // Handle anonymous reviews: hide author info from other users
+        const isOwnReview = currentUserId && review.authorId === currentUserId
+        const isAnonymousToViewer = review.isAnonymous === true && !isOwnReview
+
+        const safeAuthor = isAnonymousToViewer
+          ? { id: 'anonymous', name: 'Anonymous Badger', image: null }
+          : review.author ? {
+              id: review.author.id,
+              name: review.author.nickname || 'Anonymous Badger',
+              image: review.author.image,
+              // Never include: email, emailVerified, real name
+            } : null
 
         // Strip sensitive fields from comment authors
         const safeComments = review.comments?.map(comment => ({
@@ -465,6 +471,12 @@ export const courseRouter = router({
           ? (review.votes?.some(vote => vote.userId === currentUserId) ?? false)
           : false
 
+        // Determine authorLevel visibility for anonymous reviews
+        const rawAuthorLevel = authorLevelMap.get(review.authorId) || computeContributorLevel(0, 0)
+        const authorLevel = isAnonymousToViewer && !review.showRankWhenAnonymous
+          ? null
+          : rawAuthorLevel
+
         // If user has full access OR this is the first (preview) review, return full content
         if (hasFullAccess || index === 0) {
           return {
@@ -473,7 +485,9 @@ export const courseRouter = router({
             comments: safeComments,
             votes: safeVotes,
             currentUserVoted,
-            authorLevel: authorLevelMap.get(review.authorId) || computeContributorLevel(0, 0),
+            authorLevel,
+            isAnonymous: review.isAnonymous,
+            showRankWhenAnonymous: review.showRankWhenAnonymous,
           }
         }
 
@@ -506,7 +520,9 @@ export const courseRouter = router({
           comments: [], // Hide comments for non-contributors
           votes: safeVotes,
           currentUserVoted,
-          authorLevel: authorLevelMap.get(review.authorId) || computeContributorLevel(0, 0),
+          authorLevel,
+          isAnonymous: review.isAnonymous,
+          showRankWhenAnonymous: review.showRankWhenAnonymous,
           _redacted: true, // Flag for frontend
         }
       })

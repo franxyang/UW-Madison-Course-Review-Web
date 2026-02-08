@@ -10,13 +10,15 @@ interface VoteButtonProps {
   initialVoteCount: number
   initialIsVoted: boolean
   userId?: string | null
+  compact?: boolean
 }
 
 export function VoteButton({ 
   reviewId, 
   initialVoteCount, 
   initialIsVoted,
-  userId 
+  userId,
+  compact: _compact = false,
 }: VoteButtonProps) {
   const [isVoted, setIsVoted] = useState(initialIsVoted)
   const [voteCount, setVoteCount] = useState(initialVoteCount)

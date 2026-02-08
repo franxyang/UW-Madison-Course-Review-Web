@@ -1,7 +1,8 @@
 'use client'
 
 import React, { useState, useMemo } from 'react'
-import { MessageSquare, X, AlertCircle, ThumbsUp, ThumbsDown, Meh } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { MessageSquare, X, AlertCircle, ThumbsUp, ThumbsDown, Meh, LogIn } from 'lucide-react'
 import { toast } from 'sonner'
 import { trpc } from '@/lib/trpc/client'
 
@@ -22,6 +23,8 @@ interface ExistingReview {
   resourceLink?: string | null
   recommendInstructor?: string | null
   instructor?: { id: string; name: string } | null
+  isAnonymous?: boolean
+  showRankWhenAnonymous?: boolean
 }
 
 interface ReviewFormProps {
@@ -32,6 +35,7 @@ interface ReviewFormProps {
   existingReview?: ExistingReview | null
   onEditComplete?: () => void
   onEditCancel?: () => void
+  isLoggedIn?: boolean
 }
 
 type ReviewFormData = {
@@ -168,7 +172,9 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
   existingReview = null,
   onEditComplete,
   onEditCancel,
+  isLoggedIn = true,
 }) => {
+  const router = useRouter()
   const isEditMode = !!existingReview
   const [isOpen, setIsOpen] = useState(isEditMode)
   const [error, setError] = useState<string | null>(null)
@@ -215,6 +221,9 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
     isCustomInstructor: false,
     recommendInstructor: (existingReview?.recommendInstructor as any) || ''
   })
+
+  const [isAnonymous, setIsAnonymous] = useState(existingReview?.isAnonymous ?? false)
+  const [showRankWhenAnonymous, setShowRankWhenAnonymous] = useState(existingReview?.showRankWhenAnonymous ?? false)
   
   // Check if selected term has data in database
   const termHasData = termsWithData.has(formData.term || '')
@@ -347,6 +356,8 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
         resourceLink: formData.resourceLink,
         recommendInstructor: formData.recommendInstructor as 'yes' | 'no' | 'neutral' | undefined,
         instructorName: formData.instructorName,
+        isAnonymous,
+        showRankWhenAnonymous,
       })
     } else {
       createReviewMutation.mutate({
@@ -366,6 +377,8 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
         resourceLink: formData.resourceLink,
         recommendInstructor: formData.recommendInstructor as 'yes' | 'no' | 'neutral' | undefined,
         instructorName: formData.instructorName!,
+        isAnonymous,
+        showRankWhenAnonymous,
       })
     }
   }
@@ -380,6 +393,17 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
   }
 
   if (!isOpen && !isEditMode) {
+    if (!isLoggedIn) {
+      return (
+        <button
+          onClick={() => router.push('/auth/signin')}
+          className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-wf-crimson text-white rounded-lg hover:bg-wf-crimson-dark transition-colors font-medium"
+        >
+          <LogIn size={20} />
+          Sign in to Write a Review
+        </button>
+      )
+    }
     return (
       <button
         onClick={() => setIsOpen(true)}
@@ -650,6 +674,50 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
                   disabled={activeMutation.isPending}
                 />
               </div>
+            </div>
+
+            {/* Anonymous Toggle */}
+            <div className="mt-6 pt-4 border-t border-surface-tertiary space-y-3">
+              <label className="flex items-start gap-3 cursor-pointer group">
+                <div className="relative mt-0.5">
+                  <input
+                    type="checkbox"
+                    checked={isAnonymous}
+                    onChange={(e) => {
+                      setIsAnonymous(e.target.checked)
+                      if (!e.target.checked) setShowRankWhenAnonymous(false)
+                    }}
+                    className="sr-only peer"
+                    disabled={activeMutation.isPending}
+                  />
+                  <div className="w-9 h-5 bg-surface-tertiary rounded-full peer-checked:bg-wf-crimson transition-colors" />
+                  <div className="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform peer-checked:translate-x-4" />
+                </div>
+                <div>
+                  <span className="text-sm font-medium text-text-primary">Post anonymously</span>
+                  <p className="text-xs text-text-tertiary mt-0.5">Your identity will be hidden from other students</p>
+                </div>
+              </label>
+
+              {isAnonymous && (
+                <label className="flex items-start gap-3 cursor-pointer group ml-6">
+                  <div className="relative mt-0.5">
+                    <input
+                      type="checkbox"
+                      checked={showRankWhenAnonymous}
+                      onChange={(e) => setShowRankWhenAnonymous(e.target.checked)}
+                      className="sr-only peer"
+                      disabled={activeMutation.isPending}
+                    />
+                    <div className="w-9 h-5 bg-surface-tertiary rounded-full peer-checked:bg-wf-crimson transition-colors" />
+                    <div className="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform peer-checked:translate-x-4" />
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-text-primary">Show my contributor rank</span>
+                    <p className="text-xs text-text-tertiary mt-0.5">Your level badge will still be visible</p>
+                  </div>
+                </label>
+              )}
             </div>
 
             {/* Actions */}

@@ -973,32 +973,32 @@ export function CoursePageLayout({
                         key={review.id} 
                         className={reviewCardClass}
                       >
-                        <div className="flex items-start justify-between mb-4">
-                          <div>
+                        {/* Header - responsive: stack on mobile */}
+                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-4">
+                          <div className="min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
                               <h4 className="font-semibold text-text-primary">{review.title || 'Untitled Review'}</h4>
-                              {review.gradeReceived && (
-                                <span className={`px-2 py-0.5 text-xs font-medium rounded ${getGradeColor(review.gradeReceived)}`}>
-                                  Grade: {review.gradeReceived}
-                                </span>
-                              )}
-                              {review.authorLevel && <ContributorBadge contributor={review.authorLevel} />}
+                              <span className="text-xs text-text-tertiary sm:hidden">
+                                {new Date(review.createdAt).toLocaleDateString()}
+                              </span>
                             </div>
-                            <div className="text-sm text-text-tertiary mt-1 flex items-center gap-2">
+                            <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                              {review.authorLevel && <ContributorBadge contributor={review.authorLevel} />}
                               {review.author && (
-                                <span className="font-medium text-text-secondary">
+                                <span className="text-sm font-medium text-text-secondary">
                                   {review.authorLevel?.badge && <span className="mr-0.5">{review.authorLevel.badge}</span>}
                                   {review.author.name}
                                 </span>
                               )}
-                              {review.author && <span className="text-text-tertiary">·</span>}
+                            </div>
+                            <div className="text-sm text-text-tertiary mt-1 flex items-center gap-2 flex-wrap">
                               <span>{review.term} · {review.instructor?.name || 'Unknown Instructor'}</span>
                               {review.recommendInstructor === 'yes' && <span title="Recommends instructor">👍</span>}
                               {review.recommendInstructor === 'no' && <span title="Does not recommend instructor">👎</span>}
                               {review.recommendInstructor === 'neutral' && <span title="Neutral about instructor">😐</span>}
                             </div>
                           </div>
-                          <div className="flex items-center gap-2">
+                          <div className="hidden sm:flex items-center gap-2 shrink-0">
                             <span className="text-xs text-text-tertiary">
                               {new Date(review.createdAt).toLocaleDateString()}
                             </span>
@@ -1009,25 +1009,34 @@ export function CoursePageLayout({
                               onDeleted={() => utils.course.byId.invalidate({ id: course.id })}
                             />
                           </div>
+                          {/* Mobile-only actions row */}
+                          <div className="flex sm:hidden items-center justify-end -mt-1">
+                            <ReviewActions
+                              reviewId={review.id}
+                              isOwner={session?.user?.id === review.authorId}
+                              onEditStart={() => setEditingReviewId(review.id)}
+                              onDeleted={() => utils.course.byId.invalidate({ id: course.id })}
+                            />
+                          </div>
                         </div>
 
                         {/* Rating Cards */}
-                        <div className="grid grid-cols-4 gap-2 mb-4">
+                        <div className="grid grid-cols-4 gap-1.5 sm:gap-2 mb-4">
                           {[
                             { label: 'Content', value: review.contentRating },
                             { label: 'Teaching', value: review.teachingRating },
                             { label: 'Grading', value: review.gradingRating },
                             { label: 'Workload', value: review.workloadRating },
                           ].map(({ label, value }) => (
-                            <div key={label} className={`p-2 rounded-lg border text-center ${getRatingColor(value)}`}>
-                              <div className="text-xs opacity-75">{label}</div>
+                            <div key={label} className={`p-1.5 sm:p-2 rounded-lg border text-center ${getRatingColor(value)}`}>
+                              <div className="text-[10px] sm:text-xs opacity-75">{label}</div>
                               <div className="text-sm font-bold">{value}</div>
                             </div>
                           ))}
                         </div>
 
                         {/* Comments - each in its own card */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 text-sm">
                           {review.contentComment && (
                             <div className="p-3 rounded-lg border border-surface-tertiary bg-surface-secondary/50">
                               <div className="text-xs font-semibold text-text-tertiary uppercase tracking-wide mb-1.5">Content</div>

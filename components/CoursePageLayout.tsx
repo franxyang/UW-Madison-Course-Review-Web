@@ -220,7 +220,7 @@ function LeftSidebar({
   }, [])
   
   return (
-    <aside className="w-[320px] flex-shrink-0 h-full overflow-y-auto scrollbar-thin">
+    <aside className="w-[320px] flex-shrink-0 h-full overflow-y-auto scrollbar-hide">
       <div className="space-y-5">
       {/* Search - global, with live preview */}
       <div className="relative z-30" ref={containerRef}>
@@ -423,7 +423,7 @@ function RightSidebar({
   }[filterType]
   
   return (
-    <aside className="w-full lg:w-[280px] lg:flex-shrink-0 lg:h-full lg:overflow-y-auto scrollbar-thin">
+    <aside className="w-full lg:w-[280px] lg:flex-shrink-0 lg:h-full lg:overflow-y-auto scrollbar-hide">
       <div className="space-y-6">
         {/* Review Count */}
         <div className="text-center">
@@ -778,7 +778,7 @@ export function CoursePageLayout({
           </div>
 
           {/* Main Content - only this column scrolls on desktop */}
-          <main className="flex-1 min-w-0 lg:overflow-y-auto py-6 lg:py-8">
+          <main className="flex-1 min-w-0 lg:overflow-y-auto lg:scrollbar-hide py-6 lg:py-8">
             {/* Breadcrumb */}
             <div className="flex items-center gap-2 text-sm text-text-secondary mb-4">
               <Link href="/courses" className="hover:text-text-primary transition-colors">Courses</Link>

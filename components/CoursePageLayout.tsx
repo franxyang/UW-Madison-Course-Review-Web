@@ -220,7 +220,8 @@ function LeftSidebar({
   }, [])
   
   return (
-    <aside className="w-[320px] flex-shrink-0 space-y-5">
+    <aside className="w-[320px] flex-shrink-0">
+      <div className="sticky top-24 space-y-5 max-h-[calc(100vh-7rem)] overflow-y-auto scrollbar-thin">
       {/* Search - global, with live preview */}
       <div className="relative z-30" ref={containerRef}>
         <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary pointer-events-none" />
@@ -381,6 +382,7 @@ function LeftSidebar({
           )}
         </div>
       )}
+      </div>
     </aside>
   )
 }
@@ -422,7 +424,7 @@ function RightSidebar({
   
   return (
     <aside className="w-full lg:w-[280px] lg:flex-shrink-0">
-      <div className="sticky top-24 space-y-6">
+      <div className="sticky top-24 space-y-6 max-h-[calc(100vh-7rem)] overflow-y-auto scrollbar-thin">
         {/* Review Count */}
         <div className="text-center">
           <div className="text-4xl font-bold text-text-primary">{course.reviews.length}</div>

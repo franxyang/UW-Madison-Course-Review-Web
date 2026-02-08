@@ -5,7 +5,7 @@
 [![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=next.js)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Neon-4169E1?logo=postgresql&logoColor=white)](https://neon.tech/)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+[![License](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](./LICENSE)
 
 > Make smarter course decisions with real reviews from fellow Badgers 🦡
 
@@ -134,4 +134,4 @@ MadSpace is an independent student project. It is not affiliated with, endorsed 
 
 ## License
 
-[MIT](LICENSE)
+[GNU AGPL v3.0](LICENSE)

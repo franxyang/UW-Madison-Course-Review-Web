@@ -220,8 +220,8 @@ function LeftSidebar({
   }, [])
   
   return (
-    <aside className="w-[320px] flex-shrink-0">
-      <div className="sticky top-24 space-y-5 max-h-[calc(100vh-7rem)] overflow-y-auto scrollbar-thin">
+    <aside className="w-[320px] flex-shrink-0 h-full overflow-y-auto scrollbar-thin">
+      <div className="space-y-5">
       {/* Search - global, with live preview */}
       <div className="relative z-30" ref={containerRef}>
         <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary pointer-events-none" />
@@ -423,8 +423,8 @@ function RightSidebar({
   }[filterType]
   
   return (
-    <aside className="w-full lg:w-[280px] lg:flex-shrink-0">
-      <div className="sticky top-24 space-y-6 max-h-[calc(100vh-7rem)] overflow-y-auto scrollbar-thin">
+    <aside className="w-full lg:w-[280px] lg:flex-shrink-0 lg:h-full lg:overflow-y-auto scrollbar-thin">
+      <div className="space-y-6">
         {/* Review Count */}
         <div className="text-center">
           <div className="text-4xl font-bold text-text-primary">{course.reviews.length}</div>
@@ -765,20 +765,20 @@ export function CoursePageLayout({
   const latestDistribution = filteredDistributions[0]
 
   return (
-    <div className="min-h-screen bg-surface-secondary">
+    <div className="h-screen flex flex-col bg-surface-secondary overflow-hidden">
       {/* Header */}
       <Header currentPath="/courses" />
 
       {/* Main Content - 3 Column Layout (responsive: stack on mobile) */}
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
-        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
-          {/* Left Sidebar - hidden on mobile, shown on lg+ */}
-          <div className="hidden lg:block">
+      <div className="flex-1 min-h-0 max-w-[1400px] w-full mx-auto px-4 sm:px-6">
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 h-full">
+          {/* Left Sidebar - hidden on mobile, fixed height with internal scroll */}
+          <div className="hidden lg:block py-6 sm:py-8">
             <LeftSidebar course={course} relatedCourses={relatedCourses} />
           </div>
 
-          {/* Main Content */}
-          <main className="flex-1 min-w-0">
+          {/* Main Content - only this column scrolls */}
+          <main className="flex-1 min-w-0 overflow-y-auto py-6 sm:py-8">
             {/* Breadcrumb */}
             <div className="flex items-center gap-2 text-sm text-text-secondary mb-4">
               <Link href="/courses" className="hover:text-text-primary transition-colors">Courses</Link>
@@ -1127,8 +1127,8 @@ export function CoursePageLayout({
             </div>
           </main>
 
-          {/* Right Sidebar - below main on mobile, side on lg+ */}
-          <div className="w-full lg:w-auto">
+          {/* Right Sidebar - fixed height with internal scroll on desktop */}
+          <div className="w-full lg:w-auto py-6 sm:py-8">
             <RightSidebar
               course={course}
               avgRatings={avgRatings}

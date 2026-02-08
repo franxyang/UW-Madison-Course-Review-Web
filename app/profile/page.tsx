@@ -185,7 +185,12 @@ export default async function ProfilePage() {
                     >
                       <div className="flex items-start justify-between mb-2">
                         <div>
-                          <h3 className="font-semibold text-text-primary">{toOfficialCode(review.course.code)}: {review.course.name}</h3>
+                          <h3 className="font-semibold text-text-primary">
+                            {toOfficialCode(review.course.code)}: {review.course.name}
+                            {review.isAnonymous && (
+                              <span className="ml-2 text-xs font-normal text-text-tertiary">🔒 Anonymous</span>
+                            )}
+                          </h3>
                           <p className="text-sm text-text-secondary">{review.instructor.name} · {review.term}</p>
                         </div>
                         <div className="flex items-center gap-2">

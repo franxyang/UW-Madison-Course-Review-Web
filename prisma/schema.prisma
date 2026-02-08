@@ -116,6 +116,7 @@ model Course {
   gradeDistributions GradeDistribution[]
   reviews            Review[]
   savedBy            SavedCourse[]
+  codeAliases        CourseCodeAlias[]
   prerequisites      Course[]                 @relation("CoursePrereqs")
   prerequisiteFor    Course[]                 @relation("CoursePrereqs")
 
@@ -124,6 +125,17 @@ model Course {
   @@index([level])
   @@index([crossListGroupId])
   @@index([searchVector], type: Gin)
+}
+
+model CourseCodeAlias {
+  id                String   @id @default(cuid())
+  sourceCode        String   @unique
+  canonicalCourseId String
+  source            String   @default("madgrades-extractor")
+  createdAt         DateTime @default(now())
+  canonicalCourse   Course   @relation(fields: [canonicalCourseId], references: [id], onDelete: Cascade)
+
+  @@index([canonicalCourseId])
 }
 
 // Groups cross-listed courses together (e.g., CS 514 / MATH 514)
@@ -161,8 +173,11 @@ model GradeDistribution {
   course       Course      @relation(fields: [courseId], references: [id])
   instructor   Instructor? @relation(fields: [instructorId], references: [id])
 
-  @@unique([courseId, term, instructorId])
+  // NOTE: Uniqueness is enforced by partial unique indexes in SQL migration:
+  // 1) (courseId, term, instructorId) WHERE instructorId IS NOT NULL
+  // 2) (courseId, term) WHERE instructorId IS NULL
   @@index([courseId])
+  @@index([courseId, term])
   @@index([instructorId])
 }
 
@@ -193,6 +208,8 @@ model Review {
   course          Course     @relation(fields: [courseId], references: [id])
   instructor      Instructor @relation(fields: [instructorId], references: [id])
   votes           Vote[]
+  isAnonymous           Boolean   @default(false)
+  showRankWhenAnonymous Boolean   @default(false)
 
   // P1 Fix: Prevent duplicate reviews via DB constraint (one review per user per course+instructor)
   @@unique([authorId, courseId, instructorId])

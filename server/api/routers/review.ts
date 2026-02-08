@@ -26,6 +26,8 @@ export const reviewRouter = router({
         resourceLink: z.string().url().optional().or(z.literal('')),
         recommendInstructor: z.enum(['yes', 'no', 'neutral']).optional(),
         instructorName: z.string().min(1, 'Instructor name is required'),
+        isAnonymous: z.boolean().default(false),
+        showRankWhenAnonymous: z.boolean().default(false),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -108,6 +110,8 @@ export const reviewRouter = router({
           assessments: input.assessments ? JSON.stringify(input.assessments) : null,
           resourceLink: input.resourceLink || null,
           recommendInstructor: input.recommendInstructor || null,
+          isAnonymous: input.isAnonymous,
+          showRankWhenAnonymous: input.showRankWhenAnonymous,
         },
         include: {
           author: true,
@@ -237,6 +241,8 @@ export const reviewRouter = router({
         resourceLink: z.string().url().optional().or(z.literal('')),
         recommendInstructor: z.enum(['yes', 'no', 'neutral']).optional(),
         instructorName: z.string().min(1).optional(),
+        isAnonymous: z.boolean().optional(),
+        showRankWhenAnonymous: z.boolean().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -290,6 +296,8 @@ export const reviewRouter = router({
           ...(input.resourceLink !== undefined && { resourceLink: input.resourceLink || null }),
           // Fix: include recommendInstructor update
           ...(input.recommendInstructor !== undefined && { recommendInstructor: input.recommendInstructor }),
+          ...(input.isAnonymous !== undefined && { isAnonymous: input.isAnonymous }),
+          ...(input.showRankWhenAnonymous !== undefined && { showRankWhenAnonymous: input.showRankWhenAnonymous }),
           ...instructorUpdate,
         },
         include: {

@@ -765,20 +765,20 @@ export function CoursePageLayout({
   const latestDistribution = filteredDistributions[0]
 
   return (
-    <div className="h-screen flex flex-col bg-surface-secondary overflow-hidden">
+    <div className="min-h-screen lg:h-screen lg:flex lg:flex-col bg-surface-secondary lg:overflow-hidden">
       {/* Header */}
       <Header currentPath="/courses" />
 
       {/* Main Content - 3 Column Layout (responsive: stack on mobile) */}
-      <div className="flex-1 min-h-0 max-w-[1400px] w-full mx-auto px-4 sm:px-6">
-        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 h-full">
+      <div className="lg:flex-1 lg:min-h-0 max-w-[1400px] w-full mx-auto px-4 sm:px-6">
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 lg:h-full">
           {/* Left Sidebar - hidden on mobile, fixed height with internal scroll */}
-          <div className="hidden lg:block py-6 sm:py-8">
+          <div className="hidden lg:block py-6 lg:py-8">
             <LeftSidebar course={course} relatedCourses={relatedCourses} />
           </div>
 
-          {/* Main Content - only this column scrolls */}
-          <main className="flex-1 min-w-0 overflow-y-auto py-6 sm:py-8">
+          {/* Main Content - only this column scrolls on desktop */}
+          <main className="flex-1 min-w-0 lg:overflow-y-auto py-6 lg:py-8">
             {/* Breadcrumb */}
             <div className="flex items-center gap-2 text-sm text-text-secondary mb-4">
               <Link href="/courses" className="hover:text-text-primary transition-colors">Courses</Link>
@@ -1128,7 +1128,7 @@ export function CoursePageLayout({
           </main>
 
           {/* Right Sidebar - fixed height with internal scroll on desktop */}
-          <div className="w-full lg:w-auto py-6 sm:py-8">
+          <div className="w-full lg:w-auto py-6 lg:py-8">
             <RightSidebar
               course={course}
               avgRatings={avgRatings}

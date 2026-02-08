@@ -24,6 +24,7 @@ const ReportButton = dynamic(() => import('@/components/ReportButton').then(m =>
 })
 import { ReviewGateOverlay, FrostedReview } from '@/components/ReviewGate'
 import { toOfficialCode, getOfficialDeptPrefix, getCourseNumber } from '@/lib/courseCodeDisplay'
+import { normalizeInstructorName } from '@/lib/instructorName'
 import {
   ChevronRight,
   Building,
@@ -89,6 +90,17 @@ interface RelatedCourse {
   name: string
   avgGPA: number | null
 }
+
+type InstructorFacet = {
+  id: string
+  name: string
+  instructorIds: string[]
+  terms: string[]
+  hasOfficialGpa: boolean
+  reviewCount: number
+}
+
+const GRADE_ORDER = ['A', 'AB', 'B', 'BC', 'C', 'D', 'F']
 
 // Helper functions
 function getGradeColor(grade: string) {
@@ -397,6 +409,9 @@ function RightSidebar({
   totalGraded,
   isFiltered,
   filterType,
+  officialDistributionMissing,
+  reviewGradeData,
+  reviewGradeTotal,
 }: { 
   course: Course
   avgRatings: { content: number; teaching: number; grading: number; workload: number } | null
@@ -406,8 +421,12 @@ function RightSidebar({
   totalGraded: number
   isFiltered: boolean
   filterType: 'none' | 'term' | 'instructor' | 'term+instructor'
+  officialDistributionMissing: boolean
+  reviewGradeData: { grade: string; count: number }[]
+  reviewGradeTotal: number
 }) {
   const maxCount = Math.max(...gradeData.map(g => g.count), 1)
+  const reviewMaxCount = Math.max(...reviewGradeData.map(g => g.count), 1)
   
   const getRatingLabel = (val: number) => ['F', 'D', 'C', 'BC', 'B', 'AB', 'A'][Math.min(6, Math.max(0, Math.round(val)))] || 'N/A'
 
@@ -517,6 +536,44 @@ function RightSidebar({
           </div>
         )}
 
+        {officialDistributionMissing && (
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+            <p className="text-sm text-amber-900">
+              The official GPA distribution for this filter has not been published yet.
+            </p>
+          </div>
+        )}
+
+        {reviewGradeTotal > 0 && (
+          <div className="bg-surface-primary border border-surface-tertiary rounded-xl p-4">
+            <h4 className="text-sm font-semibold text-text-primary mb-3">
+              Unofficial (Based on Student Reviews)
+            </h4>
+            <div className="space-y-2.5">
+              {reviewGradeData.map(({ grade, count }) => {
+                const percentage = ((count / reviewGradeTotal) * 100).toFixed(1)
+                return (
+                  <div key={`review-${grade}`} className="group">
+                    <div className="flex items-center justify-between text-xs mb-1">
+                      <span className="font-medium text-text-secondary">{grade}</span>
+                      <span className="text-text-tertiary">{percentage}%</span>
+                    </div>
+                    <div className="relative bg-surface-secondary rounded-full h-2.5 overflow-hidden shadow-inner">
+                      <div
+                        className={`h-full ${getBarColor(grade)} transition-all duration-500 ease-out rounded-full shadow-sm`}
+                        style={{ width: `${(count / reviewMaxCount) * 100}%` }}
+                      />
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+            <div className="text-center text-xs text-text-tertiary mt-3">
+              {reviewGradeTotal.toLocaleString()} reviews with self-reported final grades
+            </div>
+          </div>
+        )}
+
         {/* Quick Stats */}
         <div className="grid grid-cols-2 gap-3 text-center">
           <div className="bg-surface-secondary rounded-lg p-3">
@@ -544,7 +601,7 @@ function FilterBar({
   onReset
 }: {
   terms: string[]
-  instructors: { id: string; name: string }[]
+  instructors: { id: string; name: string; reviewOnly?: boolean }[]
   selectedTerm: string
   selectedInstructor: string
   onTermChange: (term: string) => void
@@ -581,7 +638,9 @@ function FilterBar({
         >
           <option value="all">All Instructors</option>
           {instructors.map(inst => (
-            <option key={inst.id} value={inst.id}>{inst.name}</option>
+            <option key={inst.id} value={inst.id}>
+              {inst.name}{inst.reviewOnly ? ' (Review-only)' : ''}
+            </option>
           ))}
         </select>
         <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-tertiary pointer-events-none" />
@@ -631,68 +690,176 @@ export function CoursePageLayout({
     assessments: review.assessments ? (typeof review.assessments === 'string' ? JSON.parse(review.assessments) : review.assessments) : []
   }))
 
-  // Extract ALL unique terms from gradeDistributions
-  const allTerms = useMemo(() => {
-    const uniqueTerms = [...new Set(course.gradeDistributions.map(g => g.term))]
-    return uniqueTerms.sort().reverse()
-  }, [course.gradeDistributions])
+  const instructorFacets = useMemo(() => {
+    const map = new Map<string, {
+      id: string
+      name: string
+      instructorIds: Set<string>
+      terms: Set<string>
+      hasOfficialGpa: boolean
+      reviewCount: number
+    }>()
 
-  // Extract ALL unique instructors from gradeDistributions (now direct relation)
-  const allInstructors = useMemo(() => {
-    const uniqueInstructors: { id: string; name: string }[] = []
-    const seen = new Set<string>()
-    
     course.gradeDistributions.forEach(g => {
-      if (g.instructor && !seen.has(g.instructor.id)) {
-        seen.add(g.instructor.id)
-        uniqueInstructors.push(g.instructor)
+      if (!g.instructor) return
+      const normalized = normalizeInstructorName(g.instructor.name)
+      const existing = map.get(normalized.key) || {
+        id: normalized.key,
+        name: normalized.displayName,
+        instructorIds: new Set<string>(),
+        terms: new Set<string>(),
+        hasOfficialGpa: false,
+        reviewCount: 0,
       }
+      existing.instructorIds.add(g.instructor.id)
+      existing.terms.add(g.term)
+      existing.hasOfficialGpa = true
+      map.set(normalized.key, existing)
+    })
+
+    reviewsWithParsedData.forEach(review => {
+      if (!review.instructor?.name || !review.instructor?.id) return
+      const normalized = normalizeInstructorName(review.instructor.name)
+      const existing = map.get(normalized.key) || {
+        id: normalized.key,
+        name: normalized.displayName,
+        instructorIds: new Set<string>(),
+        terms: new Set<string>(),
+        hasOfficialGpa: false,
+        reviewCount: 0,
+      }
+      existing.instructorIds.add(review.instructor.id)
+      if (review.term) existing.terms.add(review.term)
+      existing.reviewCount += 1
+      map.set(normalized.key, existing)
+    })
+
+    return Array.from(map.values())
+      .map((v): InstructorFacet => ({
+        id: v.id,
+        name: v.name,
+        instructorIds: [...v.instructorIds],
+        terms: [...v.terms],
+        hasOfficialGpa: v.hasOfficialGpa,
+        reviewCount: v.reviewCount,
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name))
+  }, [course.gradeDistributions, reviewsWithParsedData])
+
+  // Extract unique terms from both official GPA and reviews
+  const allTerms = useMemo(() => {
+    const uniqueTerms = new Set<string>()
+    course.gradeDistributions.forEach(g => uniqueTerms.add(g.term))
+    reviewsWithParsedData.forEach(r => {
+      if (r.term) uniqueTerms.add(r.term)
     })
     
-    return uniqueInstructors.sort((a, b) => a.name.localeCompare(b.name))
-  }, [course.gradeDistributions])
+    const sorted = [...uniqueTerms].sort().reverse()
+    return sorted
+  }, [course.gradeDistributions, reviewsWithParsedData])
 
-  // FILTERED terms based on selected instructor
+  const selectedInstructorFacet = useMemo(
+    () => instructorFacets.find(f => f.id === selectedInstructor) || null,
+    [instructorFacets, selectedInstructor]
+  )
+
+  const selectedInstructorIds = useMemo(() => {
+    if (!selectedInstructorFacet) return new Set<string>()
+    return new Set(selectedInstructorFacet.instructorIds)
+  }, [selectedInstructorFacet])
+
+  const reviewInstructorsByTerm = useMemo(() => {
+    const byTerm = new Map<string, Set<string>>()
+    reviewsWithParsedData.forEach(review => {
+      if (!review.term || !review.instructor?.name) return
+      const normalized = normalizeInstructorName(review.instructor.name).displayName
+      if (!byTerm.has(review.term)) {
+        byTerm.set(review.term, new Set<string>())
+      }
+      byTerm.get(review.term)!.add(normalized)
+    })
+    return [...byTerm.entries()].map(([term, names]) => ({
+      term,
+      names: [...names].sort((a, b) => a.localeCompare(b)),
+    }))
+  }, [reviewsWithParsedData])
+
+  // FILTERED terms based on selected instructor facet
   const terms = useMemo(() => {
-    if (selectedInstructor === 'all') {
+    if (selectedInstructor === 'all' || !selectedInstructorFacet) {
       return allTerms
     }
-    // Only show terms where this instructor has grade data
-    const filteredTerms = course.gradeDistributions
-      .filter(g => g.instructor?.id === selectedInstructor)
-      .map(g => g.term)
-    return [...new Set(filteredTerms)].sort().reverse()
-  }, [allTerms, course.gradeDistributions, selectedInstructor])
+    return allTerms.filter(term => selectedInstructorFacet.terms.includes(term))
+  }, [allTerms, selectedInstructor, selectedInstructorFacet])
 
-  // FILTERED instructors based on selected term
+  // FILTERED instructor facets based on selected term
   const instructors = useMemo(() => {
     if (selectedTerm === 'all') {
-      return allInstructors
+      return instructorFacets.map(f => ({
+        id: f.id,
+        name: f.name,
+        reviewOnly: !f.hasOfficialGpa,
+      }))
     }
-    // Only show instructors who have grade data in this term
-    const termInstructors = course.gradeDistributions
-      .filter(g => g.term === selectedTerm && g.instructor)
-      .map(g => g.instructor!)
-    
-    // Deduplicate
-    const seen = new Set<string>()
-    return termInstructors
-      .filter(i => {
-        if (seen.has(i.id)) return false
-        seen.add(i.id)
-        return true
-      })
-      .sort((a, b) => a.name.localeCompare(b.name))
-  }, [allInstructors, course.gradeDistributions, selectedTerm])
+    return instructorFacets
+      .filter(f => f.terms.includes(selectedTerm))
+      .map(f => ({
+        id: f.id,
+        name: f.name,
+        reviewOnly: !f.hasOfficialGpa,
+      }))
+  }, [instructorFacets, selectedTerm])
 
   // Filter reviews
   const filteredReviews = useMemo(() => {
     return reviewsWithParsedData.filter(review => {
       if (selectedTerm !== 'all' && review.term !== selectedTerm) return false
-      if (selectedInstructor !== 'all' && review.instructor?.id !== selectedInstructor) return false
+      if (selectedInstructor !== 'all') {
+        const reviewInstructorId = review.instructor?.id
+        if (!reviewInstructorId || !selectedInstructorIds.has(reviewInstructorId)) {
+          return false
+        }
+      }
       return true
     })
-  }, [reviewsWithParsedData, selectedTerm, selectedInstructor])
+  }, [reviewsWithParsedData, selectedTerm, selectedInstructor, selectedInstructorIds])
+
+  // Grade distribution - filter by selected term AND/OR instructor facet
+  const filteredDistributions = useMemo(() => {
+    let filtered = course.gradeDistributions
+
+    if (selectedTerm !== 'all') {
+      filtered = filtered.filter(g => g.term === selectedTerm)
+    }
+
+    if (selectedInstructor !== 'all') {
+      filtered = filtered.filter(g => {
+        if (!g.instructor?.id) return false
+        return selectedInstructorIds.has(g.instructor.id)
+      })
+    }
+
+    return filtered
+  }, [course.gradeDistributions, selectedTerm, selectedInstructor, selectedInstructorIds])
+
+  const reviewGradeDistribution = useMemo(() => {
+    const counts = new Map<string, number>(GRADE_ORDER.map(grade => [grade, 0]))
+    let total = 0
+    filteredReviews.forEach(review => {
+      if (!review.gradeReceived || !counts.has(review.gradeReceived)) return
+      counts.set(review.gradeReceived, (counts.get(review.gradeReceived) || 0) + 1)
+      total += 1
+    })
+    return {
+      gradeData: GRADE_ORDER.map(grade => ({ grade, count: counts.get(grade) || 0 })).filter(g => g.count > 0),
+      total,
+    }
+  }, [filteredReviews])
+
+  const officialDistributionMissingForFilter = useMemo(() => {
+    const hasActiveFilters = selectedTerm !== 'all' || selectedInstructor !== 'all'
+    return hasActiveFilters && filteredDistributions.length === 0
+  }, [selectedTerm, selectedInstructor, filteredDistributions])
 
   // Calculate average ratings from filtered reviews
   const avgRatings = filteredReviews.length > 0 ? {
@@ -701,24 +868,6 @@ export function CoursePageLayout({
     grading: filteredReviews.reduce((sum, r) => sum + (['F', 'D', 'C', 'BC', 'B', 'AB', 'A'].indexOf(r.gradingRating)), 0) / filteredReviews.length,
     workload: filteredReviews.reduce((sum, r) => sum + (['F', 'D', 'C', 'BC', 'B', 'AB', 'A'].indexOf(r.workloadRating)), 0) / filteredReviews.length
   } : null
-
-  // Grade distribution - filter by selected term AND/OR instructor
-  // Now with per-instructor data, we get exact GPA for each instructor!
-  const filteredDistributions = useMemo(() => {
-    let filtered = course.gradeDistributions
-
-    // Filter by term
-    if (selectedTerm !== 'all') {
-      filtered = filtered.filter(g => g.term === selectedTerm)
-    }
-
-    // Filter by instructor (now exact per-instructor data!)
-    if (selectedInstructor !== 'all') {
-      filtered = filtered.filter(g => g.instructor?.id === selectedInstructor)
-    }
-
-    return filtered
-  }, [course.gradeDistributions, selectedTerm, selectedInstructor])
 
   // Calculate aggregated grade data from filtered distributions
   const { gradeData, filteredAvgGPA, totalGraded } = useMemo(() => {
@@ -873,11 +1022,8 @@ export function CoursePageLayout({
               selectedInstructor={selectedInstructor}
               onTermChange={(term) => {
                 setSelectedTerm(term)
-                // Reset instructor if not available in new term (per-instructor data)
                 if (term !== 'all' && selectedInstructor !== 'all') {
-                  const hasData = course.gradeDistributions.some(
-                    g => g.term === term && g.instructor?.id === selectedInstructor
-                  )
+                  const hasData = selectedInstructorFacet?.terms.includes(term) ?? false
                   if (!hasData) {
                     setSelectedInstructor('all')
                   }
@@ -885,11 +1031,9 @@ export function CoursePageLayout({
               }}
               onInstructorChange={(instructor) => {
                 setSelectedInstructor(instructor)
-                // Reset term if instructor doesn't have data in current term
                 if (instructor !== 'all' && selectedTerm !== 'all') {
-                  const hasData = course.gradeDistributions.some(
-                    g => g.term === selectedTerm && g.instructor?.id === instructor
-                  )
+                  const selectedFacet = instructorFacets.find(f => f.id === instructor)
+                  const hasData = selectedFacet?.terms.includes(selectedTerm) ?? false
                   if (!hasData) {
                     setSelectedTerm('all')
                   }
@@ -920,6 +1064,7 @@ export function CoursePageLayout({
                   courseName={`${toOfficialCode(course.code)}: ${course.name}`}
                   gradeDistributions={course.gradeDistributions}
                   courseInstructors={course.instructors}
+                  reviewInstructorsByTerm={reviewInstructorsByTerm}
                   isLoggedIn={!!session?.user}
                 />
               </div>
@@ -1214,6 +1359,9 @@ export function CoursePageLayout({
                 selectedTerm !== 'all' ? 'term' :
                 selectedInstructor !== 'all' ? 'instructor' : 'none'
               }
+              officialDistributionMissing={officialDistributionMissingForFilter}
+              reviewGradeData={officialDistributionMissingForFilter ? reviewGradeDistribution.gradeData : []}
+              reviewGradeTotal={officialDistributionMissingForFilter ? reviewGradeDistribution.total : 0}
             />
           </div>
         </div>

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { MessageSquare, X, AlertCircle, ThumbsUp, ThumbsDown, Meh, LogIn } from 'lucide-react'
 import { toast } from 'sonner'
 import { trpc } from '@/lib/trpc/client'
+import { normalizeInstructorName } from '@/lib/instructorName'
 
 interface ExistingReview {
   id: string
@@ -32,6 +33,7 @@ interface ReviewFormProps {
   courseName: string
   courseInstructors?: { instructor: { id: string; name: string } }[]
   gradeDistributions?: { term: string; instructor?: { id: string; name: string } | null }[]
+  reviewInstructorsByTerm?: { term: string; names: string[] }[]
   existingReview?: ExistingReview | null
   onEditComplete?: () => void
   onEditCancel?: () => void
@@ -185,6 +187,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
   courseName, 
   courseInstructors = [],
   gradeDistributions = [],
+  reviewInstructorsByTerm = [],
   existingReview = null,
   onEditComplete,
   onEditCancel,
@@ -204,19 +207,6 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
     return terms
   }, [gradeDistributions])
   
-  // Get instructors for a specific term
-  const getInstructorsForTerm = (term: string) => {
-    const instructors = new Map<string, string>()
-    gradeDistributions
-      .filter(gd => gd.term === term && gd.instructor)
-      .forEach(gd => {
-        if (gd.instructor) {
-          instructors.set(gd.instructor.id, gd.instructor.name)
-        }
-      })
-    return Array.from(instructors.entries()).map(([id, name]) => ({ id, name }))
-  }
-
   const [formData, setFormData] = useState<Partial<ReviewFormData>>({
     courseId,
     term: existingReview?.term || availableTerms[0] || '',
@@ -233,7 +223,9 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
     title: existingReview?.title || '',
     assessments: existingReview?.assessments || [],
     resourceLink: existingReview?.resourceLink || '',
-    instructorName: existingReview?.instructor?.name || '',
+    instructorName: existingReview?.instructor?.name
+      ? normalizeInstructorName(existingReview.instructor.name).displayName
+      : '',
     isCustomInstructor: false,
     recommendInstructor: (existingReview?.recommendInstructor as any) || ''
   })
@@ -244,7 +236,35 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
   
   // Check if selected term has data in database
   const termHasData = termsWithData.has(formData.term || '')
-  const instructorsForTerm = termHasData ? getInstructorsForTerm(formData.term || '') : []
+  const instructorsForTerm = useMemo(() => {
+    const selectedTerm = formData.term || ''
+    const names = new Set<string>()
+
+    gradeDistributions
+      .filter(gd => gd.term === selectedTerm && gd.instructor?.name)
+      .forEach(gd => {
+        if (gd.instructor?.name) {
+          names.add(normalizeInstructorName(gd.instructor.name).displayName)
+        }
+      })
+
+    reviewInstructorsByTerm
+      .find(entry => entry.term === selectedTerm)
+      ?.names.forEach(name => names.add(normalizeInstructorName(name).displayName))
+
+    courseInstructors.forEach(entry => {
+      if (entry.instructor?.name) {
+        names.add(normalizeInstructorName(entry.instructor.name).displayName)
+      }
+    })
+
+    return [...names].sort((a, b) => a.localeCompare(b))
+  }, [formData.term, gradeDistributions, reviewInstructorsByTerm, courseInstructors])
+
+  const instructorSuggestionsId = useMemo(
+    () => `instructor-suggestions-${courseId.replace(/[^a-zA-Z0-9_-]/g, '')}`,
+    [courseId]
+  )
 
   // Calculate modal gradient based on current ratings (real-time)
   const modalGradient = useMemo(() => getModalGradientStyle({
@@ -321,8 +341,9 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
     setError(null)
 
     // Validate required fields
+    const normalizedInstructor = normalizeInstructorName(formData.instructorName || '')
     if (!formData.contentRating || !formData.teachingRating ||
-        !formData.gradingRating || !formData.workloadRating || !formData.instructorName) {
+        !formData.gradingRating || !formData.workloadRating || !normalizedInstructor.key) {
       setError('Please fill in all required fields (ratings and instructor)')
       return
     }
@@ -372,7 +393,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
         assessments: formData.assessments,
         resourceLink: formData.resourceLink,
         recommendInstructor: formData.recommendInstructor as 'yes' | 'no' | 'neutral' | undefined,
-        instructorName: formData.instructorName,
+        instructorName: normalizedInstructor.displayName,
         isAnonymous,
         showRankWhenAnonymous,
       })
@@ -393,7 +414,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
         assessments: formData.assessments,
         resourceLink: formData.resourceLink,
         recommendInstructor: formData.recommendInstructor as 'yes' | 'no' | 'neutral' | undefined,
-        instructorName: formData.instructorName!,
+        instructorName: normalizedInstructor.displayName,
         isAnonymous,
         showRankWhenAnonymous,
       })
@@ -510,27 +531,34 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
                   <label className="block text-sm font-medium text-text-primary mb-1">
                     Instructor <span className="text-red-500">*</span>
                   </label>
-                  {termHasData && instructorsForTerm.length > 0 ? (
-                    <select
-                      value={formData.instructorName}
-                      onChange={(e) => setFormData({ ...formData, instructorName: e.target.value })}
-                      className="w-full px-3 py-2 bg-surface-secondary border border-surface-tertiary rounded-lg focus:outline-none focus:ring-2 focus:ring-wf-crimson/20 focus:border-wf-crimson text-text-primary"
-                      disabled={activeMutation.isPending}
-                    >
-                      <option value="">Select instructor...</option>
-                      {instructorsForTerm.map(inst => (
-                        <option key={inst.id} value={inst.name}>{inst.name}</option>
-                      ))}
-                    </select>
+                  <input
+                    type="text"
+                    list={instructorSuggestionsId}
+                    value={formData.instructorName}
+                    onChange={(e) => setFormData({ ...formData, instructorName: e.target.value })}
+                    onBlur={() =>
+                      setFormData(prev => ({
+                        ...prev,
+                        instructorName: normalizeInstructorName(prev.instructorName || '').displayName,
+                      }))
+                    }
+                    placeholder="Professor name"
+                    className="w-full px-3 py-2 bg-surface-secondary border border-surface-tertiary rounded-lg focus:outline-none focus:ring-2 focus:ring-wf-crimson/20 focus:border-wf-crimson text-text-primary"
+                    disabled={activeMutation.isPending}
+                  />
+                  <datalist id={instructorSuggestionsId}>
+                    {instructorsForTerm.map(name => (
+                      <option key={name} value={name} />
+                    ))}
+                  </datalist>
+                  {termHasData ? (
+                    <p className="text-xs text-text-tertiary mt-1">
+                      Pick from suggestions or type a new instructor.
+                    </p>
                   ) : (
-                    <input
-                      type="text"
-                      value={formData.instructorName}
-                      onChange={(e) => setFormData({ ...formData, instructorName: e.target.value })}
-                      placeholder="Professor name"
-                      className="w-full px-3 py-2 bg-surface-secondary border border-surface-tertiary rounded-lg focus:outline-none focus:ring-2 focus:ring-wf-crimson/20 focus:border-wf-crimson text-text-primary"
-                      disabled={activeMutation.isPending}
-                    />
+                    <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                      No official data for this term yet. You can still type or pick a community-entered instructor.
+                    </p>
                   )}
                 </div>
               </div>

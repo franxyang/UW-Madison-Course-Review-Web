@@ -9,6 +9,7 @@
     "start": "next start",
     "lint": "next lint",
     "seed": "tsx scripts/seed.ts",
+    "reconcile:instructors": "tsx scripts/reconcileOfficialInstructorAliases.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {

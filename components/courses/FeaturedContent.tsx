@@ -4,16 +4,6 @@ import Link from 'next/link'
 import { Star, Clock, TrendingUp } from 'lucide-react'
 import { trpc } from '@/lib/trpc/client'
 import { toOfficialCode } from '@/lib/courseCodeDisplay'
-import { CourseCardGrid } from './CourseGrid'
-
-function getGPAColor(gpa: number | null) {
-  if (!gpa || gpa === 0) return 'text-text-tertiary'
-  if (gpa >= 3.5) return 'text-emerald-500'
-  if (gpa >= 3.0) return 'text-emerald-400'
-  if (gpa >= 2.5) return 'text-amber-500'
-  if (gpa >= 2.0) return 'text-orange-500'
-  return 'text-red-500'
-}
 
 function getRatingColor(rating: string) {
   const colors: Record<string, string> = {
@@ -69,65 +59,86 @@ export function FeaturedContent({ onLevelSelect }: FeaturedContentProps = {}) {
 
   return (
     <div className="space-y-6">
-      {/* Most Reviewed */}
-      <div>
-        <h2 className="font-semibold text-text-primary mb-4 flex items-center gap-2">
-          <TrendingUp size={18} className="text-wf-crimson" />
-          Most Reviewed Courses
-        </h2>
-        {mostReviewed.length > 0 ? (
-          <CourseCardGrid courses={mostReviewed} />
-        ) : (
-          <p className="text-sm text-text-tertiary">No reviewed courses yet</p>
-        )}
-      </div>
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+        {/* Most Reviewed */}
+        <section className="bg-surface-primary border border-surface-tertiary rounded-xl p-4">
+          <h2 className="font-semibold text-text-primary mb-3 flex items-center gap-2">
+            <TrendingUp size={18} className="text-wf-crimson" />
+            Most Reviewed Courses
+          </h2>
+          {mostReviewed.length > 0 ? (
+            <div className="max-h-[270px] overflow-y-auto scrollbar-hide pr-1 space-y-2">
+              {mostReviewed.map(course => (
+                <Link
+                  key={course.id}
+                  href={`/courses/${course.id}`}
+                  className="flex items-center justify-between gap-3 rounded-lg border border-surface-tertiary px-3 py-2 hover:border-wf-crimson/30 hover:bg-hover-bg transition-colors"
+                >
+                  <div className="min-w-0">
+                    <div className="text-sm font-semibold text-text-primary truncate">
+                      {toOfficialCode(course.code)}
+                    </div>
+                    <div className="text-xs text-text-secondary truncate">{course.name}</div>
+                  </div>
+                  <div className="flex items-center gap-1 text-xs text-text-tertiary whitespace-nowrap">
+                    <Star size={10} className="text-amber-400" />
+                    <span>{course._count.reviews}</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-text-tertiary">No reviewed courses yet</p>
+          )}
+        </section>
 
-      {/* Recent Reviews */}
-      <div>
-        <h2 className="font-semibold text-text-primary mb-4 flex items-center gap-2">
-          <Clock size={18} className="text-text-tertiary" />
-          Recent Reviews
-        </h2>
-        {recentReviews.length > 0 ? (
-        <div className="space-y-2">
-          {recentReviews.map(review => (
-            <Link
-              key={review.id}
-              href={`/courses/${review.course.id}`}
-              className="block bg-surface-primary border border-surface-tertiary rounded-lg p-3 hover:border-wf-crimson/30 transition-colors"
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-medium text-sm text-wf-crimson">
-                      {toOfficialCode(review.course.code)}
-                    </span>
-                    <span className={`text-xs font-semibold ${getRatingColor(review.contentRating)}`}>
-                      {review.contentRating}
+        {/* Recent Reviews */}
+        <section className="bg-surface-primary border border-surface-tertiary rounded-xl p-4">
+          <h2 className="font-semibold text-text-primary mb-3 flex items-center gap-2">
+            <Clock size={18} className="text-text-tertiary" />
+            Recent Reviews
+          </h2>
+          {recentReviews.length > 0 ? (
+            <div className="max-h-[270px] overflow-y-auto scrollbar-hide pr-1 space-y-2">
+              {recentReviews.map(review => (
+                <Link
+                  key={review.id}
+                  href={`/courses/${review.course.id}`}
+                  className="block border border-surface-tertiary rounded-lg p-3 hover:border-wf-crimson/30 hover:bg-hover-bg transition-colors"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-medium text-sm text-wf-crimson">
+                          {toOfficialCode(review.course.code)}
+                        </span>
+                        <span className={`text-xs font-semibold ${getRatingColor(review.contentRating)}`}>
+                          {review.contentRating}
+                        </span>
+                      </div>
+                      {review.title && (
+                        <p className="text-sm text-text-secondary line-clamp-1">
+                          &quot;{review.title}&quot;
+                        </p>
+                      )}
+                    </div>
+                    <span className="text-xs text-text-tertiary whitespace-nowrap">
+                      {new Date(review.createdAt).toLocaleDateString()}
                     </span>
                   </div>
-                  {review.title && (
-                    <p className="text-sm text-text-secondary line-clamp-1">
-                      &quot;{review.title}&quot;
-                    </p>
-                  )}
-                </div>
-                <span className="text-xs text-text-tertiary whitespace-nowrap">
-                  {new Date(review.createdAt).toLocaleDateString()}
-                </span>
-              </div>
-            </Link>
-          ))}
-        </div>
-        ) : (
-          <p className="text-sm text-text-tertiary">No reviews yet</p>
-        )}
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-text-tertiary">No reviews yet</p>
+          )}
+        </section>
       </div>
 
       {/* Browse by Level */}
       <div>
         <h2 className="font-semibold text-text-primary mb-4">Browse by Level</h2>
-        <div className="flex gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
           {[
             { level: 'Elementary', label: '100-200 level', bgColor: 'bg-emerald-50 dark:bg-emerald-900/20', borderColor: 'border-emerald-200 dark:border-emerald-800', hoverColor: 'hover:bg-emerald-100 dark:hover:bg-emerald-900/30', textColor: 'text-emerald-700 dark:text-emerald-300', subColor: 'text-emerald-600 dark:text-emerald-400' },
             { level: 'Intermediate', label: '300-400 level', bgColor: 'bg-amber-50 dark:bg-amber-900/20', borderColor: 'border-amber-200 dark:border-amber-800', hoverColor: 'hover:bg-amber-100 dark:hover:bg-amber-900/30', textColor: 'text-amber-700 dark:text-amber-300', subColor: 'text-amber-600 dark:text-amber-400' },

@@ -33,8 +33,7 @@ export function QuickFilters({ filters, onChange }: QuickFiltersProps) {
 
   const hasActiveFilters = (filters.levels?.length || 0) > 0 || 
     filters.minGPA !== undefined || 
-    filters.maxGPA !== undefined ||
-    filters.sortBy !== undefined
+    filters.maxGPA !== undefined
 
   const clearAll = () => {
     onChange({})

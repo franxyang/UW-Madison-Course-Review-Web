@@ -242,10 +242,31 @@ model Vote {
 model Instructor {
   id                 String              @id @default(cuid())
   name               String              @unique
+  nameKey            String?
   aliases            String?
   courses            CourseInstructor[]
   gradeDistributions GradeDistribution[]
   reviews            Review[]
+  aliasMappings      InstructorAlias[]
+
+  @@index([nameKey])
+}
+
+model InstructorAlias {
+  id           String     @id @default(cuid())
+  aliasRaw     String
+  aliasKey     String
+  source       String     @default("review")
+  courseId     String?
+  term         String?
+  instructorId String
+  instructor   Instructor @relation(fields: [instructorId], references: [id], onDelete: Cascade)
+  createdAt    DateTime   @default(now())
+
+  @@index([aliasKey])
+  @@index([courseId, term])
+  @@index([instructorId])
+  @@unique([aliasKey, instructorId])
 }
 
 model CourseInstructor {

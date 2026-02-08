@@ -2,8 +2,118 @@ import { z } from 'zod'
 import { router, protectedProcedure } from '../trpc/trpc'
 import { TRPCError } from '@trpc/server'
 import { calculateReviewXP, computeContributorLevel } from '@/lib/contributorLevel'
+import { normalizeInstructorName } from '@/lib/instructorName'
 
 const gradeEnum = z.enum(['A', 'AB', 'B', 'BC', 'C', 'D', 'F'])
+
+async function resolveInstructorByName(
+  prisma: any,
+  instructorName: string,
+  courseId?: string,
+  term?: string
+) {
+  const normalized = normalizeInstructorName(instructorName)
+  if (!normalized.key) {
+    throw new TRPCError({
+      code: 'BAD_REQUEST',
+      message: 'Instructor name is required',
+    })
+  }
+
+  const aliasMatches = await prisma.instructorAlias.findMany({
+    where: { aliasKey: normalized.key },
+    include: { instructor: true },
+  })
+
+  if (aliasMatches.length > 0) {
+    const best = aliasMatches.sort((a: any, b: any) => {
+      const score = (row: any) =>
+        (courseId && row.courseId === courseId ? 4 : 0) +
+        (term && row.term === term ? 2 : 0) +
+        (row.source === 'official' ? 1 : 0)
+      return score(b) - score(a)
+    })[0]
+    return best.instructor
+  }
+
+  if (courseId) {
+    const reviewScoped = await prisma.review.findFirst({
+      where: {
+        courseId,
+        instructor: { nameKey: normalized.key },
+      },
+      include: { instructor: true },
+      orderBy: { createdAt: 'desc' },
+    })
+    if (reviewScoped?.instructor) {
+      return reviewScoped.instructor
+    }
+
+    const courseInstructorScoped = await prisma.courseInstructor.findFirst({
+      where: {
+        courseId,
+        instructor: { nameKey: normalized.key },
+      },
+      include: { instructor: true },
+    })
+    if (courseInstructorScoped?.instructor) {
+      return courseInstructorScoped.instructor
+    }
+  }
+
+  let instructor =
+    (await prisma.instructor.findFirst({
+      where: { nameKey: normalized.key },
+    })) ||
+    (await prisma.instructor.findFirst({
+      where: {
+        name: {
+          equals: normalized.displayName,
+          mode: 'insensitive',
+        },
+      },
+    }))
+
+  if (!instructor) {
+    instructor = await prisma.instructor.create({
+      data: {
+        name: normalized.displayName,
+        nameKey: normalized.key,
+        aliases: null,
+      },
+    })
+  } else if (!instructor.nameKey) {
+    instructor = await prisma.instructor.update({
+      where: { id: instructor.id },
+      data: { nameKey: normalized.key },
+    })
+  }
+
+  await prisma.instructorAlias.upsert({
+    where: {
+      aliasKey_instructorId: {
+        aliasKey: normalized.key,
+        instructorId: instructor.id,
+      },
+    },
+    update: {
+      aliasRaw: normalized.raw,
+      courseId: courseId ?? null,
+      term: term ?? null,
+      source: 'review',
+    },
+    create: {
+      aliasRaw: normalized.raw,
+      aliasKey: normalized.key,
+      source: 'review',
+      courseId: courseId ?? null,
+      term: term ?? null,
+      instructorId: instructor.id,
+    },
+  })
+
+  return instructor
+}
 
 export const reviewRouter = router({
   // Create a new review
@@ -39,19 +149,12 @@ export const reviewRouter = router({
         })
       }
 
-      // Find or create instructor
-      let instructor = await ctx.prisma.instructor.findUnique({
-        where: { name: input.instructorName },
-      })
-
-      if (!instructor) {
-        instructor = await ctx.prisma.instructor.create({
-          data: {
-            name: input.instructorName,
-            aliases: null,
-          },
-        })
-      }
+      const instructor = await resolveInstructorByName(
+        ctx.prisma,
+        input.instructorName,
+        input.courseId,
+        input.term
+      )
 
       // Get user from database
       const user = await ctx.prisma.user.findUnique({
@@ -164,7 +267,7 @@ export const reviewRouter = router({
       // Get the review to find its author (for level updates)
       const review = await ctx.prisma.review.findUnique({
         where: { id: input.reviewId },
-        select: { authorId: true },
+        select: { authorId: true, courseId: true, term: true },
       })
 
       if (existingVote) {
@@ -251,7 +354,7 @@ export const reviewRouter = router({
       // Verify ownership
       const review = await ctx.prisma.review.findUnique({
         where: { id: input.reviewId },
-        select: { authorId: true },
+        select: { authorId: true, courseId: true, term: true },
       })
 
       if (!review) {
@@ -265,14 +368,12 @@ export const reviewRouter = router({
       // Handle instructor update if name changed
       let instructorUpdate: { instructorId?: string } = {}
       if (input.instructorName) {
-        let instructor = await ctx.prisma.instructor.findUnique({
-          where: { name: input.instructorName },
-        })
-        if (!instructor) {
-          instructor = await ctx.prisma.instructor.create({
-            data: { name: input.instructorName, aliases: null },
-          })
-        }
+        const instructor = await resolveInstructorByName(
+          ctx.prisma,
+          input.instructorName,
+          review.courseId,
+          input.term || review.term
+        )
         instructorUpdate = { instructorId: instructor.id }
       }
 

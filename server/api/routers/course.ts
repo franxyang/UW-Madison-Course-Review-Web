@@ -697,7 +697,7 @@ export const courseRouter = router({
           _count: { select: { reviews: true } }
         },
         orderBy: { reviews: { _count: 'desc' } },
-        take: 8
+        take: 20
       }),
       ctx.prisma.review.findMany({
         select: {
@@ -708,7 +708,7 @@ export const courseRouter = router({
           course: { select: { id: true, code: true, name: true } }
         },
         orderBy: { createdAt: 'desc' },
-        take: 6
+        take: 20
       })
     ])
     return { mostReviewed, recentReviews }

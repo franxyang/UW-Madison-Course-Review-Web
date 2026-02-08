@@ -10,7 +10,6 @@ import { CourseList, CourseNumberGrid } from '@/components/courses/CourseGrid'
 import { DepartmentStats } from '@/components/courses/DepartmentStats'
 import { QuickFilters, type QuickFilterValues } from '@/components/courses/QuickFilters'
 import { trpc } from '@/lib/trpc/client'
-import { toOfficialCode } from '@/lib/courseCodeDisplay'
 
 export default function CoursesPage() {
   return (
@@ -46,9 +45,15 @@ function CoursesPageContent() {
     searchParams.get('dept') || null
   )
   const [filters, setFilters] = useState<QuickFilterValues>({
-    levels: searchParams.get('level') ? [searchParams.get('level')!] : undefined,
-    sortBy: 'reviews'
+    levels: searchParams.get('level') ? [searchParams.get('level')!] : undefined
   })
+
+  const effectiveSortBy = (filters.sortBy as 'reviews' | 'gpa' | 'code' | undefined) || 'reviews'
+  const hasHomepageFilters =
+    !selectedDept &&
+    ((filters.levels?.length || 0) > 0 ||
+      filters.minGPA !== undefined ||
+      filters.maxGPA !== undefined)
 
   // Fetch department data when selected
   const { data: deptStats, isLoading: deptLoading } = trpc.course.getDepartmentStats.useQuery(
@@ -76,7 +81,7 @@ function CoursesPageContent() {
     }
 
     // Sort
-    switch (filters.sortBy) {
+    switch (effectiveSortBy) {
       case 'gpa':
         courses.sort((a, b) => (b.avgGPA || 0) - (a.avgGPA || 0))
         break
@@ -89,7 +94,25 @@ function CoursesPageContent() {
     }
 
     return courses
-  }, [deptStats?.courses, filters])
+  }, [deptStats?.courses, filters, effectiveSortBy])
+
+  const {
+    data: homepageFilteredData,
+    isLoading: homepageFilteredLoading,
+  } = trpc.course.list.useQuery(
+    {
+      levels: filters.levels,
+      minGPA: filters.minGPA,
+      maxGPA: filters.maxGPA,
+      sortBy: effectiveSortBy,
+      limit: 100,
+      offset: 0,
+    },
+    {
+      enabled: hasHomepageFilters,
+    },
+  )
+  const homepageFilteredCourses = homepageFilteredData?.courses ?? []
 
   // Handle department selection
   const handleSelectDept = (deptCode: string | null) => {
@@ -190,10 +213,42 @@ function CoursesPageContent() {
                 </div>
               )
             ) : (
-              // Show featured content
-              <FeaturedContent onLevelSelect={(level) => {
-                setFilters(prev => ({ ...prev, levels: [level] }))
-              }} />
+              hasHomepageFilters ? (
+                homepageFilteredLoading ? (
+                  <div className="space-y-3 animate-pulse">
+                    {[1, 2, 3, 4, 5].map(i => (
+                      <div key={i} className="h-20 bg-surface-tertiary rounded-lg" />
+                    ))}
+                  </div>
+                ) : (
+                  <div>
+                    <div className="text-sm text-text-secondary mb-4">
+                      Showing {homepageFilteredData?.total || 0} courses
+                      {filters.levels && filters.levels.length > 0 && (
+                        <span> • Level: {filters.levels.join(', ')}</span>
+                      )}
+                      {(filters.minGPA !== undefined || filters.maxGPA !== undefined) && (
+                        <span>
+                          {' '}
+                          • GPA: {filters.minGPA?.toFixed(1) ?? '0.0'} - {filters.maxGPA?.toFixed(1) ?? '4.0'}
+                        </span>
+                      )}
+                    </div>
+                    {homepageFilteredCourses.length > 0 ? (
+                      <CourseList courses={homepageFilteredCourses} />
+                    ) : (
+                      <div className="bg-surface-primary border border-surface-tertiary rounded-xl p-12 text-center text-text-secondary">
+                        No courses match your filters.
+                      </div>
+                    )}
+                  </div>
+                )
+              ) : (
+                // Show featured content
+                <FeaturedContent onLevelSelect={(level) => {
+                  setFilters(prev => ({ ...prev, levels: [level] }))
+                }} />
+              )
             )}
           </div>
 

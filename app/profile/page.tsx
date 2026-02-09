@@ -8,6 +8,7 @@ import { signOut } from '@/auth'
 import { computeContributorLevel, getAllLevels } from '@/lib/contributorLevel'
 import { toOfficialCode } from '@/lib/courseCodeDisplay'
 import { NicknameEditor } from '@/components/NicknameEditor'
+import { ProfileSecuritySettings } from '@/components/auth/ProfileSecuritySettings'
 
 export default async function ProfilePage() {
   const session = await auth()
@@ -240,6 +241,8 @@ export default async function ProfilePage() {
 
           {/* Sidebar: Saved Courses + Level Info */}
           <div className="space-y-6">
+            <ProfileSecuritySettings />
+
             {/* Contributor Level Card */}
             <div className="bg-surface-primary rounded-xl border border-surface-tertiary p-6">
               <h2 className="text-lg font-bold text-text-primary mb-4 flex items-center gap-2">

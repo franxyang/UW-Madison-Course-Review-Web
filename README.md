@@ -31,7 +31,8 @@ Inspired by [USTSpace](https://ust.space) — a beloved student community platfo
 - 👨‍🏫 **Instructor profiles** — Teaching portfolios with radar charts, timelines, and aggregated ratings
 - 🔍 **Smart search** — Full-text search with course code alias support (e.g. `CS 577` → `COMP SCI 577`)
 - 🏆 **Contributor level system** — Quality-weighted XP progression (🐾→🐣→🐥→🦡→👑→🏆)
-- 🔒 **@wisc.edu verified** — Only UW-Madison students can review
+- 🔐 **Hybrid auth** — @wisc.edu OTP verification + Google OAuth + handle/password login
+- 🎓 **Graduate-safe recovery** — bind non-@wisc recovery email to keep access after graduation
 - 🛡️ **Content moderation** — Admin portal with reporting queue
 - 🌙 **Dark mode** — System-aware theme switching
 
@@ -45,7 +46,7 @@ Inspired by [USTSpace](https://ust.space) — a beloved student community platfo
 | Database | PostgreSQL (Neon) + Prisma ORM |
 | Search | PostgreSQL `tsvector` + GIN index |
 | Caching | Upstash Redis (graceful degradation) |
-| Auth | NextAuth.js v5 + Google OAuth |
+| Auth | NextAuth.js v5 + Google OAuth + Credentials + OTP |
 | Data Fetching | TanStack Query (React Query) |
 | Deployment | Vercel |
 
@@ -68,7 +69,8 @@ Data sourced from UW-Madison's course catalog and [MadGrades](https://madgrades.
 
 - Node.js 18+
 - PostgreSQL database (or a [Neon](https://neon.tech/) account)
-- Google OAuth credentials (for @wisc.edu authentication)
+- Google OAuth credentials
+- SMTP credentials (for OTP delivery)
 
 ### Setup
 

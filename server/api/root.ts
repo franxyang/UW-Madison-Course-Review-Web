@@ -5,6 +5,7 @@ import { commentRouter } from './routers/comment'
 import { instructorRouter } from './routers/instructor'
 import { userRouter } from './routers/user'
 import { adminRouter } from './routers/admin'
+import { authRouter } from './routers/auth'
 
 export const appRouter = router({
   course: courseRouter,
@@ -13,6 +14,7 @@ export const appRouter = router({
   instructor: instructorRouter,
   user: userRouter,
   admin: adminRouter,
+  auth: authRouter,
 })
 
 export type AppRouter = typeof appRouter

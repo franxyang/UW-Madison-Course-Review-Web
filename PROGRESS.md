@@ -1,6 +1,6 @@
 # MadSpace Development Progress
 
-**Last Updated**: 2026-02-08  
+**Last Updated**: 2026-02-09  
 **Current Phase**: Phase 4 + Data Integrity Stabilization  
 **Overall Completion**: ~90%
 
@@ -38,6 +38,19 @@ Overall:                 ██████████████████�
   - Grade scale unified to `A / AB / B / BC / C / D / F`
   - Dynamic color logic aligned with GPA distribution palette
   - Stronger visual feedback for assessments and detailed rating modules
+
+### ✅ Auth Upgrade (Credentials + OTP + Recovery)
+- [x] **Hybrid authentication shipped**:
+  - Google OAuth (@wisc.edu verification path)
+  - Handle/email + password credentials login
+  - Wisc email OTP signup flow
+- [x] **Graduate-safe account continuity**:
+  - Added recovery-email verification flow (`non-@wisc.edu`)
+  - Added password reset OTP flow
+  - Added profile security panel (handle / recovery email / password)
+- [x] **Identity model migration deployed**:
+  - `UserEmail`, `UserCredential`, `EmailOtpChallenge`
+  - `eligibilityStatus`-based review authorization
 
 ### ✅ Browse / Discovery UX
 - [x] **Courses page featured panels** updated:
@@ -91,7 +104,7 @@ Overall:                 ██████████████████�
 
 ## ✅ Phase 2: Core Features — 100% COMPLETE
 
-- [x] User authentication (NextAuth v5 + Google OAuth, @wisc.edu only)
+- [x] User authentication (NextAuth v5 + Google OAuth + credentials login + OTP verification)
 - [x] Course list page with search + filters + pagination
 - [x] Course detail page (grade distributions, prereqs, reviews)
 - [x] Review system (create with 4-dimension ratings: Content/Teaching/Grading/Workload)

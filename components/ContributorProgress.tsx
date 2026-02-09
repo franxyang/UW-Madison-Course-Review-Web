@@ -46,7 +46,7 @@ export function ContributorProgress() {
           href="/auth/signin"
           className="block w-full py-2 text-center text-sm font-medium bg-wf-crimson text-white rounded-lg hover:bg-wf-crimson-dark transition-colors"
         >
-          Sign In with @wisc.edu
+          Sign In to Continue
         </Link>
       </div>
     )

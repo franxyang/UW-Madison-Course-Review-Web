@@ -109,6 +109,10 @@ export default function AboutPage() {
             </li>
             <li className="flex items-start gap-2">
               <span className="text-wf-crimson">•</span>
+              The four-dimensional review framework is inspired by <a href="https://ust.space" target="_blank" rel="noopener noreferrer" className="text-wf-crimson hover:underline">USTSPACE</a>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-wf-crimson">•</span>
               Course catalog sourced from UW-Madison&apos;s official database
             </li>
             <li className="flex items-start gap-2">
@@ -128,6 +132,7 @@ export default function AboutPage() {
                 <p className="text-text-secondary text-sm mt-1">
                   Next.js, TypeScript, Tailwind CSS, PostgreSQL, Prisma, and tRPC — 
                   designed for performance, accessibility, and a great developer experience.
+                  Production Core Web Vitals are monitored with Vercel Speed Insights.
                 </p>
               </div>
             </div>

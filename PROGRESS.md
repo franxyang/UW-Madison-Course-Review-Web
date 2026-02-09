@@ -23,6 +23,12 @@ Overall:                 ██████████████████�
 
 ## 🚀 Recent Shipping (2026-02-08)
 
+### ✅ Observability & Documentation (2026-02-09)
+- [x] **Vercel Speed Insights integrated** in app root layout for production Core Web Vitals tracking
+- [x] **About page acknowledgments expanded** with explicit USTSPACE four-dimensional review inspiration note
+- [x] **Roadmap docs restored** via `docs/ROADMAP.md` and linked from project docs
+- [x] **Project docs synchronized** (`README.md`, `PROGRESS.md`, `CHANGELOG.md`, `docs/README.md`)
+
 ### ✅ Data Integrity & Cross-Listed Consistency
 - [x] **Madgrades term/instructor data recovery** completed with canonical rebuild + audit workflow
 - [x] **Instructor normalization pipeline** shipped (review input normalization + alias resolution + reconciliation script)

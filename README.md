@@ -30,6 +30,7 @@ Inspired by [USTSpace](https://ust.space) — a beloved student community platfo
 - 🧭 **Instructor normalization** — Manual instructor input is normalized and alias-matched across terms/courses
 - 👨‍🏫 **Instructor profiles** — Teaching portfolios with radar charts, timelines, and aggregated ratings
 - 🔍 **Smart search** — Full-text search with course code alias support (e.g. `CS 577` → `COMP SCI 577`)
+- ⚡ **Performance telemetry** — Production Core Web Vitals collected via Vercel Speed Insights
 - 🏆 **Contributor level system** — Quality-weighted XP progression (🐾→🐣→🐥→🦡→👑→🏆)
 - 🔐 **Hybrid auth** — @wisc.edu OTP verification + Google OAuth + handle/password login
 - 🎓 **Graduate-safe recovery** — bind non-@wisc recovery email to keep access after graduation
@@ -122,7 +123,7 @@ madspace/
 
 ## Roadmap
 
-See [PROGRESS.md](PROGRESS.md) and [CHANGELOG.md](CHANGELOG.md) for the active roadmap and recent delivery history.
+See [PROGRESS.md](PROGRESS.md), [CHANGELOG.md](CHANGELOG.md), and [docs/ROADMAP.md](docs/ROADMAP.md) for active status, release history, and planned milestones.
 
 **Coming next:**
 - Admin portal for content moderation

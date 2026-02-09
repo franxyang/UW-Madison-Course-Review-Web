@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.6.2-dev] - 2026-02-09
+
+### Added
+
+- **Production performance telemetry**
+  - Added Vercel Speed Insights package and root layout instrumentation (`<SpeedInsights />`)
+  - Enabled Core Web Vitals collection for production navigation and route changes
+- **Roadmap document restored**
+  - Added `docs/ROADMAP.md` to centralize near-term and mid-term product milestones
+
+### Changed
+
+- **About page acknowledgments**
+  - Added explicit note that the four-dimensional review framework is inspired by USTSPACE
+  - Added note that production performance is monitored with Vercel Speed Insights
+- **Documentation alignment**
+  - Updated `README.md`, `PROGRESS.md`, and `docs/README.md` to reflect the current observability and planning docs structure
+
 ## [0.6.1-dev] - 2026-02-09
 
 ### Added

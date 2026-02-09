@@ -24,7 +24,10 @@ Inspired by [USTSpace](https://ust.space) — a beloved student community platfo
 ## Features
 
 - 🎓 **Multi-dimensional course reviews** — Rate Content, Teaching, Grading, and Workload independently
+- 🕶️ **Anonymous reviews** — Post anonymously with optional contributor-rank disclosure
 - 📊 **Historical grade distributions** — 247K+ records from MadGrades, filterable by term and instructor
+- 🔄 **Cross-listed consistency** — Cross-listed courses now share review/instructor/GPA reads across the same group
+- 🧭 **Instructor normalization** — Manual instructor input is normalized and alias-matched across terms/courses
 - 👨‍🏫 **Instructor profiles** — Teaching portfolios with radar charts, timelines, and aggregated ratings
 - 🔍 **Smart search** — Full-text search with course code alias support (e.g. `CS 577` → `COMP SCI 577`)
 - 🏆 **Contributor level system** — Quality-weighted XP progression (🐾→🐣→🐥→🦡→👑→🏆)
@@ -88,6 +91,9 @@ npx prisma migrate dev
 npx tsx scripts/seedSchools.ts
 npx tsx scripts/seedCourses.ts
 npx tsx scripts/seedDepartments.ts
+npx tsx scripts/reimportMadgrades.ts --commit
+npm run reconcile:instructors
+npm run reconcile:course-levels
 
 # Start dev server
 npm run dev
@@ -114,7 +120,7 @@ madspace/
 
 ## Roadmap
 
-See [docs/ROADMAP.md](docs/ROADMAP.md) for the full roadmap.
+See [PROGRESS.md](PROGRESS.md) and [CHANGELOG.md](CHANGELOG.md) for the active roadmap and recent delivery history.
 
 **Coming next:**
 - Admin portal for content moderation

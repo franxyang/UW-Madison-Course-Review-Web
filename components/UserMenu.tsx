@@ -1,6 +1,6 @@
 'use client'
 
-import { User, LogOut, Settings, BookMarked, Star } from 'lucide-react'
+import { User, LogOut, BookMarked, Star } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { signOut } from 'next-auth/react'
@@ -43,7 +43,7 @@ export function UserMenu({ user }: UserMenuProps) {
         .join('')
         .toUpperCase()
         .slice(0, 2)
-    : user.email?.[0].toUpperCase() || 'U'
+    : 'U'
 
   return (
     <div className="relative" ref={menuRef}>
@@ -64,7 +64,7 @@ export function UserMenu({ user }: UserMenuProps) {
           </div>
         )}
         <span className="text-sm font-medium text-text-secondary hidden sm:block">
-          {displayName || user.email?.split('@')[0]}
+          {displayName || 'Badger'}
         </span>
       </button>
 
@@ -74,7 +74,6 @@ export function UserMenu({ user }: UserMenuProps) {
           {/* User Info */}
           <div className="px-4 py-3 border-b border-surface-tertiary">
             <p className="text-sm font-semibold text-text-primary">{displayName || 'Anonymous Badger'}</p>
-            <p className="text-xs text-text-tertiary truncate">{user.email}</p>
           </div>
 
           {/* Menu Items */}

@@ -37,6 +37,16 @@ Inspired by [USTSpace](https://ust.space) — a beloved student community platfo
 - 🛡️ **Content moderation** — Admin portal with reporting queue
 - 🌙 **Dark mode** — System-aware theme switching
 
+## Screenshots
+
+| Home | Courses |
+|---|---|
+| ![Home Page Overview](docs/screenshots/home-page-overview.png) | ![Courses Browse Page](docs/screenshots/courses-browse-page.png) |
+
+| About | Write Review |
+|---|---|
+| ![About Page](docs/screenshots/about-page.png) | ![Write Review Modal](docs/screenshots/write-review-modal.png) |
+
 ## Tech Stack
 
 | Layer | Technology |

@@ -7,6 +7,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.6.1-dev] - 2026-02-09
+
+### Added
+
+- **Multi-path authentication (implemented)**
+  - Added credentials login via `handle/email + password` using NextAuth Credentials provider
+  - Added `auth` tRPC router with OTP flows:
+    - `requestWiscSignupOtp`
+    - `completeWiscSignup`
+    - `requestRecoveryEmailOtp`
+    - `verifyRecoveryEmailOtp`
+    - `requestPasswordResetOtp`
+    - `resetPasswordWithOtp`
+  - Added account-security APIs:
+    - `getSecurityProfile`
+    - `updateLoginHandle`
+    - `setPassword`
+- **New identity/security models**
+  - Added Prisma models: `UserEmail`, `UserCredential`, `EmailOtpChallenge`
+  - Added user fields: `loginHandle`, `loginHandleNormalized`, `eligibilityStatus`, `firstVerifiedAt`, `lastWiscVerifiedAt`, `requiresRecoverySetup`
+- **Graduate-safe access path**
+  - Added recovery-email binding flow (`non-@wisc.edu`) for long-term account recovery
+  - Added profile-side security panel for handle, recovery email, and password management
+
+### Changed
+
+- **Auth UX pages**
+  - `/auth/signin` now supports Google + password login + OTP reset UI
+  - `/auth/signup` now supports wisc OTP signup + password + handle setup
+- **Authorization checks**
+  - Review creation now checks `eligibilityStatus` instead of raw `@wisc.edu` suffix
+  - Course review gating count now resolves users by `session.user.id` (not email lookup)
+- **Google sign-in reconciliation**
+  - On Google login, user identity is reconciled into `UserEmail` and normalized handle is guaranteed
+
+### Migration
+
+- Applied `20260208195739_add_credentials_auth_and_identity_models`
+  - Backfilled legacy users into `UserEmail`
+  - Backfilled eligibility and verification timestamps for existing @wisc users
+
 ## [0.6.0-dev] - 2026-02-08
 
 ### Added

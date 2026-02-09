@@ -173,14 +173,6 @@ export const reviewRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      // Check if user email ends with @wisc.edu
-      if (!ctx.session.user.email?.endsWith('@wisc.edu')) {
-        throw new TRPCError({
-          code: 'FORBIDDEN',
-          message: 'Only @wisc.edu email addresses are allowed',
-        })
-      }
-
       const groupCourseIds = await resolveCrossListCourseIds(ctx.prisma, input.courseId)
 
       const instructor = await resolveInstructorByName(
@@ -193,13 +185,26 @@ export const reviewRouter = router({
 
       // Get user from database
       const user = await ctx.prisma.user.findUnique({
-        where: { email: ctx.session.user.email! },
+        where: { id: ctx.session.user.id },
+        select: {
+          id: true,
+          xp: true,
+          level: true,
+          eligibilityStatus: true,
+        },
       })
 
       if (!user) {
         throw new TRPCError({
           code: 'NOT_FOUND',
           message: 'User account not found. Please sign up first.',
+        })
+      }
+
+      if (!['STUDENT_VERIFIED', 'ALUMNI_VERIFIED'].includes(user.eligibilityStatus)) {
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message: 'Only verified UW-Madison community accounts can post reviews.',
         })
       }
 

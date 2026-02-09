@@ -42,29 +42,82 @@ model VerificationToken {
 }
 
 model User {
-  id            String                 @id @default(cuid())
-  email         String                 @unique
-  emailVerified DateTime?
-  name          String?
-  nickname      String?
-  image         String?
-  role          UserRole               @default(STUDENT)
-  createdAt     DateTime               @default(now())
-  level         Int                    @default(0)
-  title         String?
-  xp            Int                    @default(0)
-  accounts      Account[]
-  comments      Comment[]
-  reports       Report[]               @relation("ReportedBy")
-  reviews       Review[]
-  savedCourses  SavedCourse[]
-  sessions      Session[]
-  transcript    StudentCourseHistory[]
-  votes         Vote[]
-  auditLogs     AuditLog[]             @relation("AuditActor")
-  bans          UserBan[]              @relation("BannedUser")
-  bansIssued    UserBan[]              @relation("BanIssuer")
-  resolvedReports Report[]             @relation("ResolvedBy")
+  id                    String                 @id @default(cuid())
+  email                 String                 @unique
+  emailVerified         DateTime?
+  loginHandle           String?                @unique
+  loginHandleNormalized String?                @unique
+  name                  String?
+  nickname              String?
+  image                 String?
+  role                  UserRole               @default(STUDENT)
+  eligibilityStatus     EligibilityStatus      @default(UNVERIFIED)
+  firstVerifiedAt       DateTime?
+  lastWiscVerifiedAt    DateTime?
+  requiresRecoverySetup Boolean                @default(false)
+  createdAt             DateTime               @default(now())
+  level                 Int                    @default(0)
+  title                 String?
+  xp                    Int                    @default(0)
+  accounts              Account[]
+  emails                UserEmail[]
+  credential            UserCredential?
+  comments              Comment[]
+  reports               Report[]               @relation("ReportedBy")
+  reviews               Review[]
+  savedCourses          SavedCourse[]
+  sessions              Session[]
+  transcript            StudentCourseHistory[]
+  votes                 Vote[]
+  auditLogs             AuditLog[]             @relation("AuditActor")
+  bans                  UserBan[]              @relation("BannedUser")
+  bansIssued            UserBan[]              @relation("BanIssuer")
+  resolvedReports       Report[]               @relation("ResolvedBy")
+}
+
+model UserEmail {
+  id              String        @id @default(cuid())
+  userId          String
+  email           String
+  emailNormalized String        @unique
+  type            UserEmailType
+  isVerified      Boolean       @default(false)
+  verifiedAt      DateTime?
+  canLogin        Boolean       @default(false)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, type])
+}
+
+model UserCredential {
+  userId            String    @id
+  passwordHash      String
+  passwordUpdatedAt DateTime  @default(now())
+  failedAttempts    Int       @default(0)
+  lockedUntil       DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model EmailOtpChallenge {
+  id              String     @id @default(cuid())
+  emailNormalized String
+  purpose         OtpPurpose
+  codeHash        String
+  expiresAt       DateTime
+  attemptsLeft    Int        @default(5)
+  lastSentAt      DateTime   @default(now())
+  consumedAt      DateTime?
+  ipHash          String?
+  userAgentHash   String?
+  createdAt       DateTime   @default(now())
+
+  @@index([emailNormalized, purpose, createdAt])
+  @@index([expiresAt])
 }
 
 model School {
@@ -182,34 +235,34 @@ model GradeDistribution {
 }
 
 model Review {
-  id              String     @id @default(cuid())
-  term            String
-  title           String?
-  gradeReceived   Grade?
-  contentRating   String
-  teachingRating  String
-  gradingRating   String
-  workloadRating  String
-  contentComment  String?
-  teachingComment String?
-  gradingComment  String?
+  id                    String     @id @default(cuid())
+  term                  String
+  title                 String?
+  gradeReceived         Grade?
+  contentRating         String
+  teachingRating        String
+  gradingRating         String
+  workloadRating        String
+  contentComment        String?
+  teachingComment       String?
+  gradingComment        String?
   workloadComment       String?
-  recommendInstructor   String?    // 'yes' | 'no' | 'neutral'
+  recommendInstructor   String? // 'yes' | 'no' | 'neutral'
   assessments           String?
-  tags            String?
-  resourceLink    String?
-  instructorId    String
-  courseId        String
-  authorId        String
-  createdAt       DateTime   @default(now())
-  comments        Comment[]
-  reports         Report[]
-  author          User       @relation(fields: [authorId], references: [id])
-  course          Course     @relation(fields: [courseId], references: [id])
-  instructor      Instructor @relation(fields: [instructorId], references: [id])
-  votes           Vote[]
-  isAnonymous           Boolean   @default(false)
-  showRankWhenAnonymous Boolean   @default(false)
+  tags                  String?
+  resourceLink          String?
+  instructorId          String
+  courseId              String
+  authorId              String
+  createdAt             DateTime   @default(now())
+  comments              Comment[]
+  reports               Report[]
+  author                User       @relation(fields: [authorId], references: [id])
+  course                Course     @relation(fields: [courseId], references: [id])
+  instructor            Instructor @relation(fields: [instructorId], references: [id])
+  votes                 Vote[]
+  isAnonymous           Boolean    @default(false)
+  showRankWhenAnonymous Boolean    @default(false)
 
   // P1 Fix: Prevent duplicate reviews via DB constraint (one review per user per course+instructor)
   @@unique([authorId, courseId, instructorId])
@@ -263,10 +316,10 @@ model InstructorAlias {
   instructor   Instructor @relation(fields: [instructorId], references: [id], onDelete: Cascade)
   createdAt    DateTime   @default(now())
 
+  @@unique([aliasKey, instructorId])
   @@index([aliasKey])
   @@index([courseId, term])
   @@index([instructorId])
-  @@unique([aliasKey, instructorId])
 }
 
 model CourseInstructor {
@@ -299,7 +352,7 @@ model Report {
   createdAt    DateTime  @default(now())
   resolvedById String?
   resolvedAt   DateTime?
-  resolution   String?   // "approved" | "rejected" | "escalated"
+  resolution   String? // "approved" | "rejected" | "escalated"
   reporter     User      @relation("ReportedBy", fields: [reporterId], references: [id])
   review       Review    @relation(fields: [reviewId], references: [id])
   resolvedBy   User?     @relation("ResolvedBy", fields: [resolvedById], references: [id])
@@ -326,10 +379,27 @@ enum UserRole {
   ADMIN
 }
 
+enum UserEmailType {
+  UNIVERSITY
+  RECOVERY
+}
+
+enum OtpPurpose {
+  REGISTER_WISC
+  LINK_RECOVERY
+  RESET_PASSWORD
+}
+
+enum EligibilityStatus {
+  UNVERIFIED
+  STUDENT_VERIFIED
+  ALUMNI_VERIFIED
+}
+
 model AuditLog {
   id         String   @id @default(cuid())
-  action     String   // e.g. "RESOLVE_REPORT", "DELETE_REVIEW", "BAN_USER", "CHANGE_ROLE"
-  targetType String   // e.g. "Report", "Review", "User"
+  action     String // e.g. "RESOLVE_REPORT", "DELETE_REVIEW", "BAN_USER", "CHANGE_ROLE"
+  targetType String // e.g. "Report", "Review", "User"
   targetId   String
   details    Json?
   actorId    String
@@ -342,15 +412,15 @@ model AuditLog {
 }
 
 model UserBan {
-  id        String    @id @default(cuid())
-  userId    String
-  reason    String
+  id         String    @id @default(cuid())
+  userId     String
+  reason     String
   bannedById String
-  expiresAt DateTime?
-  active    Boolean   @default(true)
-  createdAt DateTime  @default(now())
-  user      User      @relation("BannedUser", fields: [userId], references: [id])
-  bannedBy  User      @relation("BanIssuer", fields: [bannedById], references: [id])
+  expiresAt  DateTime?
+  active     Boolean   @default(true)
+  createdAt  DateTime  @default(now())
+  user       User      @relation("BannedUser", fields: [userId], references: [id])
+  bannedBy   User      @relation("BanIssuer", fields: [bannedById], references: [id])
 
   @@index([userId, active])
 }

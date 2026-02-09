@@ -11,8 +11,10 @@ export default async function AuthErrorPage({
   
   const errorMessages: Record<string, string> = {
     Configuration: 'There is a problem with the server configuration.',
-    AccessDenied: 'You must use a @wisc.edu email address.',
+    AccessDenied: 'You must verify with a @wisc.edu email first.',
+    AccountLink: 'We could not safely link this login to your existing account.',
     Verification: 'The verification link has expired or was already used.',
+    CredentialsSignin: 'Invalid handle/email or password.',
     Default: 'An error occurred during authentication.',
   }
 
@@ -40,7 +42,7 @@ export default async function AuthErrorPage({
 
           {error === 'AccessDenied' && (
             <p className="text-slate-700 dark:text-slate-300 mb-6">
-              MadSpace is only available to UW-Madison students. Please sign in with your @wisc.edu email address.
+              MadSpace requires UW-Madison verification. Use your @wisc.edu email to verify first, then you can keep logging in with handle/password.
             </p>
           )}
 

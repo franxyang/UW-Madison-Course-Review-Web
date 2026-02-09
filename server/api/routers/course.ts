@@ -441,17 +441,11 @@ export const courseRouter = router({
       let hasFullAccess = false
       let userReviewCount = 0
 
-      if (ctx.session?.user?.email) {
-        const user = await ctx.prisma.user.findUnique({
-          where: { email: ctx.session.user.email },
-          select: { id: true },
+      if (ctx.session?.user?.id) {
+        userReviewCount = await ctx.prisma.review.count({
+          where: { authorId: ctx.session.user.id },
         })
-        if (user) {
-          userReviewCount = await ctx.prisma.review.count({
-            where: { authorId: user.id },
-          })
-          hasFullAccess = userReviewCount >= 1
-        }
+        hasFullAccess = userReviewCount >= 1
       }
 
       // Sort reviews: highest-voted first for the preview

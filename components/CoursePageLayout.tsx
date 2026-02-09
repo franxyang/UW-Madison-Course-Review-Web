@@ -1332,13 +1332,13 @@ export function CoursePageLayout({
                 </div>
                 <h3 className="text-lg font-semibold text-text-primary mb-2">Sign in to see student reviews</h3>
                 <p className="text-sm text-text-secondary max-w-md mx-auto mb-6">
-                  Reviews are only visible to verified UW-Madison students (@wisc.edu). Your reviews and identity are protected.
+                  Reviews are only visible to verified UW-Madison community accounts. First-time verification requires @wisc.edu.
                 </p>
                 <Link
                   href="/auth/signin"
                   className="inline-flex items-center gap-2 px-6 py-3 bg-wf-crimson text-white rounded-lg hover:bg-wf-crimson-dark transition-colors font-medium"
                 >
-                  Sign in with Google
+                  Sign in to continue
                 </Link>
               </div>
             )}

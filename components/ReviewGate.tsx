@@ -36,7 +36,7 @@ export function ReviewGateOverlay({ totalReviews, userReviewCount, isLoggedIn, c
         <p className="text-sm text-text-secondary max-w-md mx-auto mb-6">
           {isLoggedIn
             ? 'Share your experience with any course to unlock all reviews across the entire platform.'
-            : 'Sign in with your @wisc.edu email and write one review to unlock full access.'}
+            : 'Sign in and write one review to unlock full access. First-time verification requires @wisc.edu.'}
         </p>
 
         {isLoggedIn ? (

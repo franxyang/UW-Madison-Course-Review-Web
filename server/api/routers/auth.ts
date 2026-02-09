@@ -227,7 +227,7 @@ export const authRouter = router({
 
       await sendAuthMail({
         to: emailNormalized,
-        subject: 'MadSpace verification code',
+        subject: '[MadSpace] Verification Code',
         text: `Your verification code is ${code}. It expires in ${OTP_TTL_MINUTES} minutes.`,
       })
 
@@ -390,7 +390,7 @@ export const authRouter = router({
 
       await sendAuthMail({
         to: emailNormalized,
-        subject: 'MadSpace recovery email verification code',
+        subject: '[MadSpace] Recovery Email Verification Code',
         text: `Your recovery email verification code is ${code}. It expires in ${OTP_TTL_MINUTES} minutes.`,
       })
 
@@ -489,7 +489,7 @@ export const authRouter = router({
 
       await sendAuthMail({
         to: loginEmail.email,
-        subject: 'MadSpace password reset code',
+        subject: '[MadSpace] Password Reset Code',
         text: `Your password reset code is ${code}. It expires in ${OTP_TTL_MINUTES} minutes.`,
       })
 

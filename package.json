@@ -10,6 +10,7 @@
     "lint": "next lint",
     "seed": "tsx scripts/seed.ts",
     "reconcile:instructors": "tsx scripts/reconcileOfficialInstructorAliases.ts",
+    "reconcile:course-levels": "tsx scripts/reconcileCourseLevels.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {

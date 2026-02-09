@@ -1,8 +1,8 @@
 # MadSpace Development Progress
 
 **Last Updated**: 2026-02-08  
-**Current Phase**: Phase 4 — Admin Portal (4A-4C done, 4D deferred)  
-**Overall Completion**: ~87%
+**Current Phase**: Phase 4 + Data Integrity Stabilization  
+**Overall Completion**: ~90%
 
 ---
 
@@ -16,8 +16,39 @@ Deployment               ██████████████████�
 Phase 4: Admin Portal    ████████████████░░░░  80% 🚧 (4A-4C ✅, 4D deferred)
 Phase 5: Advanced Feat.  ░░░░░░░░░░░░░░░░░░░░   0% 📋
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Overall:                 █████████████████░░░  ~87%
+Overall:                 ██████████████████░░  ~90%
 ```
+
+---
+
+## 🚀 Recent Shipping (2026-02-08)
+
+### ✅ Data Integrity & Cross-Listed Consistency
+- [x] **Madgrades term/instructor data recovery** completed with canonical rebuild + audit workflow
+- [x] **Instructor normalization pipeline** shipped (review input normalization + alias resolution + reconciliation script)
+- [x] **Course level misclassification fixed**: corrected `500-699` courses from `Intermediate` → `Advanced` (`939` records reconciled)
+- [x] **Same-level recommendations hardened**: related course ranking now derives level from course code, not stale `Course.level`
+- [x] **Cross-listed read consistency**: course detail now reads `reviews`, `gradeDistributions`, and `courseInstructors` across the full `crossListGroup`
+- [x] **Cross-listed write consistency**: review create/update duplicate checks now scope to the entire `crossListGroup` (prevents split reviews)
+
+### ✅ Review System & Privacy
+- [x] **Anonymous review support**: `isAnonymous` + `showRankWhenAnonymous` (schema, API, UI, profile indicators)
+- [x] **Server-side identity protection** for anonymous reviews (owner can still see real identity; other users see anonymous author)
+- [x] **Review form redesign (in progress polish)**:
+  - Grade scale unified to `A / AB / B / BC / C / D / F`
+  - Dynamic color logic aligned with GPA distribution palette
+  - Stronger visual feedback for assessments and detailed rating modules
+
+### ✅ Browse / Discovery UX
+- [x] **Courses page featured panels** updated:
+  - Most Reviewed + Recent Reviews switched to compact top-5 scrolling panels
+  - Filter-active state now switches to focused result display
+- [x] **License migration finalized** with official AGPL-3.0 text and package metadata
+
+### 📌 Open Data Cleanup (Next Critical)
+- [ ] **Department alias split cleanup** (`ME` vs `M E`, `ECE` vs `E C E`, etc.) with canonical department mapping and non-destructive merge
+- [ ] **School ownership correction** for known mismatches (e.g., `ILS` should live under `Letters & Science`)
+- [ ] **Cross-list canonical write target** to avoid future alias drift at source
 
 ---
 

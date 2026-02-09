@@ -7,6 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.6.0-dev] - 2026-02-08
+
+### Added
+
+- **Cross-list aware review consistency layer**
+  - `course.byId` now reads reviews, instructors, and GPA distributions across the entire `crossListGroup`
+  - cross-listed grade rows are deduplicated at read time to prevent double-counting
+  - fallback weighted `avgGPA` is computed from merged distributions when alias course records are empty
+- **Cross-list duplicate guard for reviews**
+  - `review.create` duplicate check now scopes to all course IDs in the same cross-list group
+  - `review.update` instructor-change path now blocks cross-listed duplicates
+- **Course level reconciliation tooling**
+  - Added `scripts/reconcileCourseLevels.ts`
+  - Added `npm run reconcile:course-levels` command
+
+### Changed
+
+- **Course recommendation reliability**
+  - `sameDepartment` now derives course level from parsed course code (primary source), with `Course.level` only as fallback
+- **Madgrades backfill level mapping**
+  - fixed level threshold bug in `scripts/backfillFromMadgrades.ts` (`<500` for Intermediate, not `<700`)
+- **Review pipeline instructor resolution**
+  - instructor alias matching now supports cross-list course scopes for better manual-input matching
+
+### Fixed
+
+- **System-wide 500-level classification drift**
+  - Reconciled `939` courses previously misclassified as `Intermediate` and corrected to `Advanced`
+- **Cross-listed visibility split**
+  - Example issue (`MATH 525` vs `I SY E 525`) resolved at query layer so term/instructor/review data is shared consistently
+
+### Documentation
+
+- Updated `README.md`, `PROGRESS.md`, and `docs/README.md` to reflect AGPL, data integrity stabilization work, and operational scripts.
+
 ## [0.5.2-dev] - 2026-02-06
 
 ### Added — Phase 3 UX Enhancements

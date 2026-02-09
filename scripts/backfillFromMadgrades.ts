@@ -67,7 +67,7 @@ function termCodeToString(code: number): string {
 
 function inferLevel(courseNumber: number): string {
   if (courseNumber < 300) return 'Elementary'
-  if (courseNumber < 700) return 'Intermediate'
+  if (courseNumber < 500) return 'Intermediate'
   return 'Advanced'
 }
 

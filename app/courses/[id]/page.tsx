@@ -15,11 +15,12 @@ export default function CoursePage() {
   
   // Fetch related courses (same department) - prioritize same level
   const deptCode = course?.code ? course.code.split(' ').slice(0, -1).join(' ') : ''
-  const courseLevel = course?.level || '' // e.g., "Advanced", "Elementary", "Intermediate"
+  const courseLevel = course?.level || '' // legacy fallback for malformed course codes
   
   const { data: sameDeptCourses } = trpc.course.sameDepartment.useQuery(
     { 
       codePrefix: deptCode,
+      currentCode: course?.code || '',
       currentLevel: courseLevel, // Pass text level (e.g., "Advanced") for exact match
       limit: 12
     },

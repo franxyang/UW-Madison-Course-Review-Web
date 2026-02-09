@@ -10,7 +10,8 @@ async function resolveInstructorByName(
   prisma: any,
   instructorName: string,
   courseId?: string,
-  term?: string
+  term?: string,
+  crossListCourseIds?: string[]
 ) {
   const normalized = normalizeInstructorName(instructorName)
   if (!normalized.key) {
@@ -25,10 +26,17 @@ async function resolveInstructorByName(
     include: { instructor: true },
   })
 
+  const courseScope =
+    crossListCourseIds && crossListCourseIds.length > 0
+      ? crossListCourseIds
+      : courseId
+      ? [courseId]
+      : []
+
   if (aliasMatches.length > 0) {
     const best = aliasMatches.sort((a: any, b: any) => {
       const score = (row: any) =>
-        (courseId && row.courseId === courseId ? 4 : 0) +
+        (courseScope.length > 0 && row.courseId && courseScope.includes(row.courseId) ? 4 : 0) +
         (term && row.term === term ? 2 : 0) +
         (row.source === 'official' ? 1 : 0)
       return score(b) - score(a)
@@ -36,10 +44,10 @@ async function resolveInstructorByName(
     return best.instructor
   }
 
-  if (courseId) {
+  if (courseScope.length > 0) {
     const reviewScoped = await prisma.review.findFirst({
       where: {
-        courseId,
+        courseId: { in: courseScope },
         instructor: { nameKey: normalized.key },
       },
       include: { instructor: true },
@@ -51,7 +59,7 @@ async function resolveInstructorByName(
 
     const courseInstructorScoped = await prisma.courseInstructor.findFirst({
       where: {
-        courseId,
+        courseId: { in: courseScope },
         instructor: { nameKey: normalized.key },
       },
       include: { instructor: true },
@@ -115,6 +123,30 @@ async function resolveInstructorByName(
   return instructor
 }
 
+async function resolveCrossListCourseIds(prisma: any, courseId: string): Promise<string[]> {
+  const course = await prisma.course.findUnique({
+    where: { id: courseId },
+    select: { id: true, crossListGroupId: true },
+  })
+
+  if (!course) {
+    throw new TRPCError({
+      code: 'NOT_FOUND',
+      message: 'Course not found',
+    })
+  }
+
+  if (!course.crossListGroupId) {
+    return [course.id]
+  }
+
+  const peers = await prisma.course.findMany({
+    where: { crossListGroupId: course.crossListGroupId },
+    select: { id: true },
+  })
+  return peers.map((peer: any) => peer.id)
+}
+
 export const reviewRouter = router({
   // Create a new review
   create: protectedProcedure
@@ -149,11 +181,14 @@ export const reviewRouter = router({
         })
       }
 
+      const groupCourseIds = await resolveCrossListCourseIds(ctx.prisma, input.courseId)
+
       const instructor = await resolveInstructorByName(
         ctx.prisma,
         input.instructorName,
         input.courseId,
-        input.term
+        input.term,
+        groupCourseIds
       )
 
       // Get user from database
@@ -172,7 +207,7 @@ export const reviewRouter = router({
       const existingReview = await ctx.prisma.review.findFirst({
         where: {
           authorId: user.id,
-          courseId: input.courseId,
+          courseId: { in: groupCourseIds },
           instructorId: instructor.id,
         },
       })
@@ -180,13 +215,13 @@ export const reviewRouter = router({
       if (existingReview) {
         throw new TRPCError({
           code: 'CONFLICT',
-          message: 'You have already reviewed this course with this instructor',
+          message: 'You have already reviewed this cross-listed course with this instructor',
         })
       }
 
       // Check if this is the first review on this course (bonus XP)
       const existingCourseReviewCount = await ctx.prisma.review.count({
-        where: { courseId: input.courseId },
+        where: { courseId: { in: groupCourseIds } },
       })
       const isFirstReviewOnCourse = existingCourseReviewCount === 0
 
@@ -368,12 +403,29 @@ export const reviewRouter = router({
       // Handle instructor update if name changed
       let instructorUpdate: { instructorId?: string } = {}
       if (input.instructorName) {
+        const groupCourseIds = await resolveCrossListCourseIds(ctx.prisma, review.courseId)
         const instructor = await resolveInstructorByName(
           ctx.prisma,
           input.instructorName,
           review.courseId,
-          input.term || review.term
+          input.term || review.term,
+          groupCourseIds
         )
+        const duplicateReview = await ctx.prisma.review.findFirst({
+          where: {
+            id: { not: input.reviewId },
+            authorId: userId,
+            instructorId: instructor.id,
+            courseId: { in: groupCourseIds },
+          },
+          select: { id: true },
+        })
+        if (duplicateReview) {
+          throw new TRPCError({
+            code: 'CONFLICT',
+            message: 'You already have a review with this instructor for this cross-listed course group',
+          })
+        }
         instructorUpdate = { instructorId: instructor.id }
       }
 

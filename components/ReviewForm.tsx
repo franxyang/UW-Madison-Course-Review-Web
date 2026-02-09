@@ -62,14 +62,64 @@ type ReviewFormData = {
 }
 
 const GRADES = ['A', 'AB', 'B', 'BC', 'C', 'D', 'F']
-const RATINGS = ['A', 'B', 'C', 'D', 'F']
+const RATINGS = ['A', 'AB', 'B', 'BC', 'C', 'D', 'F']
+const GRADE_COLOR_HEX: Record<string, string> = {
+  A: '#10b981',
+  AB: '#34d399',
+  B: '#fbbf24',
+  BC: '#f59e0b',
+  C: '#fb923c',
+  D: '#f87171',
+  F: '#ef4444',
+}
+const OVERALL_COLOR_STOPS: Array<{ value: number; color: string }> = [
+  { value: 0.0, color: GRADE_COLOR_HEX.F },
+  { value: 1.0, color: GRADE_COLOR_HEX.D },
+  { value: 2.0, color: GRADE_COLOR_HEX.C },
+  { value: 2.5, color: GRADE_COLOR_HEX.BC },
+  { value: 3.0, color: GRADE_COLOR_HEX.B },
+  { value: 3.5, color: GRADE_COLOR_HEX.AB },
+  { value: 4.0, color: GRADE_COLOR_HEX.A },
+]
 
 // Tooltips explaining what each rating means per dimension
 const RATING_HINTS: Record<string, Record<string, string>> = {
-  Content: { A: 'Excellent material', B: 'Good', C: 'Average', D: 'Below average', F: 'Poor' },
-  Teaching: { A: 'Outstanding teaching', B: 'Good', C: 'Average', D: 'Below average', F: 'Poor' },
-  Grading: { A: 'Very fair grading', B: 'Fair', C: 'Average', D: 'Harsh', F: 'Very harsh' },
-  Workload: { A: 'Very light', B: 'Light', C: 'Moderate', D: 'Heavy', F: 'Extremely heavy' },
+  Content: {
+    A: 'Exceptional depth and structure',
+    AB: 'Very strong with minor gaps',
+    B: 'Solid overall coverage',
+    BC: 'Usable but somewhat uneven',
+    C: 'Average clarity and organization',
+    D: 'Hard to follow',
+    F: 'Very poor content quality',
+  },
+  Teaching: {
+    A: 'Outstanding teaching clarity',
+    AB: 'Very effective teaching',
+    B: 'Generally clear instruction',
+    BC: 'Mixed teaching effectiveness',
+    C: 'Average teaching quality',
+    D: 'Mostly unclear delivery',
+    F: 'Very ineffective teaching',
+  },
+  Grading: {
+    A: 'Very fair and transparent',
+    AB: 'Mostly fair grading',
+    B: 'Reasonably fair',
+    BC: 'Somewhat inconsistent',
+    C: 'Average fairness',
+    D: 'Often felt harsh',
+    F: 'Very unfair grading',
+  },
+  Workload: {
+    A: 'Very manageable workload',
+    AB: 'Light-to-moderate workload',
+    B: 'Manageable with planning',
+    BC: 'Moderately heavy',
+    C: 'Average-heavy workload',
+    D: 'Heavy workload',
+    F: 'Extremely heavy workload',
+  },
 }
 
 // Short description shown below each rating section
@@ -83,10 +133,10 @@ const ASSESSMENTS = ['Midterm', 'Final', 'Project', 'Homework', 'Quiz', 'Lab', '
 
 // Comment examples for each dimension
 const COMMENT_EXAMPLES = {
-  content: "e.g., Chapter 1: Introduction to... Midterm covers Ch 1-5, Final covers Ch 6-12. Key topics include...",
-  teaching: "e.g., Professor explains concepts clearly, very open to questions. Office hours are helpful. Uses real-world examples...",
-  grading: "e.g., Midterm 30%, Final 40%, HW 20%, Participation 10%. Exams are multiple choice. Grading curve applied...",
-  workload: "e.g., Light workload with 2 problem sets per week (~3 hours). Reading is optional. No group projects..."
+  content: "Example:\nThis course covers foundational topics in [Subject], including:\n1. Major Topic A (e.g., Energy Balance)\n2. Major Topic B (e.g., Heat Transfer)\n3. Major Topic C (e.g., Fluid Flow)\n4. Major Topic D\n\nThe content is well structured for beginners, though some sections could go deeper.",
+  teaching: "Example:\nI enjoyed [Instructor Name]'s teaching style. The pace was steady and explanations were clear.\n\nLectures combined demonstrations and practical examples, which made concepts easier to understand. TAs were also helpful and patient.",
+  grading: "Example:\n- Participation: 10%\n- Project: 20%\n- Final Exam: 35%\n- Lab Reports: 15% (3 x 5)\n- Homework: 20%\n\nGrading felt transparent overall. Homework was challenging but fair, and expectations were clearly communicated.",
+  workload: "Example:\nIf you have prior background in [Related Subject], you may already know much of the material.\n\nWeekly homework volume is moderate, and study time is manageable with consistent effort. Overall workload feels light-to-moderate for this department."
 }
 
 // Generate available terms (current + past 3 years)
@@ -126,28 +176,15 @@ function getGradeButtonColor(grade: string, isSelected: boolean) {
     return 'bg-surface-secondary border-surface-tertiary text-text-secondary hover:border-text-tertiary'
   }
   const colors: Record<string, string> = {
-    'A': 'bg-emerald-500 border-emerald-500 text-white',
+    'A': 'bg-emerald-600 border-emerald-600 text-white',
     'AB': 'bg-emerald-400 border-emerald-400 text-white',
-    'B': 'bg-blue-500 border-blue-500 text-white',
-    'BC': 'bg-blue-400 border-blue-400 text-white',
-    'C': 'bg-amber-500 border-amber-500 text-white',
-    'D': 'bg-orange-500 border-orange-500 text-white',
+    'B': 'bg-amber-400 border-amber-400 text-slate-900',
+    'BC': 'bg-amber-500 border-amber-500 text-white',
+    'C': 'bg-orange-400 border-orange-400 text-white',
+    'D': 'bg-red-400 border-red-400 text-white',
     'F': 'bg-red-500 border-red-500 text-white',
   }
   return colors[grade] || 'bg-wf-crimson border-wf-crimson text-white'
-}
-
-// Get rating color for the 4-dimension cards
-function getRatingColor(rating: string) {
-  const colors: Record<string, string> = {
-    'A': 'bg-emerald-100 dark:bg-emerald-900/30 border-emerald-300 dark:border-emerald-700 text-emerald-700 dark:text-emerald-300',
-    'B': 'bg-blue-100 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300',
-    'C': 'bg-amber-100 dark:bg-amber-900/30 border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-300',
-    'D': 'bg-orange-100 dark:bg-orange-900/30 border-orange-300 dark:border-orange-700 text-orange-700 dark:text-orange-300',
-    'F': 'bg-red-100 dark:bg-red-900/30 border-red-300 dark:border-red-700 text-red-700 dark:text-red-300',
-    '': 'bg-surface-secondary border-surface-tertiary text-text-secondary'
-  }
-  return colors[rating] || colors['']
 }
 
 // Convert letter grade to numeric value
@@ -158,7 +195,78 @@ function gradeToNumeric(grade: string): number {
   return grades[grade] ?? -1
 }
 
-// Get modal background gradient based on average of 4 ratings
+function hexToRgb(hex: string): { r: number; g: number; b: number } {
+  const normalized = hex.replace('#', '')
+  const bigint = parseInt(normalized, 16)
+  return {
+    r: (bigint >> 16) & 255,
+    g: (bigint >> 8) & 255,
+    b: bigint & 255,
+  }
+}
+
+function rgbToHex(r: number, g: number, b: number): string {
+  const toHex = (n: number) => Math.round(n).toString(16).padStart(2, '0')
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`
+}
+
+function rgba(hex: string, alpha: number): string {
+  const { r, g, b } = hexToRgb(hex)
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`
+}
+
+function interpolateOverallColor(value: number): string {
+  const clamped = Math.max(0, Math.min(4, value))
+  for (let i = 0; i < OVERALL_COLOR_STOPS.length - 1; i += 1) {
+    const a = OVERALL_COLOR_STOPS[i]
+    const b = OVERALL_COLOR_STOPS[i + 1]
+    if (clamped >= a.value && clamped <= b.value) {
+      const t = (clamped - a.value) / (b.value - a.value || 1)
+      const rgbA = hexToRgb(a.color)
+      const rgbB = hexToRgb(b.color)
+      return rgbToHex(
+        rgbA.r + (rgbB.r - rgbA.r) * t,
+        rgbA.g + (rgbB.g - rgbA.g) * t,
+        rgbA.b + (rgbB.b - rgbA.b) * t,
+      )
+    }
+  }
+  return OVERALL_COLOR_STOPS[OVERALL_COLOR_STOPS.length - 1].color
+}
+
+function getRatingPanelStyle(rating: string): React.CSSProperties {
+  const numeric = gradeToNumeric(rating)
+  if (numeric < 0) {
+    return {
+      background: 'var(--surface-secondary)',
+      borderColor: 'var(--surface-tertiary)',
+    }
+  }
+
+  const color = GRADE_COLOR_HEX[rating] || interpolateOverallColor(numeric)
+  return {
+    background: `linear-gradient(145deg, ${rgba(color, 0.30)} 0%, ${rgba(color, 0.46)} 100%)`,
+    borderColor: rgba(color, 0.95),
+  }
+}
+
+function getRatingButtonClass(isSelected: boolean) {
+  if (isSelected) return 'text-white shadow-sm border'
+  return 'text-text-secondary hover:bg-white/50 dark:hover:bg-black/20 border border-transparent'
+}
+
+function getSelectedRatingButtonStyle(rating: string): React.CSSProperties {
+  const numeric = gradeToNumeric(rating)
+  if (numeric < 0) return {}
+  const color = GRADE_COLOR_HEX[rating] || interpolateOverallColor(numeric)
+  return {
+    backgroundColor: color,
+    borderColor: rgba(color, 0.98),
+    boxShadow: `0 0 0 1px ${rgba(color, 0.35)}`,
+  }
+}
+
+// Use rating average to drive a strong top accent gradient for the modal.
 function getModalGradientStyle(ratings: { content: string; teaching: string; grading: string; workload: string }) {
   const values = [
     gradeToNumeric(ratings.content),
@@ -169,16 +277,20 @@ function getModalGradientStyle(ratings: { content: string; teaching: string; gra
   
   // If no ratings selected yet, return neutral
   if (values.length === 0) {
-    return { background: undefined, borderColor: undefined }
+    return {
+      topBarGradient: 'linear-gradient(90deg, #94a3b8 0%, #64748b 100%)',
+      borderColor: 'var(--surface-tertiary)',
+    }
   }
   
   const avgNumeric = values.reduce((a, b) => a + b, 0) / values.length
-  // Map 0-4 to hue 0-120 (red to green)
-  const hue = (avgNumeric / 4) * 120
+  const centerColor = interpolateOverallColor(avgNumeric)
+  const startColor = interpolateOverallColor(Math.min(4, avgNumeric + 0.35))
+  const endColor = interpolateOverallColor(Math.max(0, avgNumeric - 0.35))
   
   return {
-    background: `linear-gradient(135deg, hsl(${hue}, 60%, 98%) 0%, hsl(${hue}, 50%, 95%) 100%)`,
-    borderColor: `hsl(${hue}, 50%, 80%)`
+    topBarGradient: `linear-gradient(90deg, ${startColor} 0%, ${centerColor} 52%, ${endColor} 100%)`,
+    borderColor: rgba(centerColor, 0.98),
   }
 }
 
@@ -273,6 +385,27 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
     grading: formData.gradingRating || '',
     workload: formData.workloadRating || ''
   }), [formData.contentRating, formData.teachingRating, formData.gradingRating, formData.workloadRating])
+  const sectionCardClass = 'rounded-xl border border-surface-tertiary/80 bg-surface-primary/85 p-4 sm:p-5 shadow-sm'
+  const overallNumeric = useMemo(() => {
+    const values = [
+      gradeToNumeric(formData.contentRating || ''),
+      gradeToNumeric(formData.teachingRating || ''),
+      gradeToNumeric(formData.gradingRating || ''),
+      gradeToNumeric(formData.workloadRating || ''),
+    ].filter(v => v >= 0)
+    if (values.length === 0) return null
+    return values.reduce((a, b) => a + b, 0) / values.length
+  }, [formData.contentRating, formData.teachingRating, formData.gradingRating, formData.workloadRating])
+  const overallLetter = useMemo(() => {
+    if (overallNumeric === null) return 'NA'
+    if (overallNumeric >= 3.75) return 'A'
+    if (overallNumeric >= 3.25) return 'AB'
+    if (overallNumeric >= 2.75) return 'B'
+    if (overallNumeric >= 2.25) return 'BC'
+    if (overallNumeric >= 1.5) return 'C'
+    if (overallNumeric >= 0.75) return 'D'
+    return 'F'
+  }, [overallNumeric])
 
   const utils = trpc.useUtils()
   const createReviewMutation = trpc.review.create.useMutation({
@@ -463,12 +596,17 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
 
         {/* Modal */}
         <div 
-          className="inline-block align-bottom rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full border"
+          className="inline-block align-bottom rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-5xl sm:w-full border"
           style={{
-            background: modalGradient.background || 'var(--surface-primary)',
+            background: 'var(--surface-primary)',
             borderColor: modalGradient.borderColor || 'var(--surface-tertiary)'
           }}
         >
+          <div
+            className="h-4 w-full"
+            style={{ background: modalGradient.topBarGradient }}
+          />
+
           {/* Header */}
           <div className="bg-surface-primary px-6 pt-6 pb-4 border-b border-surface-tertiary">
             <div className="flex items-start justify-between">
@@ -501,9 +639,9 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
               </div>
             )}
 
-            <div className="space-y-6">
+            <div className="space-y-5">
               {/* Term & Instructor */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className={`${sectionCardClass} grid grid-cols-1 md:grid-cols-2 gap-4`}>
                 <div>
                   <label className="block text-sm font-medium text-text-primary mb-1">
                     Term <span className="text-red-500">*</span>
@@ -563,60 +701,73 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
                 </div>
               </div>
 
-              {/* Recommend Instructor */}
-              <div>
-                <label className="block text-sm font-medium text-text-primary mb-2">
-                  Would you recommend this instructor?
-                </label>
-                <div className="flex gap-3">
-                  {[
-                    { value: 'yes', icon: ThumbsUp, label: 'Yes', color: 'emerald' },
-                    { value: 'neutral', icon: Meh, label: 'Neutral', color: 'amber' },
-                    { value: 'no', icon: ThumbsDown, label: 'No', color: 'red' },
-                  ].map(({ value, icon: Icon, label, color }) => (
-                    <button
-                      key={value}
-                      type="button"
-                      onClick={() => setFormData({ ...formData, recommendInstructor: formData.recommendInstructor === value ? '' : value as any })}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 transition-all ${
-                        formData.recommendInstructor === value
-                          ? `bg-${color}-100 dark:bg-${color}-900/30 border-${color}-400 text-${color}-700 dark:text-${color}-300`
-                          : 'bg-surface-secondary border-surface-tertiary text-text-secondary hover:border-text-tertiary'
-                      }`}
-                      disabled={activeMutation.isPending}
-                    >
-                      <Icon size={18} />
-                      <span className="font-medium">{label}</span>
-                    </button>
-                  ))}
+              <div className={`${sectionCardClass} grid grid-cols-1 lg:grid-cols-2 gap-5`}>
+                {/* Recommend Instructor */}
+                <div>
+                  <label className="block text-sm font-medium text-text-primary mb-2">
+                    Would you recommend this instructor?
+                  </label>
+                  <div className="flex gap-3">
+                    {[
+                      { value: 'yes', icon: ThumbsUp, label: 'Yes', color: 'emerald' },
+                      { value: 'neutral', icon: Meh, label: 'Neutral', color: 'amber' },
+                      { value: 'no', icon: ThumbsDown, label: 'No', color: 'red' },
+                    ].map(({ value, icon: Icon, label, color }) => (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => setFormData({ ...formData, recommendInstructor: formData.recommendInstructor === value ? '' : value as any })}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 transition-all ${
+                          formData.recommendInstructor === value
+                            ? `bg-${color}-100 dark:bg-${color}-900/30 border-${color}-400 text-${color}-700 dark:text-${color}-300`
+                            : 'bg-surface-secondary border-surface-tertiary text-text-secondary hover:border-text-tertiary'
+                        }`}
+                        disabled={activeMutation.isPending}
+                      >
+                        <Icon size={18} />
+                        <span className="font-medium">{label}</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
 
-              {/* Grade Received - Now with grade-specific colors */}
-              <div>
-                <label className="block text-sm font-medium text-text-primary mb-2">
-                  Grade Received <span className="text-text-tertiary text-xs">(optional)</span>
-                </label>
-                <div className="flex gap-2 flex-wrap">
-                  {GRADES.map(grade => (
-                    <button
-                      key={grade}
-                      type="button"
-                      onClick={() => setFormData({ ...formData, gradeReceived: formData.gradeReceived === grade ? '' : grade })}
-                      className={`px-4 py-2 rounded-lg border-2 font-medium transition-all ${getGradeButtonColor(grade, formData.gradeReceived === grade)}`}
-                      disabled={activeMutation.isPending}
-                    >
-                      {grade}
-                    </button>
-                  ))}
+                {/* Grade Received */}
+                <div>
+                  <label className="block text-sm font-medium text-text-primary mb-2">
+                    Grade Received <span className="text-text-tertiary text-xs">(optional)</span>
+                  </label>
+                  <div className="flex gap-2 flex-wrap">
+                    {GRADES.map(grade => (
+                      <button
+                        key={grade}
+                        type="button"
+                        onClick={() => setFormData({ ...formData, gradeReceived: formData.gradeReceived === grade ? '' : grade })}
+                        className={`px-4 py-2 rounded-lg border-2 font-medium transition-all ${getGradeButtonColor(grade, formData.gradeReceived === grade)}`}
+                        disabled={activeMutation.isPending}
+                      >
+                        {grade}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
 
               {/* 4-Grid Ratings with required comments */}
-              <div>
-                <h4 className="text-sm font-medium text-text-primary mb-1">Course Ratings <span className="text-red-500">*</span></h4>
-                <p className="text-xs text-text-tertiary mb-3">All 4 dimension ratings and comments are required (min 5 chars each)</p>
-                <div className="grid grid-cols-2 gap-4">
+              <div className={sectionCardClass}>
+                <div className="flex items-start justify-between gap-4 mb-3">
+                  <div>
+                    <h4 className="text-sm font-medium text-text-primary mb-1">Detailed Ratings <span className="text-red-500">*</span></h4>
+                    <p className="text-xs text-text-tertiary">Use A / AB / B / BC / C / D / F for all four dimensions.</p>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-xs text-text-tertiary uppercase tracking-wide">Current Overall</div>
+                    <div className="text-lg font-bold text-text-primary">
+                      {overallLetter}{overallNumeric !== null ? ` (${overallNumeric.toFixed(2)})` : ''}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {[
                     { key: 'contentRating', label: 'Content', comment: 'contentComment', required: true },
                     { key: 'teachingRating', label: 'Teaching', comment: 'teachingComment', required: true },
@@ -624,7 +775,10 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
                     { key: 'workloadRating', label: 'Workload', comment: 'workloadComment', required: true }
                   ].map(({ key, label, comment, required }) => (
                     <div key={key} className="space-y-2">
-                      <div className={`p-4 rounded-lg border-2 transition-all ${getRatingColor(formData[key as keyof typeof formData] as string)}`}>
+                      <div
+                        className="p-4 rounded-lg border-2 transition-all"
+                        style={getRatingPanelStyle(formData[key as keyof typeof formData] as string)}
+                      >
                         <div className="text-xs font-medium mb-1">
                           {label} {required && <span className="text-red-500">*</span>}
                         </div>
@@ -638,11 +792,8 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
                               type="button"
                               onClick={() => setFormData({ ...formData, [key]: rating })}
                               title={RATING_HINTS[label]?.[rating] || rating}
-                              className={`px-2 py-1 text-sm font-bold rounded transition-all ${
-                                formData[key as keyof typeof formData] === rating
-                                  ? 'bg-white/80 dark:bg-black/30 shadow-sm'
-                                  : 'hover:bg-white/40 dark:hover:bg-black/20'
-                              }`}
+                              className={`px-2 py-1 text-xs font-bold rounded transition-all ${getRatingButtonClass(formData[key as keyof typeof formData] === rating)}`}
+                              style={formData[key as keyof typeof formData] === rating ? getSelectedRatingButtonStyle(rating) : undefined}
                               disabled={activeMutation.isPending}
                             >
                               {rating}
@@ -676,7 +827,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
               </div>
 
               {/* Review Title */}
-              <div>
+              <div className={sectionCardClass}>
                 <label className="block text-sm font-medium text-text-primary mb-1">
                   Review Title (optional)
                 </label>
@@ -691,7 +842,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
               </div>
 
               {/* Assessments */}
-              <div>
+              <div className={sectionCardClass}>
                 <label className="block text-sm font-medium text-text-primary mb-2">
                   Assessments
                 </label>
@@ -701,10 +852,10 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
                       key={assessment}
                       type="button"
                       onClick={() => toggleAssessment(assessment)}
-                      className={`px-3 py-2 text-sm rounded-lg border transition-all ${
+                      className={`px-3 py-2.5 text-sm rounded-xl border transition-all ${
                         formData.assessments?.includes(assessment)
-                          ? 'bg-wf-crimson/10 border-wf-crimson text-wf-crimson font-medium'
-                          : 'bg-surface-secondary border-surface-tertiary text-text-secondary hover:border-text-tertiary'
+                          ? 'bg-amber-50 border-red-400 text-red-700 font-semibold shadow-sm ring-1 ring-red-200'
+                          : 'bg-surface-secondary border-surface-tertiary text-text-secondary hover:border-text-tertiary hover:bg-surface-tertiary/60'
                       }`}
                       disabled={activeMutation.isPending}
                     >
@@ -715,7 +866,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
               </div>
 
               {/* Resource Link */}
-              <div>
+              <div className={sectionCardClass}>
                 <label className="block text-sm font-medium text-text-primary mb-1">
                   Course Resources Link (optional)
                 </label>

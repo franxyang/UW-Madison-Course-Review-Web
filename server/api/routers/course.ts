@@ -5,6 +5,7 @@ import { Prisma } from '@prisma/client'
 import { cached, cacheKeys, TTL } from '@/lib/redis'
 import { expandSearchAliases } from '@/lib/courseAliases'
 import { computeContributorLevel } from '@/lib/contributorLevel'
+import { inferCourseLevelFromCode, isCanonicalCourseLevel } from '@/lib/courseLevel'
 
 export const courseRouter = router({
   // Get course list with search and filters
@@ -318,39 +319,6 @@ export const courseRouter = router({
         where: { id: input.id },
         include: {
           school: true,
-          reviews: {
-            include: {
-              author: true,
-              instructor: true,
-              votes: {
-                include: {
-                  user: true,
-                },
-              },
-              comments: {
-                include: {
-                  author: true,
-                },
-              },
-            },
-            orderBy: {
-              createdAt: 'desc',
-            },
-          },
-          instructors: {
-            include: {
-              instructor: true,
-            },
-          },
-          gradeDistributions: {
-            include: {
-              instructor: true,  // Direct relation now (per-instructor data)
-            },
-            orderBy: [
-              { term: 'desc' },
-              { avgGPA: 'desc' },
-            ],
-          },
           prerequisites: {
             select: {
               id: true,
@@ -388,6 +356,87 @@ export const courseRouter = router({
         })
       }
 
+      const groupCourseIds =
+        course.crossListGroup?.courses?.map((c) => c.id).filter(Boolean) || [course.id]
+
+      const [groupReviews, groupInstructors, groupGradeDistributions] = await Promise.all([
+        ctx.prisma.review.findMany({
+          where: { courseId: { in: groupCourseIds } },
+          include: {
+            author: true,
+            instructor: true,
+            votes: {
+              include: {
+                user: true,
+              },
+            },
+            comments: {
+              include: {
+                author: true,
+              },
+            },
+          },
+          orderBy: {
+            createdAt: 'desc',
+          },
+        }),
+        ctx.prisma.courseInstructor.findMany({
+          where: { courseId: { in: groupCourseIds } },
+          include: {
+            instructor: true,
+          },
+        }),
+        ctx.prisma.gradeDistribution.findMany({
+          where: { courseId: { in: groupCourseIds } },
+          include: {
+            instructor: true,
+          },
+          orderBy: [{ term: 'desc' }, { avgGPA: 'desc' }],
+        }),
+      ])
+
+      // Deduplicate instructors across cross-listed courses.
+      const mergedInstructorsMap = new Map<string, (typeof groupInstructors)[number]>()
+      for (const row of groupInstructors) {
+        if (!mergedInstructorsMap.has(row.instructorId)) {
+          mergedInstructorsMap.set(row.instructorId, row)
+        }
+      }
+      const mergedInstructors = [...mergedInstructorsMap.values()]
+
+      // Deduplicate exact duplicate grade rows that may appear on multiple aliases.
+      const mergedGradeDistMap = new Map<string, (typeof groupGradeDistributions)[number]>()
+      for (const gd of groupGradeDistributions) {
+        const key = [
+          gd.term,
+          gd.instructorId ?? '__NULL__',
+          gd.aCount,
+          gd.abCount,
+          gd.bCount,
+          gd.bcCount,
+          gd.cCount,
+          gd.dCount,
+          gd.fCount,
+          gd.totalGraded,
+        ].join('|')
+        if (!mergedGradeDistMap.has(key)) {
+          mergedGradeDistMap.set(key, gd)
+        }
+      }
+      const mergedGradeDistributions = [...mergedGradeDistMap.values()]
+
+      let mergedAvgGPA: number | null = course.avgGPA
+      if ((mergedAvgGPA == null || mergedAvgGPA <= 0) && mergedGradeDistributions.length > 0) {
+        const totalStudents = mergedGradeDistributions.reduce((sum, gd) => sum + gd.totalGraded, 0)
+        if (totalStudents > 0) {
+          const weightedSum = mergedGradeDistributions.reduce(
+            (sum, gd) => sum + gd.avgGPA * gd.totalGraded,
+            0
+          )
+          mergedAvgGPA = weightedSum / totalStudents
+        }
+      }
+
       // Review-gating: check if the user has contributed at least 1 review
       let hasFullAccess = false
       let userReviewCount = 0
@@ -406,7 +455,7 @@ export const courseRouter = router({
       }
 
       // Sort reviews: highest-voted first for the preview
-      const sortedReviews = [...course.reviews].sort(
+      const sortedReviews = [...groupReviews].sort(
         (a, b) => (b.votes?.length || 0) - (a.votes?.length || 0)
       )
 
@@ -526,11 +575,14 @@ export const courseRouter = router({
 
       return {
         ...course,
+        avgGPA: mergedAvgGPA,
+        instructors: mergedInstructors,
+        gradeDistributions: mergedGradeDistributions,
         reviews: sanitizedReviews,
         reviewAccess: {
           hasFullAccess,
           userReviewCount,
-          totalReviews: course.reviews.length,
+          totalReviews: sortedReviews.length,
         },
       }
     }),
@@ -541,17 +593,22 @@ export const courseRouter = router({
       z.object({
         codePrefix: z.string().min(1),
         excludeId: z.string().optional(),
+        currentCode: z.string().optional(),
         currentLevel: z.string().optional(), // e.g., "Advanced", "Elementary", "Intermediate"
         limit: z.number().min(1).max(20).default(12),
       })
     )
     .query(async ({ ctx, input }) => {
-      // First, try to get same-level courses (using the text level field)
-      let courses = await ctx.prisma.course.findMany({
+      // Build target level from course code first (more reliable than stored text level).
+      const targetLevelFromCode = input.currentCode ? inferCourseLevelFromCode(input.currentCode) : null
+      const targetLevel =
+        targetLevelFromCode ||
+        (input.currentLevel && isCanonicalCourseLevel(input.currentLevel) ? input.currentLevel : null)
+
+      const candidates = await ctx.prisma.course.findMany({
         where: {
           code: { startsWith: input.codePrefix },
           ...(input.excludeId ? { id: { not: input.excludeId } } : {}),
-          ...(input.currentLevel ? { level: input.currentLevel } : {}),
         },
         select: {
           id: true,
@@ -562,33 +619,24 @@ export const courseRouter = router({
           level: true,
         },
         orderBy: { code: 'asc' },
-        take: input.limit,
       })
-      
-      // If not enough same-level courses, fill with other courses from same department
-      if (courses.length < input.limit && input.currentLevel) {
-        const existingIds = courses.map(c => c.id)
-        const additionalCourses = await ctx.prisma.course.findMany({
-          where: {
-            code: { startsWith: input.codePrefix },
-            id: { notIn: [input.excludeId || '', ...existingIds].filter(Boolean) },
-            level: { not: input.currentLevel },
-          },
-          select: {
-            id: true,
-            code: true,
-            name: true,
-            avgGPA: true,
-            credits: true,
-            level: true,
-          },
-          orderBy: { code: 'asc' },
-          take: input.limit - courses.length,
-        })
-        courses = [...courses, ...additionalCourses]
+
+      if (!targetLevel) {
+        return candidates.slice(0, input.limit)
       }
-      
-      return courses
+
+      const sameLevel: typeof candidates = []
+      const otherLevels: typeof candidates = []
+      for (const course of candidates) {
+        const parsedLevel = inferCourseLevelFromCode(course.code)
+        const fallbackLevel = isCanonicalCourseLevel(course.level) ? course.level : null
+        const candidateLevel = parsedLevel || fallbackLevel
+
+        if (candidateLevel === targetLevel) sameLevel.push(course)
+        else otherLevels.push(course)
+      }
+
+      return [...sameLevel, ...otherLevels].slice(0, input.limit)
     }),
 
   // Get all schools (cached for 24h)

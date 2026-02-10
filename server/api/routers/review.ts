@@ -3,8 +3,14 @@ import { router, protectedProcedure } from '../trpc/trpc'
 import { TRPCError } from '@trpc/server'
 import { calculateReviewXP, computeContributorLevel } from '@/lib/contributorLevel'
 import { normalizeInstructorName } from '@/lib/instructorName'
+import { getAppSettings } from '@/lib/appSettings'
 
 const gradeEnum = z.enum(['A', 'AB', 'B', 'BC', 'C', 'D', 'F'])
+const optionalTitleSchema = z.preprocess((value) => {
+  if (typeof value !== 'string') return value
+  const trimmed = value.trim()
+  return trimmed.length === 0 ? undefined : trimmed
+}, z.string().min(1).max(200).optional())
 
 async function resolveInstructorByName(
   prisma: any,
@@ -153,7 +159,7 @@ export const reviewRouter = router({
     .input(
       z.object({
         courseId: z.string(),
-        title: z.string().min(1).max(200).optional(),
+        title: optionalTitleSchema,
         term: z.string(),
         gradeReceived: gradeEnum.optional(),
         contentRating: gradeEnum,
@@ -173,6 +179,7 @@ export const reviewRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      const appSettings = await getAppSettings(ctx.prisma)
       const groupCourseIds = await resolveCrossListCourseIds(ctx.prisma, input.courseId)
 
       const instructor = await resolveInstructorByName(
@@ -237,7 +244,7 @@ export const reviewRouter = router({
           instructorId: instructor.id,
           authorId: user.id,
           term: input.term,
-          title: input.title || null,
+          title: input.title || appSettings.fallbackReviewTitle,
           gradeReceived: input.gradeReceived || null,
           // Store rating enums as strings
           contentRating: input.contentRating,
@@ -369,7 +376,7 @@ export const reviewRouter = router({
     .input(
       z.object({
         reviewId: z.string(),
-        title: z.string().min(1).max(200).optional(),
+        title: optionalTitleSchema,
         term: z.string().optional(),
         gradeReceived: gradeEnum.optional(),
         contentRating: gradeEnum.optional(),
@@ -389,6 +396,7 @@ export const reviewRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      const appSettings = await getAppSettings(ctx.prisma)
       const userId = ctx.session.user.id!
 
       // Verify ownership
@@ -438,7 +446,7 @@ export const reviewRouter = router({
       const updated = await ctx.prisma.review.update({
         where: { id: input.reviewId },
         data: {
-          ...(input.title !== undefined && { title: input.title || null }),
+          ...(input.title !== undefined && { title: input.title || appSettings.fallbackReviewTitle }),
           ...(input.term && { term: input.term }),
           ...(input.gradeReceived && { gradeReceived: input.gradeReceived }),
           ...(input.contentRating && { contentRating: input.contentRating }),

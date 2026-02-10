@@ -3,6 +3,7 @@
 import { useState, useMemo, useRef, useEffect, lazy, Suspense } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
+import { useSearchParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { trpc } from '@/lib/trpc/client'
 import { useDebounce } from '@/lib/hooks/useDebounce'
@@ -22,7 +23,7 @@ const CommentSection = dynamic(() => import('@/components/CommentSection').then(
 const ReportButton = dynamic(() => import('@/components/ReportButton').then(m => ({ default: m.ReportButton })), {
   ssr: false,
 })
-import { ReviewGateOverlay, FrostedReview } from '@/components/ReviewGate'
+import { ReviewGateOverlay, FrostedInlineLock, FrostedReview } from '@/components/ReviewGate'
 import { toOfficialCode, getOfficialDeptPrefix, getCourseNumber } from '@/lib/courseCodeDisplay'
 import { normalizeInstructorName } from '@/lib/instructorName'
 import {
@@ -75,6 +76,11 @@ interface Course {
     hasFullAccess: boolean
     userReviewCount: number
     totalReviews: number
+    previewCount: number
+    isLoggedIn: boolean
+    requireSignInToViewReviews: boolean
+    requireContributionToViewFullReviews: boolean
+    restrictionReason: 'none' | 'signin' | 'contribution' | 'signin+contribution'
   }
   departments?: { department: { code: string; name: string } }[]
   crossListGroup?: {
@@ -101,6 +107,7 @@ type InstructorFacet = {
 }
 
 const GRADE_ORDER = ['A', 'AB', 'B', 'BC', 'C', 'D', 'F']
+type ReviewDensity = 'mild' | 'dense'
 
 // Helper functions
 function getGradeColor(grade: string) {
@@ -668,8 +675,10 @@ export function CoursePageLayout({
   course: Course
   relatedCourses?: RelatedCourse[]
 }) {
+  const searchParams = useSearchParams()
   const { data: session } = useSession()
   const utils = trpc.useUtils()
+  const reviewDensity: ReviewDensity = searchParams.get('density') === 'mild' ? 'mild' : 'dense'
   
   // Filter state
   const [selectedTerm, setSelectedTerm] = useState('all')
@@ -1046,13 +1055,17 @@ export function CoursePageLayout({
             />
 
             {/* Reviews Section */}
-            {session?.user ? (
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-text-primary">
                 Student Reviews ({filteredReviews.length})
                 {(selectedTerm !== 'all' || selectedInstructor !== 'all') && (
                   <span className="text-sm font-normal text-text-tertiary ml-2">
                     (filtered from {reviewsWithParsedData.length})
+                  </span>
+                )}
+                {process.env.NODE_ENV === 'development' && (
+                  <span className="text-xs font-normal text-text-tertiary ml-2">
+                    density: {reviewDensity} (use <code>?density=mild</code>)
                   </span>
                 )}
               </h3>
@@ -1082,7 +1095,7 @@ export function CoursePageLayout({
               ) : (
                 <div className="space-y-4">
                   {filteredReviews.map((review, index) => {
-                    const isGated = !course.reviewAccess.hasFullAccess && index > 0
+                    const isGated = !course.reviewAccess.hasFullAccess && index >= course.reviewAccess.previewCount
 
                     // Show edit form instead of review card when editing
                     if (editingReviewId === review.id) {
@@ -1132,76 +1145,86 @@ export function CoursePageLayout({
                     }
 
                     const reviewCardClass = getReviewCardClass(review)
+                    const dense = reviewDensity === 'dense'
+                    const fadeThreshold = dense ? 180 : 260
+                    const titleClass = dense ? 'text-[15px] leading-5' : 'text-[17px] leading-6'
+                    const authorClass = dense ? 'text-[12px] leading-[18px] font-medium text-text-secondary' : 'text-[13px] leading-5 font-medium text-text-secondary'
+                    const metaClass = dense ? 'text-[11px] leading-4 text-text-tertiary' : 'text-xs leading-[18px] text-text-tertiary'
+                    const ratingGridClass = dense ? 'grid grid-cols-4 gap-1.5 mb-3' : 'grid grid-cols-4 gap-1.5 sm:gap-2 mb-3.5'
+                    const ratingCardClass = dense ? 'p-1.5 rounded-lg border text-center' : 'p-2 rounded-lg border text-center'
+                    const ratingLabelClass = dense ? 'text-[10px] opacity-75' : 'text-[11px] opacity-75'
+                    const ratingValueClass = dense ? 'text-[13px] font-bold' : 'text-[14px] font-bold'
+                    const commentsGridClass = dense ? 'grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm' : 'grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-sm'
+                    const commentCardClass = dense ? 'p-3 rounded-lg border border-surface-tertiary bg-surface-secondary/55' : 'p-4 rounded-lg border border-surface-tertiary bg-surface-secondary/50'
+                    const commentHeadingClass = dense ? 'inline-flex items-center rounded-md border border-surface-tertiary bg-surface-primary/90 px-1.5 py-0.5 text-[10px] font-bold text-text-secondary uppercase tracking-[0.08em] mb-1.5' : 'inline-flex items-center rounded-md border border-surface-tertiary bg-surface-primary/85 px-2 py-0.5 text-[11px] font-bold text-text-secondary uppercase tracking-[0.08em] mb-2'
+                    const commentTextClass = dense ? 'text-[13px] leading-5 text-gray-800 dark:text-gray-200 whitespace-pre-line' : 'text-[14px] leading-[22px] text-gray-800 dark:text-gray-200 whitespace-pre-line'
+                    const commentClipClass = dense ? 'relative max-h-28 overflow-hidden' : 'relative max-h-36 overflow-hidden'
+                    const fadeOverlayClass = dense
+                      ? 'pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-surface-secondary via-surface-secondary/90 to-transparent'
+                      : 'pointer-events-none absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-surface-secondary via-surface-secondary/85 to-transparent'
+                    const readMoreButtonClass = dense
+                      ? 'inline-flex items-center rounded-md border border-surface-tertiary bg-surface-primary/95 px-3 py-1 text-xs font-semibold text-text-secondary hover:text-text-primary hover:bg-surface-secondary transition-colors'
+                      : 'inline-flex items-center rounded-md border border-surface-tertiary bg-surface-primary/95 px-3.5 py-1.5 text-sm font-semibold text-text-secondary hover:text-text-primary hover:bg-surface-secondary transition-colors'
+
                     const reviewCard = (
                       <div 
                         key={review.id} 
-                        className={reviewCardClass}
+                        className={`${reviewCardClass} ${dense ? '!p-4' : '!p-[18px]'}`}
                       >
-                        {/* Header - responsive: stack on mobile */}
-                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-4">
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <h4 className="font-semibold text-text-primary">{review.title || 'Untitled Review'}</h4>
-                              <span className="text-xs text-text-tertiary sm:hidden">
+                        {/* Header - stable two-row layout */}
+                        <div className={dense ? 'mb-3' : 'mb-4'}>
+                          <div className="flex items-start justify-between gap-2">
+                            <h4 className={`${titleClass} font-semibold text-text-primary line-clamp-1`}>
+                              {review.title || 'No Title, Still Helpful'}
+                            </h4>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <span className={metaClass}>
                                 {new Date(review.createdAt).toLocaleDateString()}
                               </span>
-                            </div>
-                            <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-                              {review.authorLevel && review.authorLevel.level > 0 && <ContributorBadge contributor={review.authorLevel} />}
-                              {review.author && (
-                                <span className="text-sm font-medium text-text-secondary">
-                                  {review.authorLevel?.badge && review.authorLevel.level > 0 && <span className="mr-0.5">{review.authorLevel.badge}</span>}
-                                  {review.author.name}
-                                </span>
-                              )}
-                            </div>
-                            <div className="text-sm text-text-tertiary mt-1 flex items-center gap-2 flex-wrap">
-                              <span>{review.term} · {review.instructor?.name || 'Unknown Instructor'}</span>
-                              {review.recommendInstructor === 'yes' && <span title="Recommends instructor">👍</span>}
-                              {review.recommendInstructor === 'no' && <span title="Does not recommend instructor">👎</span>}
-                              {review.recommendInstructor === 'neutral' && <span title="Neutral about instructor">😐</span>}
+                              <ReviewActions
+                                reviewId={review.id}
+                                isOwner={session?.user?.id === review.authorId}
+                                onEditStart={() => setEditingReviewId(review.id)}
+                                onDeleted={() => utils.course.byId.invalidate({ id: course.id })}
+                              />
                             </div>
                           </div>
-                          <div className="hidden sm:flex items-center gap-2 shrink-0">
-                            <span className="text-xs text-text-tertiary">
-                              {new Date(review.createdAt).toLocaleDateString()}
+
+                          <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
+                            {review.authorLevel && review.authorLevel.level > 0 && <ContributorBadge contributor={review.authorLevel} />}
+                            {review.author && (
+                              <span className={authorClass}>
+                                {review.authorLevel?.badge && review.authorLevel.level > 0 && <span className="mr-0.5">{review.authorLevel.badge}</span>}
+                                {review.author.name}
+                              </span>
+                            )}
+                            <span className={metaClass}>
+                              {review.term} · {review.instructor?.name || 'Unknown Instructor'}
                             </span>
-                            <ReviewActions
-                              reviewId={review.id}
-                              isOwner={session?.user?.id === review.authorId}
-                              onEditStart={() => setEditingReviewId(review.id)}
-                              onDeleted={() => utils.course.byId.invalidate({ id: course.id })}
-                            />
-                          </div>
-                          {/* Mobile-only actions row */}
-                          <div className="flex sm:hidden items-center justify-end -mt-1">
-                            <ReviewActions
-                              reviewId={review.id}
-                              isOwner={session?.user?.id === review.authorId}
-                              onEditStart={() => setEditingReviewId(review.id)}
-                              onDeleted={() => utils.course.byId.invalidate({ id: course.id })}
-                            />
+                            {review.recommendInstructor === 'yes' && <span title="Recommends instructor">👍</span>}
+                            {review.recommendInstructor === 'no' && <span title="Does not recommend instructor">👎</span>}
+                            {review.recommendInstructor === 'neutral' && <span title="Neutral about instructor">😐</span>}
                           </div>
                         </div>
 
                         {/* Rating Cards */}
-                        <div className="grid grid-cols-4 gap-1.5 sm:gap-2 mb-4">
+                        <div className={ratingGridClass}>
                           {[
                             { label: 'Content', value: review.contentRating },
                             { label: 'Teaching', value: review.teachingRating },
                             { label: 'Grading', value: review.gradingRating },
                             { label: 'Workload', value: review.workloadRating },
                           ].map(({ label, value }) => (
-                            <div key={label} className={`p-1.5 sm:p-2 rounded-lg border text-center ${getRatingColor(value)}`}>
-                              <div className="text-[10px] sm:text-xs opacity-75">{label}</div>
-                              <div className="text-sm font-bold">{value}</div>
+                            <div key={label} className={`${ratingCardClass} ${getRatingColor(value)}`}>
+                              <div className={ratingLabelClass}>{label}</div>
+                              <div className={ratingValueClass}>{value}</div>
                             </div>
                           ))}
                         </div>
 
                         {/* Assessments (above comments) */}
                         {review.assessments && review.assessments.length > 0 && (
-                          <div className="flex items-center flex-wrap gap-1.5 mb-3">
+                          <div className={`flex items-center flex-wrap gap-1.5 ${dense ? 'mb-2.5' : 'mb-3'}`}>
                             <span className="text-xs font-medium text-text-secondary">Including:</span>
                             {review.assessments.map((assessment: string) => (
                               <span key={assessment} className="px-2 py-0.5 text-xs bg-surface-secondary text-text-primary rounded border border-surface-tertiary">
@@ -1214,61 +1237,69 @@ export function CoursePageLayout({
                         {/* Collapsed: Content & Teaching only (line-clamped) */}
                         {!isExpanded && (
                           <>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 text-sm">
+                            <div className={commentsGridClass}>
                               {review.contentComment && (
-                                <div className="p-3 rounded-lg border border-surface-tertiary bg-surface-secondary/50">
-                                  <div className="text-xs font-semibold text-text-tertiary uppercase tracking-wide mb-1.5">Content</div>
-                                  <p className="text-gray-800 dark:text-gray-200 whitespace-pre-line leading-relaxed line-clamp-3">{review.contentComment}</p>
+                                <div className={commentCardClass}>
+                                  <div className={commentHeadingClass}>Content</div>
+                                  <div className={commentClipClass}>
+                                    <p className={commentTextClass}>{review.contentComment}</p>
+                                    {review.contentComment.length > fadeThreshold && <div className={fadeOverlayClass} />}
+                                  </div>
                                 </div>
                               )}
                               {review.teachingComment && (
-                                <div className="p-3 rounded-lg border border-surface-tertiary bg-surface-secondary/50">
-                                  <div className="text-xs font-semibold text-text-tertiary uppercase tracking-wide mb-1.5">Teaching</div>
-                                  <p className="text-gray-800 dark:text-gray-200 whitespace-pre-line leading-relaxed line-clamp-3">{review.teachingComment}</p>
+                                <div className={commentCardClass}>
+                                  <div className={commentHeadingClass}>Teaching</div>
+                                  <div className={commentClipClass}>
+                                    <p className={commentTextClass}>{review.teachingComment}</p>
+                                    {review.teachingComment.length > fadeThreshold && <div className={fadeOverlayClass} />}
+                                  </div>
                                 </div>
                               )}
                             </div>
-                            <button
-                              onClick={toggleExpanded}
-                              className="text-sm text-wf-crimson hover:underline cursor-pointer mt-3"
-                            >
-                              Read more ▾
-                            </button>
+                            <div className="mt-3 flex justify-center">
+                              <button
+                                onClick={toggleExpanded}
+                                className={readMoreButtonClass}
+                              >
+                                Read more
+                              </button>
+                            </div>
                           </>
                         )}
 
                         {/* Expanded: all comments + actions */}
                         {isExpanded && (
                           <>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 text-sm">
+                            <div className={commentsGridClass}>
                               {review.contentComment && (
-                                <div className="p-3 rounded-lg border border-surface-tertiary bg-surface-secondary/50">
-                                  <div className="text-xs font-semibold text-text-tertiary uppercase tracking-wide mb-1.5">Content</div>
-                                  <p className="text-gray-800 dark:text-gray-200 whitespace-pre-line leading-relaxed">{review.contentComment}</p>
+                                <div className={commentCardClass}>
+                                  <div className={commentHeadingClass}>Content</div>
+                                  <p className={commentTextClass}>{review.contentComment}</p>
                                 </div>
                               )}
                               {review.teachingComment && (
-                                <div className="p-3 rounded-lg border border-surface-tertiary bg-surface-secondary/50">
-                                  <div className="text-xs font-semibold text-text-tertiary uppercase tracking-wide mb-1.5">Teaching</div>
-                                  <p className="text-gray-800 dark:text-gray-200 whitespace-pre-line leading-relaxed">{review.teachingComment}</p>
+                                <div className={commentCardClass}>
+                                  <div className={commentHeadingClass}>Teaching</div>
+                                  <p className={commentTextClass}>{review.teachingComment}</p>
                                 </div>
                               )}
                               {review.gradingComment && (
-                                <div className="p-3 rounded-lg border border-surface-tertiary bg-surface-secondary/50">
-                                  <div className="text-xs font-semibold text-text-tertiary uppercase tracking-wide mb-1.5">Grading</div>
-                                  <p className="text-gray-800 dark:text-gray-200 whitespace-pre-line leading-relaxed">{review.gradingComment}</p>
+                                <div className={commentCardClass}>
+                                  <div className={commentHeadingClass}>Grading</div>
+                                  <p className={commentTextClass}>{review.gradingComment}</p>
                                 </div>
                               )}
                               {review.workloadComment && (
-                                <div className="p-3 rounded-lg border border-surface-tertiary bg-surface-secondary/50">
-                                  <div className="text-xs font-semibold text-text-tertiary uppercase tracking-wide mb-1.5">Workload</div>
-                                  <p className="text-gray-800 dark:text-gray-200 whitespace-pre-line leading-relaxed">{review.workloadComment}</p>
+                                <div className={commentCardClass}>
+                                  <div className={commentHeadingClass}>Workload</div>
+                                  <p className={commentTextClass}>{review.workloadComment}</p>
                                 </div>
                               )}
                             </div>
 
                             {/* Actions + Comments - compact single row */}
-                            <div className="flex items-center gap-3 mt-3 pt-3 border-t border-surface-tertiary text-sm">
+                            <div className={`flex items-center gap-3 mt-3 pt-3 border-t border-surface-tertiary ${dense ? 'text-xs' : 'text-sm'}`}>
                               <VoteButton
                                 reviewId={review.id}
                                 initialVoteCount={review.votes?.length || 0}
@@ -1276,12 +1307,29 @@ export function CoursePageLayout({
                                 userId={session?.user?.id || undefined}
                                 compact
                               />
-                              <CommentSection
-                                reviewId={review.id}
-                                comments={review.comments}
-                                userId={session?.user?.id}
-                                compact
-                              />
+                              {course.reviewAccess.hasFullAccess ? (
+                                <CommentSection
+                                  reviewId={review.id}
+                                  comments={review.comments}
+                                  userId={session?.user?.id}
+                                  compact
+                                />
+                              ) : (
+                                <FrostedInlineLock
+                                  message={
+                                    course.reviewAccess.isLoggedIn
+                                      ? 'Write 1 review to unlock comments'
+                                      : 'Sign in to unlock comments'
+                                  }
+                                >
+                                  <CommentSection
+                                    reviewId={review.id}
+                                    comments={review.comments}
+                                    userId={session?.user?.id}
+                                    compact
+                                  />
+                                </FrostedInlineLock>
+                              )}
                               <div className="ml-auto">
                                 {session?.user && (
                                   <ReportButton
@@ -1294,7 +1342,7 @@ export function CoursePageLayout({
 
                             <button
                               onClick={toggleExpanded}
-                              className="text-sm text-wf-crimson hover:underline cursor-pointer mt-2"
+                              className={`${dense ? 'text-xs' : 'text-sm'} text-wf-crimson hover:underline cursor-pointer mt-2`}
                             >
                               Show less ▴
                             </button>
@@ -1302,16 +1350,16 @@ export function CoursePageLayout({
                         )}
                       </div>
                     )
-
                     if (isGated) {
                       return (
                         <div key={review.id}>
-                          {index === 1 && (
+                          {index === course.reviewAccess.previewCount && (
                             <ReviewGateOverlay
                               totalReviews={course.reviewAccess.totalReviews}
+                              previewVisibleCount={course.reviewAccess.previewCount}
                               userReviewCount={course.reviewAccess.userReviewCount}
-                              isLoggedIn={!!session?.user}
-                              courseId={course.id}
+                              isLoggedIn={course.reviewAccess.isLoggedIn}
+                              restrictionReason={course.reviewAccess.restrictionReason}
                             />
                           )}
                           <FrostedReview>{reviewCard}</FrostedReview>
@@ -1324,24 +1372,6 @@ export function CoursePageLayout({
                 </div>
               )}
             </div>
-            ) : (
-              /* Login prompt for non-logged-in users */
-              <div className="bg-surface-primary rounded-xl border border-surface-tertiary p-8 text-center">
-                <div className="mx-auto w-16 h-16 bg-wf-crimson/10 rounded-full flex items-center justify-center mb-4">
-                  <MessageSquare className="h-8 w-8 text-wf-crimson" />
-                </div>
-                <h3 className="text-lg font-semibold text-text-primary mb-2">Sign in to see student reviews</h3>
-                <p className="text-sm text-text-secondary max-w-md mx-auto mb-6">
-                  Reviews are only visible to verified UW-Madison community accounts. First-time verification requires @wisc.edu.
-                </p>
-                <Link
-                  href="/auth/signin"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-wf-crimson text-white rounded-lg hover:bg-wf-crimson-dark transition-colors font-medium"
-                >
-                  Sign in to continue
-                </Link>
-              </div>
-            )}
           </main>
 
           {/* Right Sidebar - fixed height with internal scroll on desktop */}

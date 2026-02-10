@@ -135,6 +135,31 @@
     color: var(--text-primary);
   }
 
+  /* Global typography scale */
+  .type-display {
+    @apply text-[30px] leading-[36px] font-bold tracking-[-0.01em];
+  }
+
+  .type-section-title {
+    @apply text-[20px] leading-7 font-semibold;
+  }
+
+  .type-card-title {
+    @apply text-[17px] leading-6 font-semibold;
+  }
+
+  .type-body {
+    @apply text-sm leading-[22px];
+  }
+
+  .type-meta {
+    @apply text-xs leading-[18px] text-text-tertiary;
+  }
+
+  .type-label {
+    @apply text-[11px] leading-4 uppercase tracking-[0.06em] font-semibold text-text-tertiary;
+  }
+
   .grade-badge {
     @apply px-2 py-1 rounded-md text-xs font-semibold;
   }

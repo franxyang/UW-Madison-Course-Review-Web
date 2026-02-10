@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { router, adminProcedure, superAdminProcedure } from '../trpc/trpc'
 import { TRPCError } from '@trpc/server'
+import { APP_SETTING_KEYS, getAppSettings } from '@/lib/appSettings'
 
 // Helper to write audit log
 async function writeAuditLog(
@@ -93,6 +94,55 @@ export const adminRouter = router({
 
     return days
   }),
+
+  getAccessSettings: adminProcedure.query(async ({ ctx }) => {
+    return getAppSettings(ctx.prisma)
+  }),
+
+  updateAccessSettings: adminProcedure
+    .input(
+      z.object({
+        requireSignInToViewReviews: z.boolean(),
+        requireContributionToViewFullReviews: z.boolean(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const actorId = ctx.session.user.id!
+
+      try {
+        await ctx.prisma.$transaction([
+          ctx.prisma.appSetting.upsert({
+            where: { key: APP_SETTING_KEYS.requireSignInToViewReviews },
+            update: { value: String(input.requireSignInToViewReviews) },
+            create: {
+              key: APP_SETTING_KEYS.requireSignInToViewReviews,
+              value: String(input.requireSignInToViewReviews),
+            },
+          }),
+          ctx.prisma.appSetting.upsert({
+            where: { key: APP_SETTING_KEYS.requireContributionToViewFullReviews },
+            update: { value: String(input.requireContributionToViewFullReviews) },
+            create: {
+              key: APP_SETTING_KEYS.requireContributionToViewFullReviews,
+              value: String(input.requireContributionToViewFullReviews),
+            },
+          }),
+        ])
+      } catch (error) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Unable to save access settings. Ensure latest migrations are deployed.',
+          cause: error,
+        })
+      }
+
+      await writeAuditLog(ctx.prisma, actorId, 'UPDATE_ACCESS_SETTINGS', 'AppSetting', 'reviewAccess', {
+        requireSignInToViewReviews: input.requireSignInToViewReviews,
+        requireContributionToViewFullReviews: input.requireContributionToViewFullReviews,
+      })
+
+      return getAppSettings(ctx.prisma)
+    }),
 
   // ============================================================
   // REPORTS

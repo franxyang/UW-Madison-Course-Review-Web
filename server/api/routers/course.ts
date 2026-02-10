@@ -6,6 +6,7 @@ import { cached, cacheKeys, TTL } from '@/lib/redis'
 import { expandSearchAliases } from '@/lib/courseAliases'
 import { computeContributorLevel } from '@/lib/contributorLevel'
 import { inferCourseLevelFromCode, isCanonicalCourseLevel } from '@/lib/courseLevel'
+import { getAppSettings, type ReviewRestrictionReason } from '@/lib/appSettings'
 
 export const courseRouter = router({
   // Get course list with search and filters
@@ -437,21 +438,37 @@ export const courseRouter = router({
         }
       }
 
-      // Review-gating: check if the user has contributed at least 1 review
-      let hasFullAccess = false
+      const accessSettings = await getAppSettings(ctx.prisma)
+      const isLoggedIn = Boolean(ctx.session?.user?.id)
       let userReviewCount = 0
 
-      if (ctx.session?.user?.id) {
+      if (isLoggedIn && ctx.session?.user?.id) {
         userReviewCount = await ctx.prisma.review.count({
           where: { authorId: ctx.session.user.id },
         })
-        hasFullAccess = userReviewCount >= 1
       }
+
+      const passesSignInGate = !accessSettings.requireSignInToViewReviews || isLoggedIn
+      const passesContributionGate =
+        !accessSettings.requireContributionToViewFullReviews || userReviewCount >= 1
+      const hasFullAccess = passesSignInGate && passesContributionGate
+      const restrictionReason: ReviewRestrictionReason = hasFullAccess
+        ? 'none'
+        : !passesSignInGate && !passesContributionGate
+        ? 'signin+contribution'
+        : !passesSignInGate
+        ? 'signin'
+        : 'contribution'
 
       // Sort reviews: highest-voted first for the preview
       const sortedReviews = [...groupReviews].sort(
         (a, b) => (b.votes?.length || 0) - (a.votes?.length || 0)
       )
+      const previewCount = hasFullAccess
+        ? sortedReviews.length
+        : !isLoggedIn && accessSettings.requireSignInToViewReviews
+        ? 0
+        : 1
 
       // Compute contributor levels for each review author
       const authorIds = [...new Set(sortedReviews.map(r => r.authorId))]
@@ -517,10 +534,11 @@ export const courseRouter = router({
         // Always show contributor rank (even for anonymous reviews)
         const authorLevel = authorLevelMap.get(review.authorId) || computeContributorLevel(0, 0)
 
-        // If user has full access OR this is the first (preview) review, return full content
-        if (hasFullAccess || index === 0) {
+        // If user has full access OR this is within preview quota, return full content
+        if (hasFullAccess || index < previewCount) {
           return {
             ...review,
+            title: review.title || accessSettings.fallbackReviewTitle,
             author: safeAuthor,
             comments: safeComments,
             votes: safeVotes,
@@ -577,6 +595,11 @@ export const courseRouter = router({
           hasFullAccess,
           userReviewCount,
           totalReviews: sortedReviews.length,
+          previewCount,
+          isLoggedIn,
+          requireSignInToViewReviews: accessSettings.requireSignInToViewReviews,
+          requireContributionToViewFullReviews: accessSettings.requireContributionToViewFullReviews,
+          restrictionReason,
         },
       }
     }),

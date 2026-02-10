@@ -343,6 +343,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
   })
 
   const [isAnonymous, setIsAnonymous] = useState(existingReview?.isAnonymous ?? false)
+  const [showExamples, setShowExamples] = useState(false)
   // Always show rank when anonymous (no toggle needed)
   const showRankWhenAnonymous = true
   
@@ -385,7 +386,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
     grading: formData.gradingRating || '',
     workload: formData.workloadRating || ''
   }), [formData.contentRating, formData.teachingRating, formData.gradingRating, formData.workloadRating])
-  const sectionCardClass = 'rounded-xl border border-surface-tertiary/80 bg-surface-primary/85 p-4 sm:p-5 shadow-sm'
+  const sectionCardClass = 'rounded-xl border border-surface-tertiary/80 bg-surface-primary/85 p-4 shadow-sm'
   const overallNumeric = useMemo(() => {
     const values = [
       gradeToNumeric(formData.contentRating || ''),
@@ -509,11 +510,13 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
       return
     }
 
+    const normalizedTitle = formData.title?.trim() || undefined
+
     if (isEditMode && existingReview) {
       updateReviewMutation.mutate({
         reviewId: existingReview.id,
         term: formData.term,
-        title: formData.title,
+        title: normalizedTitle,
         gradeReceived: (formData.gradeReceived || undefined) as 'A' | 'AB' | 'B' | 'BC' | 'C' | 'D' | 'F' | undefined,
         contentRating: formData.contentRating as 'A' | 'AB' | 'B' | 'BC' | 'C' | 'D' | 'F',
         teachingRating: formData.teachingRating as 'A' | 'AB' | 'B' | 'BC' | 'C' | 'D' | 'F',
@@ -534,7 +537,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
       createReviewMutation.mutate({
         courseId: formData.courseId!,
         term: formData.term!,
-        title: formData.title,
+        title: normalizedTitle,
         gradeReceived: (formData.gradeReceived || undefined) as 'A' | 'AB' | 'B' | 'BC' | 'C' | 'D' | 'F' | undefined,
         contentRating: formData.contentRating as 'A' | 'AB' | 'B' | 'BC' | 'C' | 'D' | 'F',
         teachingRating: formData.teachingRating as 'A' | 'AB' | 'B' | 'BC' | 'C' | 'D' | 'F',
@@ -611,8 +614,8 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
           <div className="bg-surface-primary px-6 pt-6 pb-4 border-b border-surface-tertiary">
             <div className="flex items-start justify-between">
               <div>
-                <h3 className="text-xl font-semibold text-text-primary">{isEditMode ? 'Edit Review' : 'Write a Review'}</h3>
-                <p className="mt-1 text-sm text-text-secondary">{courseName}</p>
+                <h3 className="type-section-title text-text-primary">{isEditMode ? 'Edit Review' : 'Write a Review'}</h3>
+                <p className="mt-1 type-body text-text-secondary">{courseName}</p>
               </div>
               <button
                 onClick={() => { if (!activeMutation.isPending) { isEditMode ? onEditCancel?.() : setIsOpen(false) } }}
@@ -639,11 +642,11 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
               </div>
             )}
 
-            <div className="space-y-5">
+            <div className="space-y-4">
               {/* Term & Instructor */}
               <div className={`${sectionCardClass} grid grid-cols-1 md:grid-cols-2 gap-4`}>
                 <div>
-                  <label className="block text-sm font-medium text-text-primary mb-1">
+                  <label className="block type-body font-medium text-text-primary mb-1">
                     Term <span className="text-red-500">*</span>
                   </label>
                   <select
@@ -666,7 +669,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-text-primary mb-1">
+                  <label className="block type-body font-medium text-text-primary mb-1">
                     Instructor <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -690,7 +693,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
                     ))}
                   </datalist>
                   {termHasData ? (
-                    <p className="text-xs text-text-tertiary mt-1">
+                    <p className="type-meta mt-1">
                       Pick from suggestions or type a new instructor.
                     </p>
                   ) : (
@@ -704,7 +707,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
               <div className={`${sectionCardClass} grid grid-cols-1 lg:grid-cols-2 gap-5`}>
                 {/* Recommend Instructor */}
                 <div>
-                  <label className="block text-sm font-medium text-text-primary mb-2">
+                  <label className="block type-body font-medium text-text-primary mb-2">
                     Would you recommend this instructor?
                   </label>
                   <div className="flex gap-3">
@@ -733,7 +736,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
 
                 {/* Grade Received */}
                 <div>
-                  <label className="block text-sm font-medium text-text-primary mb-2">
+                  <label className="block type-body font-medium text-text-primary mb-2">
                     Grade Received <span className="text-text-tertiary text-xs">(optional)</span>
                   </label>
                   <div className="flex gap-2 flex-wrap">
@@ -756,11 +759,18 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
               <div className={sectionCardClass}>
                 <div className="flex items-start justify-between gap-4 mb-3">
                   <div>
-                    <h4 className="text-sm font-medium text-text-primary mb-1">Detailed Ratings <span className="text-red-500">*</span></h4>
-                    <p className="text-xs text-text-tertiary">Use A / AB / B / BC / C / D / F for all four dimensions.</p>
+                    <h4 className="type-card-title text-text-primary mb-1">Detailed Ratings <span className="text-red-500">*</span></h4>
+                    <p className="type-meta">Use A / AB / B / BC / C / D / F for all four dimensions.</p>
+                    <button
+                      type="button"
+                      onClick={() => setShowExamples(prev => !prev)}
+                      className="mt-1.5 type-meta text-wf-crimson hover:underline"
+                    >
+                      {showExamples ? 'Hide examples' : 'Show examples'}
+                    </button>
                   </div>
                   <div className="text-right">
-                    <div className="text-xs text-text-tertiary uppercase tracking-wide">Current Overall</div>
+                    <div className="type-label">Current Overall</div>
                     <div className="text-lg font-bold text-text-primary">
                       {overallLetter}{overallNumeric !== null ? ` (${overallNumeric.toFixed(2)})` : ''}
                     </div>
@@ -776,13 +786,13 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
                   ].map(({ key, label, comment, required }) => (
                     <div key={key} className="space-y-2">
                       <div
-                        className="p-4 rounded-lg border-2 transition-all"
+                        className="p-3 rounded-lg border-2 transition-all"
                         style={getRatingPanelStyle(formData[key as keyof typeof formData] as string)}
                       >
-                        <div className="text-xs font-medium mb-1">
+                        <div className="type-label mb-1">
                           {label} {required && <span className="text-red-500">*</span>}
                         </div>
-                        <div className="text-[10px] text-text-tertiary mb-2 leading-tight">
+                        <div className="type-meta mb-2">
                           {DIMENSION_DESC[label]}
                         </div>
                         <div className="flex gap-1">
@@ -792,7 +802,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
                               type="button"
                               onClick={() => setFormData({ ...formData, [key]: rating })}
                               title={RATING_HINTS[label]?.[rating] || rating}
-                              className={`px-2 py-1 text-xs font-bold rounded transition-all ${getRatingButtonClass(formData[key as keyof typeof formData] === rating)}`}
+                              className={`px-2 py-1 text-[11px] font-semibold rounded transition-all ${getRatingButtonClass(formData[key as keyof typeof formData] === rating)}`}
                               style={formData[key as keyof typeof formData] === rating ? getSelectedRatingButtonStyle(rating) : undefined}
                               disabled={activeMutation.isPending}
                             >
@@ -801,22 +811,22 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
                           ))}
                         </div>
                         {formData[key as keyof typeof formData] && (
-                          <div className="text-[10px] text-text-secondary mt-1 font-medium">
+                          <div className="type-meta mt-1">
                             {RATING_HINTS[label]?.[formData[key as keyof typeof formData] as string]}
                           </div>
                         )}
                       </div>
                       <div className="relative">
                         <textarea
-                          placeholder={COMMENT_EXAMPLES[label.toLowerCase() as keyof typeof COMMENT_EXAMPLES]}
+                          placeholder={showExamples ? COMMENT_EXAMPLES[label.toLowerCase() as keyof typeof COMMENT_EXAMPLES] : 'Share your experience for this dimension...'}
                           value={formData[comment as keyof typeof formData] as string || ''}
                           onChange={(e) => setFormData({ ...formData, [comment]: e.target.value })}
                           maxLength={3000}
-                          className="w-full px-3 py-2 text-sm bg-surface-secondary border border-surface-tertiary rounded-lg focus:outline-none focus:ring-2 focus:ring-wf-crimson/20 focus:border-wf-crimson resize-y text-text-primary placeholder:text-text-tertiary/70 min-h-[120px]"
+                          className="w-full px-3 py-2 text-[14px] leading-[22px] bg-surface-secondary border border-surface-tertiary rounded-lg focus:outline-none focus:ring-2 focus:ring-wf-crimson/20 focus:border-wf-crimson resize-y text-text-primary placeholder:text-text-tertiary/70 min-h-[110px]"
                           rows={5}
                           disabled={activeMutation.isPending}
                         />
-                        <div className="text-xs text-text-tertiary mt-1 flex justify-between">
+                        <div className="type-meta mt-1 flex justify-between">
                           <span>{required ? 'Required (min 5 chars)' : 'Optional'}</span>
                           <span>{((formData[comment as keyof typeof formData] as string) || '').length}/3000</span>
                         </div>
@@ -828,22 +838,25 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
 
               {/* Review Title */}
               <div className={sectionCardClass}>
-                <label className="block text-sm font-medium text-text-primary mb-1">
-                  Review Title (optional)
+                <label className="block type-body font-medium text-text-primary mb-1">
+                  Review Title (recommended)
                 </label>
                 <input
                   type="text"
                   value={formData.title || ''}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  placeholder="Summarize your experience"
+                  placeholder="Summarize your experience (leave blank to use default)"
                   className="w-full px-3 py-2 bg-surface-secondary border border-surface-tertiary rounded-lg focus:outline-none focus:ring-2 focus:ring-wf-crimson/20 focus:border-wf-crimson text-text-primary"
                   disabled={activeMutation.isPending}
                 />
+                <p className="type-meta mt-1">
+                  Empty title will default to: &quot;No Title, Still Helpful&quot;.
+                </p>
               </div>
 
               {/* Assessments */}
               <div className={sectionCardClass}>
-                <label className="block text-sm font-medium text-text-primary mb-2">
+                <label className="block type-body font-medium text-text-primary mb-2">
                   Assessments
                 </label>
                 <div className="grid grid-cols-3 gap-2">
@@ -852,7 +865,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
                       key={assessment}
                       type="button"
                       onClick={() => toggleAssessment(assessment)}
-                      className={`px-3 py-2.5 text-sm rounded-xl border transition-all ${
+                      className={`px-3 py-2.5 text-[13px] rounded-xl border transition-all ${
                         formData.assessments?.includes(assessment)
                           ? 'bg-amber-50 border-red-400 text-red-700 font-semibold shadow-sm ring-1 ring-red-200'
                           : 'bg-surface-secondary border-surface-tertiary text-text-secondary hover:border-text-tertiary hover:bg-surface-tertiary/60'
@@ -867,7 +880,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
 
               {/* Resource Link */}
               <div className={sectionCardClass}>
-                <label className="block text-sm font-medium text-text-primary mb-1">
+                <label className="block type-body font-medium text-text-primary mb-1">
                   Course Resources Link (optional)
                 </label>
                 <input
@@ -896,8 +909,8 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
                   <div className="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform peer-checked:translate-x-4" />
                 </div>
                 <div>
-                  <span className="text-sm font-medium text-text-primary">Post anonymously</span>
-                  <p className="text-xs text-text-tertiary mt-0.5">Your identity will be hidden from other students</p>
+                  <span className="type-body font-medium text-text-primary">Post anonymously</span>
+                  <p className="type-meta mt-0.5">Your identity will be hidden from other students</p>
                 </div>
               </label>
 

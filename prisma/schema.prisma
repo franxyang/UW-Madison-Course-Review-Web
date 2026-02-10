@@ -120,6 +120,13 @@ model EmailOtpChallenge {
   @@index([expiresAt])
 }
 
+model AppSetting {
+  key       String   @id
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model School {
   id          String       @id @default(cuid())
   name        String       @unique

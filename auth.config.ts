@@ -107,6 +107,11 @@ export const authConfig: NextAuthConfig = {
           email: user.email,
           name: user.name ?? null,
           image: user.image ?? null,
+          nickname: user.nickname ?? null,
+          role: user.role ?? 'STUDENT',
+          loginHandle: user.loginHandle ?? null,
+          eligibilityStatus: user.eligibilityStatus ?? 'UNVERIFIED',
+          requiresRecoverySetup: user.requiresRecoverySetup ?? false,
         }
       },
     }),
@@ -206,14 +211,66 @@ export const authConfig: NextAuthConfig = {
 
       return true
     },
-    async session({ session, user }) {
+    async jwt({ token, user }) {
+      if (user) {
+        token.sub = user.id
+        token.email = user.email || token.email
+        token.name = user.name ?? token.name
+        token.picture = user.image ?? token.picture
+        token.nickname = (user as any).nickname ?? null
+        token.role = (user as any).role ?? 'STUDENT'
+        token.loginHandle = (user as any).loginHandle ?? null
+        token.eligibilityStatus = (user as any).eligibilityStatus ?? 'UNVERIFIED'
+        token.requiresRecoverySetup = Boolean((user as any).requiresRecoverySetup)
+      }
+
+      const userId = token.sub
+      if (
+        userId &&
+        (typeof token.role === 'undefined' ||
+          typeof token.loginHandle === 'undefined' ||
+          typeof token.eligibilityStatus === 'undefined' ||
+          typeof token.requiresRecoverySetup === 'undefined')
+      ) {
+        const dbUser = await prisma.user.findUnique({
+          where: { id: userId },
+          select: {
+            email: true,
+            name: true,
+            image: true,
+            nickname: true,
+            role: true,
+            loginHandle: true,
+            eligibilityStatus: true,
+            requiresRecoverySetup: true,
+          },
+        })
+
+        if (dbUser) {
+          token.email = dbUser.email || token.email
+          token.name = dbUser.name ?? token.name
+          token.picture = dbUser.image ?? token.picture
+          token.nickname = dbUser.nickname ?? null
+          token.role = dbUser.role ?? 'STUDENT'
+          token.loginHandle = dbUser.loginHandle ?? null
+          token.eligibilityStatus = dbUser.eligibilityStatus ?? 'UNVERIFIED'
+          token.requiresRecoverySetup = dbUser.requiresRecoverySetup
+        }
+      }
+
+      return token
+    },
+    async session({ session, token }) {
       if (session.user) {
-        session.user.id = user.id
-        ;(session.user as any).nickname = (user as any).nickname || null
-        ;(session.user as any).role = (user as any).role || 'STUDENT'
-        ;(session.user as any).loginHandle = (user as any).loginHandle || null
-        ;(session.user as any).eligibilityStatus = (user as any).eligibilityStatus || 'UNVERIFIED'
-        ;(session.user as any).requiresRecoverySetup = (user as any).requiresRecoverySetup || false
+        session.user.id = String(token.sub || '')
+        session.user.email = String(token.email || '')
+        session.user.name = typeof token.name === 'string' ? token.name : null
+        session.user.image = typeof token.picture === 'string' ? token.picture : null
+        ;(session.user as any).nickname = (token as any).nickname ?? null
+        ;(session.user as any).role = (token as any).role ?? 'STUDENT'
+        ;(session.user as any).loginHandle = (token as any).loginHandle ?? null
+        ;(session.user as any).eligibilityStatus = (token as any).eligibilityStatus ?? 'UNVERIFIED'
+        ;(session.user as any).requiresRecoverySetup = Boolean((token as any).requiresRecoverySetup)
       }
       return session
     },
@@ -223,7 +280,7 @@ export const authConfig: NextAuthConfig = {
     error: '/auth/error',
   },
   session: {
-    strategy: 'database',
+    strategy: 'jwt',
     maxAge: 30 * 24 * 60 * 60,
     updateAge: 24 * 60 * 60,
   },

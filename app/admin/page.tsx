@@ -1,12 +1,40 @@
 'use client'
 
 import { trpc } from '@/lib/trpc/client'
-import { Users, MessageSquare, Flag, Activity, TrendingUp, ArrowRight } from 'lucide-react'
+import { Users, MessageSquare, Flag, Activity, TrendingUp, ArrowRight, Shield, Lock, PenLine } from 'lucide-react'
 import Link from 'next/link'
+import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 
 export default function AdminDashboard() {
+  const utils = trpc.useUtils()
   const stats = trpc.admin.dashboardStats.useQuery()
   const trend = trpc.admin.weeklyTrend.useQuery()
+  const accessSettings = trpc.admin.getAccessSettings.useQuery()
+  const [requireSignInToViewReviews, setRequireSignInToViewReviews] = useState(true)
+  const [requireContributionToViewFullReviews, setRequireContributionToViewFullReviews] = useState(true)
+
+  useEffect(() => {
+    if (accessSettings.data) {
+      setRequireSignInToViewReviews(accessSettings.data.requireSignInToViewReviews)
+      setRequireContributionToViewFullReviews(accessSettings.data.requireContributionToViewFullReviews)
+    }
+  }, [accessSettings.data])
+
+  const updateAccessSettings = trpc.admin.updateAccessSettings.useMutation({
+    onSuccess: () => {
+      toast.success('Access settings updated.')
+      utils.admin.getAccessSettings.invalidate()
+    },
+    onError: (error) => {
+      toast.error(error.message)
+    },
+  })
+
+  const accessDirty =
+    accessSettings.data &&
+    (requireSignInToViewReviews !== accessSettings.data.requireSignInToViewReviews ||
+      requireContributionToViewFullReviews !== accessSettings.data.requireContributionToViewFullReviews)
 
   return (
     <div>
@@ -94,6 +122,82 @@ export default function AdminDashboard() {
             </table>
           </div>
         ) : null}
+      </div>
+
+      {/* Review Access Controls */}
+      <div className="bg-surface-primary rounded-xl border border-surface-tertiary p-6 mb-8">
+        <div className="flex items-center gap-2 mb-1">
+          <Shield size={18} className="text-text-secondary" />
+          <h2 className="text-lg font-semibold text-text-primary">Review Access Settings</h2>
+        </div>
+        <p className="text-sm text-text-secondary mb-4">
+          Control whether students must sign in and/or contribute a review before viewing full review content.
+        </p>
+
+        <div className="grid gap-3 md:grid-cols-2">
+          <button
+            type="button"
+            onClick={() => setRequireSignInToViewReviews((prev) => !prev)}
+            className={`flex items-center justify-between rounded-lg border p-3 text-left transition-colors ${
+              requireSignInToViewReviews
+                ? 'border-uw-red/40 bg-rose-50/40'
+                : 'border-surface-tertiary hover:bg-surface-secondary'
+            }`}
+          >
+            <div>
+              <p className="text-sm font-medium text-text-primary inline-flex items-center gap-1.5">
+                <Lock size={14} />
+                Require sign-in for full reviews
+              </p>
+              <p className="text-xs text-text-secondary mt-0.5">
+                OFF still keeps preview mode available; ON requires account sign-in for full content.
+              </p>
+            </div>
+            <span className="text-xs font-semibold text-text-secondary">
+              {requireSignInToViewReviews ? 'ON' : 'OFF'}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setRequireContributionToViewFullReviews((prev) => !prev)}
+            className={`flex items-center justify-between rounded-lg border p-3 text-left transition-colors ${
+              requireContributionToViewFullReviews
+                ? 'border-uw-red/40 bg-rose-50/40'
+                : 'border-surface-tertiary hover:bg-surface-secondary'
+            }`}
+          >
+            <div>
+              <p className="text-sm font-medium text-text-primary inline-flex items-center gap-1.5">
+                <PenLine size={14} />
+                Require 1 review contribution
+              </p>
+              <p className="text-xs text-text-secondary mt-0.5">
+                ON means users need at least one review posted to unlock all review details.
+              </p>
+            </div>
+            <span className="text-xs font-semibold text-text-secondary">
+              {requireContributionToViewFullReviews ? 'ON' : 'OFF'}
+            </span>
+          </button>
+        </div>
+
+        <div className="mt-4 flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() =>
+              updateAccessSettings.mutate({
+                requireSignInToViewReviews,
+                requireContributionToViewFullReviews,
+              })
+            }
+            disabled={!accessDirty || updateAccessSettings.isPending}
+            className="px-4 py-2 text-sm rounded-lg bg-slate-900 text-white hover:bg-slate-800 disabled:opacity-60"
+          >
+            {updateAccessSettings.isPending ? 'Saving...' : 'Save access settings'}
+          </button>
+          {accessSettings.isLoading && <span className="text-xs text-text-tertiary">Loading current values...</span>}
+        </div>
       </div>
 
       {/* Quick Links */}

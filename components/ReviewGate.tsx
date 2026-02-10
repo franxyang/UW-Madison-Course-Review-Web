@@ -2,24 +2,43 @@
 
 import { Lock, PenLine, Eye } from 'lucide-react'
 import Link from 'next/link'
+import type { ReviewRestrictionReason } from '@/lib/appSettings'
 
 interface ReviewGateProps {
   /** Total number of reviews on this course */
   totalReviews: number
+  /** Number of currently visible preview reviews */
+  previewVisibleCount: number
   /** Number of reviews the user has written (platform-wide) */
   userReviewCount: number
   /** Whether user is logged in */
   isLoggedIn: boolean
-  /** Course ID for the write-review link */
-  courseId: string
+  /** Why access is restricted right now */
+  restrictionReason: ReviewRestrictionReason
 }
 
 /**
  * Overlay CTA shown on top of frosted/blurred reviews.
  * Explains why reviews are locked and how to unlock them.
  */
-export function ReviewGateOverlay({ totalReviews, userReviewCount, isLoggedIn, courseId }: ReviewGateProps) {
-  const hiddenCount = Math.max(0, totalReviews - 1)
+export function ReviewGateOverlay({
+  totalReviews,
+  previewVisibleCount,
+  userReviewCount,
+  isLoggedIn,
+  restrictionReason,
+}: ReviewGateProps) {
+  const hiddenCount = Math.max(0, totalReviews - previewVisibleCount)
+  const requiresSignIn = restrictionReason === 'signin' || restrictionReason === 'signin+contribution'
+  const requiresContribution = restrictionReason === 'contribution' || restrictionReason === 'signin+contribution'
+
+  const description = requiresSignIn
+    ? 'Sign in to continue. Full review details are unlocked after posting one review.'
+    : requiresContribution
+    ? userReviewCount > 0
+      ? 'Your contribution status is syncing. Refresh this page if content remains locked.'
+      : 'Share your experience with one course to unlock all review details across the platform.'
+    : 'Preview mode is active.'
 
   return (
     <div className="relative my-4">
@@ -34,12 +53,17 @@ export function ReviewGateOverlay({ totalReviews, userReviewCount, isLoggedIn, c
         </h3>
 
         <p className="text-sm text-text-secondary max-w-md mx-auto mb-6">
-          {isLoggedIn
-            ? 'Share your experience with any course to unlock all reviews across the entire platform.'
-            : 'Sign in and write one review to unlock full access. First-time verification requires @wisc.edu.'}
+          {description}
         </p>
 
-        {isLoggedIn ? (
+        {requiresSignIn && !isLoggedIn ? (
+          <Link
+            href="/auth/signin"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-uw-red text-white font-medium rounded-lg hover:bg-uw-dark transition-colors shadow-sm"
+          >
+            Sign In to Unlock
+          </Link>
+        ) : (
           <a
             href="#review-form"
             className="inline-flex items-center gap-2 px-6 py-3 bg-uw-red text-white font-medium rounded-lg hover:bg-uw-dark transition-colors shadow-sm"
@@ -47,18 +71,15 @@ export function ReviewGateOverlay({ totalReviews, userReviewCount, isLoggedIn, c
             <PenLine size={18} />
             Write My First Review
           </a>
-        ) : (
-          <Link
-            href="/auth/signin"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-uw-red text-white font-medium rounded-lg hover:bg-uw-dark transition-colors shadow-sm"
-          >
-            Sign In to Unlock
-          </Link>
         )}
 
         <div className="mt-4 flex items-center justify-center gap-1.5 text-xs text-text-tertiary">
           <Eye size={14} />
-          <span>One review unlocks access to all reviews on every course</span>
+          <span>
+            {requiresContribution
+              ? 'One review unlocks access to all reviews on every course'
+              : `Preview mode: showing 1 of ${totalReviews} reviews`}
+          </span>
         </div>
       </div>
     </div>
@@ -74,6 +95,25 @@ export function FrostedReview({ children }: { children: React.ReactNode }) {
     <div className="relative select-none" aria-hidden="true">
       <div className="blur-[6px] pointer-events-none opacity-70">
         {children}
+      </div>
+    </div>
+  )
+}
+
+export function FrostedInlineLock({
+  children,
+  message,
+}: {
+  children: React.ReactNode
+  message: string
+}) {
+  return (
+    <div className="relative inline-flex items-center">
+      <div className="blur-[4px] pointer-events-none opacity-70">{children}</div>
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <span className="text-[11px] px-2 py-1 rounded-full bg-white/90 border border-surface-tertiary text-text-secondary">
+          {message}
+        </span>
       </div>
     </div>
   )

@@ -132,13 +132,27 @@ export const authConfig: NextAuthConfig = {
             select: { userId: true },
           })
 
-          const userId = existingIdentity?.userId || user.id
+          const fallbackUser = !existingIdentity
+            ? await tx.user.findUnique({
+                where: { email: normalizedEmail },
+                select: { id: true },
+              })
+            : null
+
+          const userId = existingIdentity?.userId || user.id || fallbackUser?.id
           if (!userId) {
-            throw new Error('MISSING_USER')
+            console.warn('[auth.signIn.google] deferred identity reconcile: missing user id', {
+              normalizedEmail,
+            })
+            return
           }
 
           if (existingIdentity && user.id && existingIdentity.userId !== user.id) {
-            throw new Error('ACCOUNT_LINK_CONFLICT')
+            console.warn('[auth.signIn.google] account link mismatch, preferring existing identity', {
+              normalizedEmail,
+              existingIdentityUserId: existingIdentity.userId,
+              oauthUserId: user.id,
+            })
           }
 
           const existingUser = await tx.user.findUnique({
@@ -151,7 +165,11 @@ export const authConfig: NextAuthConfig = {
           })
 
           if (!existingUser) {
-            throw new Error('MISSING_USER')
+            console.warn('[auth.signIn.google] deferred identity reconcile: user not found', {
+              userId,
+              normalizedEmail,
+            })
+            return
           }
 
           const hasRecovery = await tx.userEmail.count({
@@ -205,8 +223,7 @@ export const authConfig: NextAuthConfig = {
           })
         })
       } catch (error) {
-        console.error('[auth.signIn.google] failed to reconcile identity', error)
-        return '/auth/error?error=AccountLink'
+        console.error('[auth.signIn.google] reconcile failed (non-blocking)', error)
       }
 
       return true

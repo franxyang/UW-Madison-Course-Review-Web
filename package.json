@@ -8,7 +8,12 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:ui": "playwright test --ui",
     "seed": "tsx scripts/seed.ts",
+    "audit:madgrades-coverage": "tsx scripts/auditMadgradesCoverage.ts",
+    "rebuild:madgrades-canonical": "tsx scripts/rebuildMadgradesCanonicalFromApi.ts",
     "reconcile:instructors": "tsx scripts/reconcileOfficialInstructorAliases.ts",
     "reconcile:course-levels": "tsx scripts/reconcileCourseLevels.ts",
     "postinstall": "prisma generate"
@@ -36,6 +41,7 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "@types/node": "^22.14.0",
     "@types/react": "^19.0.2",
     "@types/react-dom": "^19.0.1",

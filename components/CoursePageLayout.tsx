@@ -88,6 +88,12 @@ interface Course {
     displayCode: string | null
     courses: { id: string; code: string; name: string; avgGPA: number | null }[]
   } | null
+  dataSourceCourseId?: string
+  canonicalCourseId?: string
+  canonicalCode?: string
+  isCrossListedSharedData?: boolean
+  sharedFromCode?: string | null
+  crossListedCodes?: string[]
 }
 
 interface RelatedCourse {
@@ -175,6 +181,36 @@ function getGPAColor(gpa: number | null): string {
   if (gpa >= 1.5) return 'text-orange-500'
   if (gpa >= 1.0) return 'text-red-400'
   return 'text-red-500'
+}
+
+function buildCrossListTitle(codes: string[], canonicalCode?: string | null): string {
+  const uniqueCodes = [...new Set(codes.map((code) => code.trim()).filter(Boolean))]
+  if (uniqueCodes.length === 0) return ''
+
+  const canonical = canonicalCode?.trim()
+  const orderedCodes = [...uniqueCodes].sort((a, b) => {
+    if (canonical) {
+      if (a === canonical) return -1
+      if (b === canonical) return 1
+    }
+    return a.localeCompare(b)
+  })
+
+  const parsed = orderedCodes.map((code) => {
+    const number = getCourseNumber(code)
+    const dept = getOfficialDeptPrefix(code)
+    return { code, number, dept, official: toOfficialCode(code) }
+  })
+
+  const firstNumber = parsed[0]?.number
+  const sameNumber = Boolean(firstNumber) && parsed.every((item) => item.number === firstNumber)
+
+  if (sameNumber) {
+    const depts = [...new Set(parsed.map((item) => item.dept))]
+    return `${depts.join('/')} ${firstNumber}`
+  }
+
+  return parsed.map((item) => item.official).join(' / ')
 }
 
 // Convert letter grade to numeric value for averaging
@@ -793,6 +829,18 @@ export function CoursePageLayout({
     }))
   }, [reviewsWithParsedData])
 
+  const sharedDataCodes = useMemo(() => {
+    const fromApi = (course.crossListedCodes ?? []).filter(Boolean)
+    if (fromApi.length > 0) return fromApi
+    return (course.crossListGroup?.courses ?? []).map((item) => item.code)
+  }, [course.crossListedCodes, course.crossListGroup])
+
+  const displayCodeTitle = useMemo(() => {
+    const fallback = toOfficialCode(course.code)
+    const title = buildCrossListTitle(sharedDataCodes, course.canonicalCode)
+    return title || fallback
+  }, [course.code, course.canonicalCode, sharedDataCodes])
+
   // FILTERED terms based on selected instructor facet
   const terms = useMemo(() => {
     if (selectedInstructor === 'all' || !selectedInstructorFacet) {
@@ -944,7 +992,7 @@ export function CoursePageLayout({
             <div className="flex items-center gap-2 text-sm text-text-secondary mb-4">
               <Link href="/courses" className="hover:text-text-primary transition-colors">Courses</Link>
               <ChevronRight size={16} />
-              <span className="text-text-primary font-medium">{toOfficialCode(course.code)}</span>
+              <span className="text-text-primary font-medium">{displayCodeTitle}</span>
             </div>
 
             {/* Course Header Card */}
@@ -952,7 +1000,7 @@ export function CoursePageLayout({
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <div className="flex items-center gap-3 mb-2">
-                    <h1 className="text-2xl font-bold text-text-primary">{toOfficialCode(course.code)}</h1>
+                    <h1 className="text-2xl font-bold text-text-primary">{displayCodeTitle}</h1>
                     <span className={`px-2.5 py-0.5 text-xs font-medium rounded-md border ${
                       course.level === 'Elementary'
                         ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
@@ -972,15 +1020,22 @@ export function CoursePageLayout({
                         {course.crossListGroup.courses
                           .filter(c => c.id !== course.id)
                           .map(c => (
-                            <Link
+                            <span
                               key={c.id}
-                              href={`/courses/${c.id}`}
-                              className="px-2 py-0.5 text-xs bg-surface-secondary text-text-secondary rounded hover:bg-wf-crimson/10 hover:text-wf-crimson transition-colors"
+                              className="px-2 py-0.5 text-xs bg-surface-secondary text-text-secondary rounded"
                             >
                               {toOfficialCode(c.code)}
-                            </Link>
+                            </span>
                           ))}
                       </div>
+                    </div>
+                  )}
+                  {course.isCrossListedSharedData && sharedDataCodes.length > 1 && (
+                    <div className="mt-4 rounded-lg border border-sky-200 bg-sky-50 px-3 py-2">
+                      <p className="text-xs text-sky-900">
+                        Grade data is shared across cross-listed courses:{' '}
+                        {sharedDataCodes.map((code) => toOfficialCode(code)).join(', ')}
+                      </p>
                     </div>
                   )}
                 </div>

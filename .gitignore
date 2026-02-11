@@ -25,6 +25,8 @@ dist-ssr
 
 /lib/generated/prisma
 .next/
+playwright-report/
+test-results/
 
 # Environment variables
 .env

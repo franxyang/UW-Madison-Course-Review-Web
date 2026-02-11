@@ -316,7 +316,7 @@ export const courseRouter = router({
   byId: publicProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
-      const course = await ctx.prisma.course.findUnique({
+      const requestedCourse = await ctx.prisma.course.findUnique({
         where: { id: input.id },
         include: {
           school: true,
@@ -350,15 +350,90 @@ export const courseRouter = router({
         },
       })
 
-      if (!course) {
+      if (!requestedCourse) {
         throw new TRPCError({
           code: 'NOT_FOUND',
           message: 'Course not found',
         })
       }
 
-      const groupCourseIds =
-        course.crossListGroup?.courses?.map((c) => c.id).filter(Boolean) || [course.id]
+      const aliasMapping = await ctx.prisma.courseCodeAlias.findUnique({
+        where: { sourceCode: requestedCourse.code },
+        select: { canonicalCourseId: true },
+      })
+
+      let dataSourceCourseId = aliasMapping?.canonicalCourseId ?? requestedCourse.id
+      let dataSourceCourse: {
+        id: string
+        code: string
+        avgGPA: number | null
+        crossListGroup: {
+          id: string
+          displayCode: string | null
+          courses: { id: string; code: string; name: string; avgGPA: number | null }[]
+        } | null
+      } = {
+        id: requestedCourse.id,
+        code: requestedCourse.code,
+        avgGPA: requestedCourse.avgGPA,
+        crossListGroup: requestedCourse.crossListGroup,
+      }
+
+      if (dataSourceCourseId !== requestedCourse.id) {
+        const canonicalCourse = await ctx.prisma.course.findUnique({
+          where: { id: dataSourceCourseId },
+          select: {
+            id: true,
+            code: true,
+            avgGPA: true,
+            crossListGroup: {
+              include: {
+                courses: {
+                  select: {
+                    id: true,
+                    code: true,
+                    name: true,
+                    avgGPA: true,
+                  },
+                },
+              },
+            },
+          },
+        })
+
+        if (!canonicalCourse) {
+          dataSourceCourseId = requestedCourse.id
+        } else {
+          dataSourceCourse = canonicalCourse
+        }
+      }
+
+      const aliasRowsForCanonical = await ctx.prisma.courseCodeAlias.findMany({
+        where: { canonicalCourseId: dataSourceCourseId },
+        select: { sourceCode: true },
+      })
+
+      const groupCourseIds = [
+        ...new Set(
+          [
+            ...(dataSourceCourse.crossListGroup?.courses?.map((c) => c.id) ?? []),
+            requestedCourse.id,
+          ].filter(Boolean),
+        ),
+      ]
+
+      const crossListedCodes = [
+        ...new Set(
+          [
+            ...(dataSourceCourse.crossListGroup?.courses?.map((c) => c.code) ?? []),
+            ...aliasRowsForCanonical.map((row) => row.sourceCode),
+            requestedCourse.code,
+            dataSourceCourse.code,
+          ].filter(Boolean),
+        ),
+      ].sort((a, b) => a.localeCompare(b))
+      const isCrossListedSharedData = dataSourceCourseId !== requestedCourse.id
+      const sharedFromCode = isCrossListedSharedData ? dataSourceCourse.code : null
 
       const [groupReviews, groupInstructors, groupGradeDistributions] = await Promise.all([
         ctx.prisma.review.findMany({
@@ -426,7 +501,8 @@ export const courseRouter = router({
       }
       const mergedGradeDistributions = [...mergedGradeDistMap.values()]
 
-      let mergedAvgGPA: number | null = course.avgGPA
+      let mergedAvgGPA: number | null =
+        (isCrossListedSharedData ? dataSourceCourse.avgGPA : requestedCourse.avgGPA) ?? null
       if ((mergedAvgGPA == null || mergedAvgGPA <= 0) && mergedGradeDistributions.length > 0) {
         const totalStudents = mergedGradeDistributions.reduce((sum, gd) => sum + gd.totalGraded, 0)
         if (totalStudents > 0) {
@@ -586,11 +662,18 @@ export const courseRouter = router({
       })
 
       return {
-        ...course,
+        ...requestedCourse,
+        crossListGroup: dataSourceCourse.crossListGroup ?? requestedCourse.crossListGroup,
         avgGPA: mergedAvgGPA,
         instructors: mergedInstructors,
         gradeDistributions: mergedGradeDistributions,
         reviews: sanitizedReviews,
+        canonicalCourseId: dataSourceCourseId,
+        canonicalCode: dataSourceCourse.code,
+        dataSourceCourseId,
+        isCrossListedSharedData,
+        sharedFromCode,
+        crossListedCodes,
         reviewAccess: {
           hasFullAccess,
           userReviewCount,

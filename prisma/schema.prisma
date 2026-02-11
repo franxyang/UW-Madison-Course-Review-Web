@@ -191,20 +191,27 @@ model CourseCodeAlias {
   id                String   @id @default(cuid())
   sourceCode        String   @unique
   canonicalCourseId String
+  sourceCourseUuid  String?
+  sourceSubjectCode String?
+  sourceSubjectAbbr String?
+  lastSeenAt        DateTime?
   source            String   @default("madgrades-extractor")
   createdAt         DateTime @default(now())
   canonicalCourse   Course   @relation(fields: [canonicalCourseId], references: [id], onDelete: Cascade)
 
   @@index([canonicalCourseId])
+  @@index([sourceCourseUuid])
+  @@index([sourceSubjectAbbr, sourceCode])
 }
 
 // Groups cross-listed courses together (e.g., CS 514 / MATH 514)
 model CrossListGroup {
-  id          String   @id @default(cuid())
+  id               String   @id @default(cuid())
+  sourceCourseUuid String?  @unique
   // Primary course code for display (e.g., "COMP SCI 514 / MATH 514")
-  displayCode String?
-  courses     Course[]
-  createdAt   DateTime @default(now())
+  displayCode      String?
+  courses          Course[]
+  createdAt        DateTime @default(now())
 }
 
 model CourseDepartment {

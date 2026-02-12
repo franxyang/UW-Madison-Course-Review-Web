@@ -6,6 +6,7 @@ import { instructorRouter } from './routers/instructor'
 import { userRouter } from './routers/user'
 import { adminRouter } from './routers/admin'
 import { authRouter } from './routers/auth'
+import { siteRouter } from './routers/site'
 
 export const appRouter = router({
   course: courseRouter,
@@ -15,6 +16,7 @@ export const appRouter = router({
   user: userRouter,
   admin: adminRouter,
   auth: authRouter,
+  site: siteRouter,
 })
 
 export type AppRouter = typeof appRouter

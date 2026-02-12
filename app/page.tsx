@@ -1,13 +1,13 @@
-import { auth } from '@/auth'
 import Link from 'next/link'
 import { Logo } from '@/components/Logo'
 import { prisma } from '@/lib/prisma'
-import { BookOpen, Users, Star, Building2, ArrowRight, MessageSquare, GraduationCap, Search, PenLine, Unlock, CheckCircle2 } from 'lucide-react'
+import { BookOpen, Users, Building2, ArrowRight, MessageSquare, GraduationCap, Search, PenLine, Unlock, CheckCircle2, TrendingUp, TrendingDown } from 'lucide-react'
 import { AcademicCalendar } from '@/components/AcademicCalendar'
 import { toOfficialCode } from '@/lib/courseCodeDisplay'
 import { HomeSearch } from '@/components/HomeSearch'
 import { ContributorProgress } from '@/components/ContributorProgress'
 import { Header } from '@/components/Header'
+import { gpaToLetterGrade } from '@/lib/gpaLetter'
 
 async function getStats() {
   const [courseCount, reviewCount, instructorCount, departmentCount, schoolCount] = await Promise.all([
@@ -20,48 +20,98 @@ async function getStats() {
   return { courseCount, reviewCount, instructorCount, departmentCount, schoolCount }
 }
 
-async function getFeaturedCourses() {
-  const courses = await prisma.course.findMany({
-    where: {
-      reviews: { some: {} },
-      avgGPA: { not: null }
-    },
-    select: {
-      id: true,
-      code: true,
-      name: true,
-      avgGPA: true,
-      credits: true,
-      level: true,
-      _count: { select: { reviews: true } }
-    },
-    orderBy: { reviews: { _count: 'desc' } },
-    take: 6
-  })
-  return courses
-}
+async function getRatingRankedCourses() {
+  const scoredCourses = await prisma.$queryRawUnsafe<any[]>(`
+    SELECT
+      c."id",
+      c."code",
+      c."name",
+      c."avgGPA",
+      COUNT(r."id")::int AS review_count,
+      AVG(
+        (
+          CASE r."contentRating"
+            WHEN 'A' THEN 4.0
+            WHEN 'AB' THEN 3.5
+            WHEN 'B' THEN 3.0
+            WHEN 'BC' THEN 2.5
+            WHEN 'C' THEN 2.0
+            WHEN 'D' THEN 1.0
+            ELSE 0.0
+          END
+          +
+          CASE r."teachingRating"
+            WHEN 'A' THEN 4.0
+            WHEN 'AB' THEN 3.5
+            WHEN 'B' THEN 3.0
+            WHEN 'BC' THEN 2.5
+            WHEN 'C' THEN 2.0
+            WHEN 'D' THEN 1.0
+            ELSE 0.0
+          END
+          +
+          CASE r."gradingRating"
+            WHEN 'A' THEN 4.0
+            WHEN 'AB' THEN 3.5
+            WHEN 'B' THEN 3.0
+            WHEN 'BC' THEN 2.5
+            WHEN 'C' THEN 2.0
+            WHEN 'D' THEN 1.0
+            ELSE 0.0
+          END
+          +
+          CASE r."workloadRating"
+            WHEN 'A' THEN 4.0
+            WHEN 'AB' THEN 3.5
+            WHEN 'B' THEN 3.0
+            WHEN 'BC' THEN 2.5
+            WHEN 'C' THEN 2.0
+            WHEN 'D' THEN 1.0
+            ELSE 0.0
+          END
+        ) / 4.0
+      ) AS rating_score
+    FROM "Course" c
+    JOIN "Review" r ON r."courseId" = c."id"
+    GROUP BY c."id", c."code", c."name", c."avgGPA"
+  `)
 
-async function getRecentReviews() {
-  const reviews = await prisma.review.findMany({
-    select: {
-      id: true,
-      title: true,
-      createdAt: true,
-      course: {
-        select: { id: true, code: true, name: true }
-      }
-    },
-    orderBy: { createdAt: 'desc' },
-    take: 5
-  })
-  return reviews
+  const normalized = scoredCourses.map((course) => ({
+    id: course.id,
+    code: course.code,
+    name: course.name,
+    avgGPA: course.avgGPA,
+    reviewCount: Number(course.review_count),
+    ratingScore: Number(course.rating_score),
+  }))
+
+  const highestRated = [...normalized]
+    .sort(
+      (a, b) =>
+        b.ratingScore - a.ratingScore ||
+        b.reviewCount - a.reviewCount ||
+        a.code.localeCompare(b.code),
+    )
+    .slice(0, 6)
+
+  const highestIds = new Set(highestRated.map((course) => course.id))
+
+  const lowestRated = normalized
+    .filter((course) => course.ratingScore < 2.0 && !highestIds.has(course.id))
+    .sort(
+      (a, b) =>
+        a.ratingScore - b.ratingScore ||
+        b.reviewCount - a.reviewCount ||
+        a.code.localeCompare(b.code),
+    )
+    .slice(0, 5)
+
+  return { highestRated, lowestRated }
 }
 
 export default async function Home() {
-  const session = await auth()
   const stats = await getStats()
-  const featuredCourses = await getFeaturedCourses()
-  const recentReviews = await getRecentReviews()
+  const { highestRated, lowestRated } = await getRatingRankedCourses()
 
   return (
     <div className="min-h-screen bg-surface-secondary">
@@ -171,19 +221,19 @@ export default async function Home() {
               </div>
             </div>
 
-            {/* Most Reviewed Courses */}
+            {/* Highest Rated Courses */}
             <div className="bg-surface-primary rounded-xl border border-surface-tertiary overflow-hidden">
               <div className="flex items-center justify-between px-5 py-4 border-b border-surface-tertiary">
                 <h2 className="font-semibold text-text-primary flex items-center gap-2">
-                  <Star size={18} className="text-amber-400" />
-                  Most Reviewed Courses
+                  <TrendingUp size={18} className="text-wf-crimson" />
+                  Highest Rated Courses
                 </h2>
                 <Link href="/courses" className="text-sm text-wf-crimson hover:text-wf-crimson-dark flex items-center gap-1">
                   View all <ArrowRight size={14} />
                 </Link>
               </div>
               <div className="divide-y divide-surface-tertiary">
-                {featuredCourses.map(course => (
+                {highestRated.map(course => (
                   <Link
                     key={course.id}
                     href={`/courses/${course.id}`}
@@ -195,20 +245,20 @@ export default async function Home() {
                           {toOfficialCode(course.code)}
                         </span>
                         <span className="text-xs text-text-tertiary">
-                          {course._count.reviews} reviews
+                          {course.reviewCount} reviews
                         </span>
                       </div>
                       <div className="text-sm text-text-secondary truncate">
                         {course.name}
                       </div>
                     </div>
-                    {course.avgGPA != null && course.avgGPA > 0 && (
+                    {course.ratingScore > 0 && (
                       <div className={`text-lg font-bold ml-4 ${
-                        course.avgGPA >= 3.5 ? 'text-emerald-500' :
-                        course.avgGPA >= 3.0 ? 'text-emerald-400' :
-                        course.avgGPA >= 2.5 ? 'text-amber-500' : 'text-orange-500'
+                        course.ratingScore >= 3.5 ? 'text-emerald-500' :
+                        course.ratingScore >= 3.0 ? 'text-emerald-400' :
+                        course.ratingScore >= 2.5 ? 'text-amber-500' : 'text-orange-500'
                       }`}>
-                        {course.avgGPA.toFixed(2)}
+                        {course.ratingScore.toFixed(2)} ({gpaToLetterGrade(course.ratingScore)})
                       </div>
                     )}
                   </Link>
@@ -221,18 +271,18 @@ export default async function Home() {
               <h2 className="font-semibold text-text-primary mb-4">Popular Departments</h2>
               <div className="flex flex-wrap gap-2">
                 {[
-                  { name: 'Computer Sciences', id: 'cml7q3gdh0497nafqn4oqpdrv' },
-                  { name: 'Mathematics', id: 'cml7q3gdg045ynafqouzdoac6' },
-                  { name: 'Economics', id: 'cml7q3gdh049enafqlqhzh1vz' },
-                  { name: 'Psychology', id: 'cml7q3gdh0476nafqi7zki53m' },
-                  { name: 'Biology', id: 'cml7q3gdh0489nafqcias0n30' },
-                  { name: 'Chemistry', id: 'cml7q3gdh048dnafqdxr0rl89' },
-                  { name: 'Physics', id: 'cml7q3gdh04asnafqemjns6ds' },
-                  { name: 'Statistics', id: 'cml7q3gdh04bjnafqkb3mm5zz' }
+                  { name: 'Computer Sciences', code: 'COMP SCI' },
+                  { name: 'Mathematics', code: 'MATH' },
+                  { name: 'Economics', code: 'ECON' },
+                  { name: 'Psychology', code: 'PSYCH' },
+                  { name: 'Biology', code: 'BIOLOGY' },
+                  { name: 'Chemistry', code: 'CHEM' },
+                  { name: 'Physics', code: 'PHYSICS' },
+                  { name: 'Statistics', code: 'STAT' }
                 ].map(dept => (
                   <Link
-                    key={dept.id}
-                    href={`/courses?departments=${dept.id}`}
+                    key={dept.code}
+                    href={`/courses?dept=${encodeURIComponent(dept.code)}`}
                     className="px-3 py-1.5 bg-surface-secondary hover:bg-hover-bg rounded-lg text-sm text-text-secondary hover:text-text-primary transition-colors"
                   >
                     {dept.name}
@@ -250,26 +300,36 @@ export default async function Home() {
             {/* Contributor Progress */}
             <ContributorProgress />
 
-            {/* Recent Activity */}
+            {/* Lowest Rated */}
             <div className="bg-surface-primary rounded-xl border border-surface-tertiary overflow-hidden">
               <div className="px-5 py-4 border-b border-surface-tertiary">
                 <h2 className="font-semibold text-text-primary flex items-center gap-2">
-                  <MessageSquare size={18} className="text-text-tertiary" />
-                  Recent Reviews
+                  <TrendingDown size={18} className="text-red-500" />
+                  Lowest Rated Courses
                 </h2>
               </div>
               <div className="divide-y divide-surface-tertiary">
-                {recentReviews.map(review => (
+                {lowestRated.map(course => (
                   <Link
-                    key={review.id}
-                    href={`/courses/${review.course.id}`}
+                    key={course.id}
+                    href={`/courses/${course.id}`}
                     className="block px-5 py-3 hover:bg-hover-bg transition-colors"
                   >
-                    <div className="text-sm font-medium text-text-primary truncate">
-                      {toOfficialCode(review.course.code)}
-                    </div>
-                    <div className="text-xs text-text-tertiary">
-                      {new Date(review.createdAt).toLocaleDateString()}
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="text-sm font-medium text-text-primary truncate">
+                          {toOfficialCode(course.code)}
+                        </div>
+                        <div className="text-xs text-text-tertiary">{course.reviewCount} reviews</div>
+                      </div>
+                      <div className={`text-sm font-semibold ${
+                        course.ratingScore >= 3.5 ? 'text-emerald-500' :
+                        course.ratingScore >= 3.0 ? 'text-emerald-400' :
+                        course.ratingScore >= 2.5 ? 'text-amber-500' :
+                        course.ratingScore >= 2.0 ? 'text-orange-500' : 'text-red-500'
+                      }`}>
+                        {course.ratingScore.toFixed(2)} ({gpaToLetterGrade(course.ratingScore)})
+                      </div>
                     </div>
                   </Link>
                 ))}

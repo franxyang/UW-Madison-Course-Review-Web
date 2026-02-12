@@ -7,6 +7,7 @@ import { useSearchParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { trpc } from '@/lib/trpc/client'
 import { useDebounce } from '@/lib/hooks/useDebounce'
+import { gpaToLetterGrade } from '@/lib/gpaLetter'
 import { Logo } from '@/components/Logo'
 import { Header } from '@/components/Header'
 import { VoteButton } from '@/components/VoteButton'
@@ -569,7 +570,7 @@ function RightSidebar({
                       displayGPA >= 2.0 ? 'text-orange-500' : 'text-red-500'
                     : 'text-text-tertiary'
                 }`}>
-                  {displayGPA?.toFixed(2) || 'N/A'}
+                  {displayGPA !== null ? `${displayGPA.toFixed(2)} (${gpaToLetterGrade(displayGPA)})` : 'N/A'}
                 </div>
               </div>
               <div className="text-center text-xs text-text-tertiary mt-2">

@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Search, X, Loader2, BookOpen, Star } from 'lucide-react'
+import { Search, X, Loader2, BookOpen, Star, Building2 } from 'lucide-react'
 import { trpc } from '@/lib/trpc/client'
 import { toOfficialCode } from '@/lib/courseCodeDisplay'
 import { useDebounce } from '@/lib/hooks/useDebounce'
@@ -29,17 +29,24 @@ export function SearchWithPreview({
   // Debounce search query
   const debouncedQuery = useDebounce(query, 300)
 
+  useEffect(() => {
+    setQuery(initialQuery)
+  }, [initialQuery])
+
   // Fetch preview results
-  const { data, isLoading } = trpc.course.list.useQuery(
-    { search: debouncedQuery, limit: 6 },
+  const { data, isLoading } = trpc.course.searchPreview.useQuery(
+    { query: debouncedQuery, courseLimit: 6, departmentLimit: 4 },
     { 
       enabled: debouncedQuery.length >= 2,
       staleTime: 30000, // Cache for 30s
     }
   )
 
+  const previewDepartments = data?.departments || []
   const previewCourses = data?.courses || []
-  const totalResults = data?.total || 0
+  const totalResults = data?.meta.courseTotal || 0
+  const hasDigit = data?.meta.hasDigit ?? /\d/.test(debouncedQuery)
+  const showDepartments = !hasDigit && previewDepartments.length > 0
 
   // Show dropdown when focused and has results or is loading
   useEffect(() => {
@@ -70,11 +77,12 @@ export function SearchWithPreview({
 
   const handleSearch = () => {
     setIsOpen(false)
+    const trimmed = query.trim()
     if (onSearch) {
-      onSearch(query)
+      onSearch(trimmed)
     } else {
       const params = new URLSearchParams()
-      if (query) params.set('search', query)
+      if (trimmed) params.set('search', trimmed)
       router.push(`/courses?${params.toString()}`)
     }
   }
@@ -124,53 +132,99 @@ export function SearchWithPreview({
             <div className="flex items-center justify-center py-8">
               <Loader2 className="animate-spin text-text-tertiary" size={24} />
             </div>
-          ) : previewCourses.length > 0 ? (
+          ) : showDepartments || previewCourses.length > 0 ? (
             <>
-              {/* Results List */}
               <div className="py-2">
-                {previewCourses.map((course) => (
-                  <Link
-                    key={course.id}
-                    href={`/courses/${course.id}`}
-                    onClick={() => setIsOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 hover:bg-hover-bg transition-colors"
-                  >
-                    <div className="w-10 h-10 bg-surface-secondary rounded-lg flex items-center justify-center flex-shrink-0">
-                      <BookOpen size={18} className="text-text-tertiary" />
+                {showDepartments && (
+                  <>
+                    <div className="px-4 py-1 text-[11px] font-semibold uppercase tracking-wide text-text-tertiary">
+                      Departments
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold text-sm text-wf-crimson">
-                          {toOfficialCode(course.code)}
-                        </span>
-                        <span className="text-xs text-text-tertiary">
-                          {course.credits} cr
-                        </span>
-                      </div>
-                      <div className="text-sm text-text-secondary truncate">
-                        {course.name}
-                      </div>
-                    </div>
-                    {course.avgGPA != null && course.avgGPA > 0 && (
-                      <div className="flex items-center gap-1 flex-shrink-0">
-                        <Star size={14} className={getGPAColor(course.avgGPA)} />
-                        <span className={`text-sm font-semibold ${getGPAColor(course.avgGPA)}`}>
-                          {course.avgGPA.toFixed(2)}
-                        </span>
+                    {previewDepartments.map((department) => {
+                      const params = new URLSearchParams()
+                      params.set('dept', department.code)
+                      return (
+                        <Link
+                          key={department.id}
+                          href={`/courses?${params.toString()}`}
+                          onClick={() => setIsOpen(false)}
+                          className="flex items-center gap-3 px-4 py-3 hover:bg-hover-bg transition-colors"
+                        >
+                          <div className="w-10 h-10 bg-surface-secondary rounded-lg flex items-center justify-center flex-shrink-0">
+                            <Building2 size={18} className="text-text-tertiary" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="font-semibold text-sm text-text-primary">{department.code}</span>
+                              <span className="text-xs text-text-tertiary">{department.courseCount} courses</span>
+                            </div>
+                            <div className="text-sm text-text-secondary truncate">
+                              {department.name}
+                            </div>
+                          </div>
+                        </Link>
+                      )
+                    })}
+                  </>
+                )}
+
+                {previewCourses.length > 0 && (
+                  <>
+                    {!hasDigit && (
+                      <div className="px-4 py-1 text-[11px] font-semibold uppercase tracking-wide text-text-tertiary">
+                        Courses
                       </div>
                     )}
-                  </Link>
-                ))}
+                    {previewCourses.map((course) => (
+                      <Link
+                        key={course.id}
+                        href={`/courses/${course.id}`}
+                        onClick={() => setIsOpen(false)}
+                        className="flex items-center gap-3 px-4 py-3 hover:bg-hover-bg transition-colors"
+                      >
+                        <div className="w-10 h-10 bg-surface-secondary rounded-lg flex items-center justify-center flex-shrink-0">
+                          <BookOpen size={18} className="text-text-tertiary" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold text-sm text-wf-crimson">
+                              {toOfficialCode(course.code)}
+                            </span>
+                            <span className="text-xs text-text-tertiary">
+                              {course.credits} cr
+                            </span>
+                          </div>
+                          <div className="text-sm text-text-secondary truncate">
+                            {course.name}
+                          </div>
+                        </div>
+                        {course.avgGPA != null && course.avgGPA > 0 && (
+                          <div className="flex items-center gap-1 flex-shrink-0">
+                            <Star size={14} className={getGPAColor(course.avgGPA)} />
+                            <span className={`text-sm font-semibold ${getGPAColor(course.avgGPA)}`}>
+                              {course.avgGPA.toFixed(2)}
+                            </span>
+                          </div>
+                        )}
+                      </Link>
+                    ))}
+                  </>
+                )}
+
+                {showDepartments && previewCourses.length === 0 && (
+                  <div className="px-4 py-2 text-xs text-text-tertiary">
+                    No course matches yet. You can jump to a department page above.
+                  </div>
+                )}
               </div>
 
-              {/* View All Results */}
-              {totalResults > previewCourses.length && (
+              {(totalResults > previewCourses.length || previewCourses.length > 0) && (
                 <div className="border-t border-surface-tertiary">
                   <button
                     onClick={handleSearch}
                     className="w-full px-4 py-3 text-sm font-medium text-wf-crimson hover:bg-hover-bg transition-colors text-center"
                   >
-                    View all {totalResults} results →
+                    View all {totalResults} course results →
                   </button>
                 </div>
               )}
@@ -178,7 +232,7 @@ export function SearchWithPreview({
           ) : debouncedQuery.length >= 2 ? (
             <div className="py-8 text-center">
               <BookOpen className="mx-auto h-10 w-10 text-text-tertiary mb-2" />
-              <p className="text-sm text-text-secondary">No courses found for &quot;{debouncedQuery}&quot;</p>
+              <p className="text-sm text-text-secondary">No courses or departments found for &quot;{debouncedQuery}&quot;</p>
             </div>
           ) : null}
         </div>

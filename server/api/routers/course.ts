@@ -8,6 +8,30 @@ import { computeContributorLevel } from '@/lib/contributorLevel'
 import { inferCourseLevelFromCode, isCanonicalCourseLevel } from '@/lib/courseLevel'
 import { getAppSettings, type ReviewRestrictionReason } from '@/lib/appSettings'
 
+type NormalizedSearchQuery = {
+  rawQuery: string
+  normalizedQuery: string
+  compactQuery: string
+  hasDigit: boolean
+}
+
+function compactAlnum(value: string): string {
+  return value.toUpperCase().replace(/[^A-Z0-9]/g, '')
+}
+
+function normalizeSearchQuery(query: string): NormalizedSearchQuery {
+  const rawQuery = query.trim()
+  const normalizedQuery = rawQuery.toUpperCase()
+  const compactQuery = compactAlnum(rawQuery)
+
+  return {
+    rawQuery,
+    normalizedQuery,
+    compactQuery,
+    hasDigit: /\d/.test(compactQuery),
+  }
+}
+
 export const courseRouter = router({
   // Get course list with search and filters
   list: publicProcedure
@@ -30,7 +54,8 @@ export const courseRouter = router({
     .query(async ({ ctx, input }) => {
       // Use full-text search when search term is provided
       if (input.search && input.search.trim().length > 0) {
-        const searchTerm = input.search.trim()
+        const normalizedSearch = normalizeSearchQuery(input.search)
+        const searchTerm = normalizedSearch.rawQuery
         
         // Expand search to include course code aliases
         // e.g., "CS 577" → also search "COMP SCI 577"
@@ -101,14 +126,20 @@ export const courseRouter = router({
           : ''
 
         // Build alias ILIKE conditions for code matching
-        const aliasConditions = aliases.map((_, i) => {
-          filterParams.push(`%${aliases[i]}%`)
-          return `c."code" ILIKE $${paramIndex + i}`
+        const aliasConditions = aliases.map((alias) => {
+          filterParams.push(`%${alias}%`)
+          return `c."code" ILIKE $${paramIndex++}`
         })
-        paramIndex += aliases.length
         const aliasSQL = aliasConditions.length > 0
           ? aliasConditions.join(' OR ')
           : 'FALSE'
+
+        let compactCodeSQL = 'FALSE'
+        if (normalizedSearch.compactQuery.length > 0) {
+          filterParams.push(`%${normalizedSearch.compactQuery}%`)
+          compactCodeSQL = `regexp_replace(c."code", '[^A-Za-z0-9]', '', 'g') ILIKE $${paramIndex}`
+          paramIndex++
+        }
 
         // Combined search: full-text OR code alias match
         const courses = await ctx.prisma.$queryRawUnsafe<any[]>(`
@@ -127,13 +158,15 @@ export const courseRouter = router({
           WHERE (
             c."searchVector" @@ plainto_tsquery('english', $1)
             OR ${aliasSQL}
+            OR ${compactCodeSQL}
             OR c."code" ILIKE $1 || '%'
             OR c."name" ILIKE '%' || $1 || '%'
           )
           ${filterSQL}
           ORDER BY 
-            CASE WHEN c."code" ILIKE $1 || '%' OR ${aliasSQL} THEN 0 ELSE 1 END,
-            rank DESC
+            CASE WHEN c."code" ILIKE $1 || '%' OR ${aliasSQL} OR ${compactCodeSQL} THEN 0 ELSE 1 END,
+            rank DESC,
+            c."code" ASC
           LIMIT ${input.limit}
           OFFSET ${input.offset}
         `, ...filterParams)
@@ -145,6 +178,7 @@ export const courseRouter = router({
           WHERE (
             c."searchVector" @@ plainto_tsquery('english', $1)
             OR ${aliasSQL}
+            OR ${compactCodeSQL}
             OR c."code" ILIKE $1 || '%'
             OR c."name" ILIKE '%' || $1 || '%'
           )
@@ -242,6 +276,155 @@ export const courseRouter = router({
       ])
 
       return { courses, total }
+    }),
+
+  searchPreview: publicProcedure
+    .input(
+      z.object({
+        query: z.string().min(1),
+        courseLimit: z.number().min(1).max(20).default(6),
+        departmentLimit: z.number().min(1).max(10).default(4),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const normalizedSearch = normalizeSearchQuery(input.query)
+      if (!normalizedSearch.rawQuery) {
+        return {
+          departments: [],
+          courses: [],
+          meta: {
+            query: '',
+            hasDigit: false,
+            courseTotal: 0,
+          },
+        }
+      }
+
+      const aliases = expandSearchAliases(normalizedSearch.rawQuery)
+      const filterParams: any[] = [normalizedSearch.rawQuery]
+      let paramIndex = 2
+
+      const aliasConditions = aliases.map((alias) => {
+        filterParams.push(`%${alias}%`)
+        return `c."code" ILIKE $${paramIndex++}`
+      })
+      const aliasSQL = aliasConditions.length > 0 ? aliasConditions.join(' OR ') : 'FALSE'
+
+      let compactCodeSQL = 'FALSE'
+      if (normalizedSearch.compactQuery.length > 0) {
+        filterParams.push(`%${normalizedSearch.compactQuery}%`)
+        compactCodeSQL = `regexp_replace(c."code", '[^A-Za-z0-9]', '', 'g') ILIKE $${paramIndex}`
+      }
+
+      const courses = await ctx.prisma.$queryRawUnsafe<any[]>(
+        `
+          SELECT
+            c."id", c."code", c."name", c."credits", c."avgGPA",
+            s."name" as "school_name",
+            GREATEST(
+              ts_rank(c."searchVector", plainto_tsquery('english', $1)),
+              CASE WHEN ${aliasSQL} THEN 1.0 ELSE 0.0 END
+            ) AS rank,
+            (SELECT COUNT(*)::int FROM "Review" r WHERE r."courseId" = c."id") as review_count
+          FROM "Course" c
+          JOIN "School" s ON c."schoolId" = s."id"
+          WHERE (
+            c."searchVector" @@ plainto_tsquery('english', $1)
+            OR ${aliasSQL}
+            OR ${compactCodeSQL}
+            OR c."code" ILIKE $1 || '%'
+            OR c."name" ILIKE '%' || $1 || '%'
+          )
+          ORDER BY
+            CASE WHEN c."code" ILIKE $1 || '%' OR ${aliasSQL} OR ${compactCodeSQL} THEN 0 ELSE 1 END,
+            rank DESC,
+            c."code" ASC
+          LIMIT ${input.courseLimit}
+        `,
+        ...filterParams,
+      )
+
+      const courseCountResult = await ctx.prisma.$queryRawUnsafe<any[]>(
+        `
+          SELECT COUNT(*)::int as total
+          FROM "Course" c
+          WHERE (
+            c."searchVector" @@ plainto_tsquery('english', $1)
+            OR ${aliasSQL}
+            OR ${compactCodeSQL}
+            OR c."code" ILIKE $1 || '%'
+            OR c."name" ILIKE '%' || $1 || '%'
+          )
+        `,
+        ...filterParams,
+      )
+
+      const allDepartments = normalizedSearch.hasDigit
+        ? []
+        : await ctx.prisma.department.findMany({
+            select: {
+              id: true,
+              code: true,
+              name: true,
+              school: { select: { name: true } },
+              _count: { select: { courses: true } },
+            },
+          })
+
+      const departments = allDepartments
+        .filter((department) => {
+          const codeUpper = department.code.toUpperCase()
+          const nameUpper = department.name.toUpperCase()
+          const codeCompact = compactAlnum(department.code)
+          const nameCompact = compactAlnum(department.name)
+
+          const directMatch =
+            codeUpper.includes(normalizedSearch.normalizedQuery) ||
+            nameUpper.includes(normalizedSearch.normalizedQuery)
+
+          const compactMatch =
+            normalizedSearch.compactQuery.length > 0 &&
+            (codeCompact.includes(normalizedSearch.compactQuery) ||
+              nameCompact.includes(normalizedSearch.compactQuery))
+
+          return directMatch || compactMatch
+        })
+        .sort((a, b) => {
+          const aCodeCompact = compactAlnum(a.code)
+          const bCodeCompact = compactAlnum(b.code)
+          const aStarts = aCodeCompact.startsWith(normalizedSearch.compactQuery) ? 1 : 0
+          const bStarts = bCodeCompact.startsWith(normalizedSearch.compactQuery) ? 1 : 0
+
+          if (aStarts !== bStarts) return bStarts - aStarts
+          if (a._count.courses !== b._count.courses) return b._count.courses - a._count.courses
+          return a.code.localeCompare(b.code)
+        })
+        .slice(0, input.departmentLimit)
+        .map((department) => ({
+          id: department.id,
+          code: department.code,
+          name: department.name,
+          schoolName: department.school.name,
+          courseCount: department._count.courses,
+        }))
+
+      return {
+        departments,
+        courses: courses.map((course) => ({
+          id: course.id,
+          code: course.code,
+          name: course.name,
+          credits: course.credits,
+          avgGPA: course.avgGPA,
+          schoolName: course.school_name,
+          reviewCount: course.review_count,
+        })),
+        meta: {
+          query: normalizedSearch.rawQuery,
+          hasDigit: normalizedSearch.hasDigit,
+          courseTotal: courseCountResult[0]?.total || 0,
+        },
+      }
     }),
 
   // Full-text search with suggestions (for autocomplete / quick search)
@@ -833,32 +1016,93 @@ export const courseRouter = router({
 
   // Get featured courses for homepage/initial view
   getFeatured: publicProcedure.query(async ({ ctx }) => {
-    const [mostReviewed, recentReviews] = await Promise.all([
-      ctx.prisma.course.findMany({
-        where: { reviews: { some: {} } },
-        select: {
-          id: true,
-          code: true,
-          name: true,
-          avgGPA: true,
-          credits: true,
-          _count: { select: { reviews: true } }
-        },
-        orderBy: { reviews: { _count: 'desc' } },
-        take: 20
-      }),
-      ctx.prisma.review.findMany({
-        select: {
-          id: true,
-          title: true,
-          contentRating: true,
-          createdAt: true,
-          course: { select: { id: true, code: true, name: true } }
-        },
-        orderBy: { createdAt: 'desc' },
-        take: 20
-      })
-    ])
-    return { mostReviewed, recentReviews }
+    const scoredCourses = await ctx.prisma.$queryRawUnsafe<any[]>(`
+      SELECT
+        c."id",
+        c."code",
+        c."name",
+        c."avgGPA",
+        c."credits",
+        COUNT(r."id")::int AS review_count,
+        AVG(
+          (
+            CASE r."contentRating"
+              WHEN 'A' THEN 4.0
+              WHEN 'AB' THEN 3.5
+              WHEN 'B' THEN 3.0
+              WHEN 'BC' THEN 2.5
+              WHEN 'C' THEN 2.0
+              WHEN 'D' THEN 1.0
+              ELSE 0.0
+            END
+            +
+            CASE r."teachingRating"
+              WHEN 'A' THEN 4.0
+              WHEN 'AB' THEN 3.5
+              WHEN 'B' THEN 3.0
+              WHEN 'BC' THEN 2.5
+              WHEN 'C' THEN 2.0
+              WHEN 'D' THEN 1.0
+              ELSE 0.0
+            END
+            +
+            CASE r."gradingRating"
+              WHEN 'A' THEN 4.0
+              WHEN 'AB' THEN 3.5
+              WHEN 'B' THEN 3.0
+              WHEN 'BC' THEN 2.5
+              WHEN 'C' THEN 2.0
+              WHEN 'D' THEN 1.0
+              ELSE 0.0
+            END
+            +
+            CASE r."workloadRating"
+              WHEN 'A' THEN 4.0
+              WHEN 'AB' THEN 3.5
+              WHEN 'B' THEN 3.0
+              WHEN 'BC' THEN 2.5
+              WHEN 'C' THEN 2.0
+              WHEN 'D' THEN 1.0
+              ELSE 0.0
+            END
+          ) / 4.0
+        ) AS rating_score
+      FROM "Course" c
+      JOIN "Review" r ON r."courseId" = c."id"
+      GROUP BY c."id", c."code", c."name", c."avgGPA", c."credits"
+    `)
+
+    const normalized = scoredCourses.map((course) => ({
+      id: course.id,
+      code: course.code,
+      name: course.name,
+      avgGPA: course.avgGPA,
+      credits: course.credits,
+      reviewCount: course.review_count,
+      ratingScore: Number(course.rating_score),
+    }))
+
+    const highestRated = [...normalized]
+      .sort(
+        (a, b) =>
+          b.ratingScore - a.ratingScore ||
+          b.reviewCount - a.reviewCount ||
+          a.code.localeCompare(b.code),
+      )
+      .slice(0, 20)
+
+    const highestIds = new Set(highestRated.map((course) => course.id))
+
+    const lowestRated = normalized
+      .filter((course) => course.ratingScore < 2.0 && !highestIds.has(course.id))
+      .sort(
+        (a, b) =>
+          a.ratingScore - b.ratingScore ||
+          b.reviewCount - a.reviewCount ||
+          a.code.localeCompare(b.code),
+      )
+      .slice(0, 20)
+
+    return { highestRated, lowestRated }
   }),
 })

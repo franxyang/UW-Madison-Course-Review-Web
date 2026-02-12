@@ -1,21 +1,17 @@
 'use client'
 
 import Link from 'next/link'
-import { Star, Clock, TrendingUp } from 'lucide-react'
+import { TrendingUp, TrendingDown } from 'lucide-react'
 import { trpc } from '@/lib/trpc/client'
 import { toOfficialCode } from '@/lib/courseCodeDisplay'
+import { gpaToLetterGrade } from '@/lib/gpaLetter'
 
-function getRatingColor(rating: string) {
-  const colors: Record<string, string> = {
-    'A': 'text-emerald-600',
-    'AB': 'text-emerald-500',
-    'B': 'text-amber-600',
-    'BC': 'text-amber-500',
-    'C': 'text-orange-500',
-    'D': 'text-red-500',
-    'F': 'text-red-600'
-  }
-  return colors[rating] || 'text-text-secondary'
+function getScoreColor(score: number) {
+  if (score >= 3.5) return 'text-emerald-500'
+  if (score >= 3.0) return 'text-emerald-400'
+  if (score >= 2.5) return 'text-amber-500'
+  if (score >= 2.0) return 'text-orange-500'
+  return 'text-red-500'
 }
 
 interface FeaturedContentProps {
@@ -55,20 +51,20 @@ export function FeaturedContent({ onLevelSelect }: FeaturedContentProps = {}) {
 
   if (!data) return null
   
-  const { mostReviewed, recentReviews } = data
+  const { highestRated, lowestRated } = data
 
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-        {/* Most Reviewed */}
+        {/* Highest Rated */}
         <section className="bg-surface-primary border border-surface-tertiary rounded-xl p-4">
           <h2 className="font-semibold text-text-primary mb-3 flex items-center gap-2">
             <TrendingUp size={18} className="text-wf-crimson" />
-            Most Reviewed Courses
+            Highest Rated Courses
           </h2>
-          {mostReviewed.length > 0 ? (
+          {highestRated.length > 0 ? (
             <div className="max-h-[270px] overflow-y-auto scrollbar-hide pr-1 space-y-2">
-              {mostReviewed.map(course => (
+              {highestRated.map(course => (
                 <Link
                   key={course.id}
                   href={`/courses/${course.id}`}
@@ -80,9 +76,11 @@ export function FeaturedContent({ onLevelSelect }: FeaturedContentProps = {}) {
                     </div>
                     <div className="text-xs text-text-secondary truncate">{course.name}</div>
                   </div>
-                  <div className="flex items-center gap-1 text-xs text-text-tertiary whitespace-nowrap">
-                    <Star size={10} className="text-amber-400" />
-                    <span>{course._count.reviews}</span>
+                  <div className="text-right whitespace-nowrap">
+                    <div className={`text-sm font-semibold ${getScoreColor(course.ratingScore)}`}>
+                      {course.ratingScore.toFixed(2)} ({gpaToLetterGrade(course.ratingScore)})
+                    </div>
+                    <div className="text-[11px] text-text-tertiary">{course.reviewCount} reviews</div>
                   </div>
                 </Link>
               ))}
@@ -92,45 +90,37 @@ export function FeaturedContent({ onLevelSelect }: FeaturedContentProps = {}) {
           )}
         </section>
 
-        {/* Recent Reviews */}
+        {/* Lowest Rated */}
         <section className="bg-surface-primary border border-surface-tertiary rounded-xl p-4">
           <h2 className="font-semibold text-text-primary mb-3 flex items-center gap-2">
-            <Clock size={18} className="text-text-tertiary" />
-            Recent Reviews
+            <TrendingDown size={18} className="text-red-500" />
+            Lowest Rated Courses
           </h2>
-          {recentReviews.length > 0 ? (
+          {lowestRated.length > 0 ? (
             <div className="max-h-[270px] overflow-y-auto scrollbar-hide pr-1 space-y-2">
-              {recentReviews.map(review => (
+              {lowestRated.map(course => (
                 <Link
-                  key={review.id}
-                  href={`/courses/${review.course.id}`}
-                  className="block border border-surface-tertiary rounded-lg p-3 hover:border-wf-crimson/30 hover:bg-hover-bg transition-colors"
+                  key={course.id}
+                  href={`/courses/${course.id}`}
+                  className="flex items-center justify-between gap-3 rounded-lg border border-surface-tertiary px-3 py-2 hover:border-wf-crimson/30 hover:bg-hover-bg transition-colors"
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-medium text-sm text-wf-crimson">
-                          {toOfficialCode(review.course.code)}
-                        </span>
-                        <span className={`text-xs font-semibold ${getRatingColor(review.contentRating)}`}>
-                          {review.contentRating}
-                        </span>
-                      </div>
-                      {review.title && (
-                        <p className="text-sm text-text-secondary line-clamp-1">
-                          &quot;{review.title}&quot;
-                        </p>
-                      )}
+                  <div className="min-w-0">
+                    <div className="text-sm font-semibold text-text-primary truncate">
+                      {toOfficialCode(course.code)}
                     </div>
-                    <span className="text-xs text-text-tertiary whitespace-nowrap">
-                      {new Date(review.createdAt).toLocaleDateString()}
-                    </span>
+                    <div className="text-xs text-text-secondary truncate">{course.name}</div>
+                  </div>
+                  <div className="text-right whitespace-nowrap">
+                    <div className={`text-sm font-semibold ${getScoreColor(course.ratingScore)}`}>
+                      {course.ratingScore.toFixed(2)} ({gpaToLetterGrade(course.ratingScore)})
+                    </div>
+                    <div className="text-[11px] text-text-tertiary">{course.reviewCount} reviews</div>
                   </div>
                 </Link>
               ))}
             </div>
           ) : (
-            <p className="text-sm text-text-tertiary">No reviews yet</p>
+            <p className="text-sm text-text-tertiary">Not enough reviewed courses yet</p>
           )}
         </section>
       </div>

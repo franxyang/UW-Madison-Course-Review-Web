@@ -39,21 +39,24 @@ function CoursesPageSkeleton() {
 function CoursesPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const selectedDept = searchParams.get('dept')?.trim() || null
+  const searchQuery = (searchParams.get('search') || '').trim()
+  const hasSearchQuery = !selectedDept && searchQuery.length > 0
 
   // State
-  const [selectedDept, setSelectedDept] = useState<string | null>(
-    searchParams.get('dept') || null
-  )
   const [filters, setFilters] = useState<QuickFilterValues>({
     levels: searchParams.get('level') ? [searchParams.get('level')!] : undefined
   })
 
   const effectiveSortBy = (filters.sortBy as 'reviews' | 'gpa' | 'code' | undefined) || 'reviews'
+  const hasManualFilters =
+    (filters.levels?.length || 0) > 0 ||
+    filters.minGPA !== undefined ||
+    filters.maxGPA !== undefined
   const hasHomepageFilters =
     !selectedDept &&
-    ((filters.levels?.length || 0) > 0 ||
-      filters.minGPA !== undefined ||
-      filters.maxGPA !== undefined)
+    !hasSearchQuery &&
+    hasManualFilters
 
   // Fetch department data when selected
   const { data: deptStats, isLoading: deptLoading } = trpc.course.getDepartmentStats.useQuery(
@@ -113,18 +116,35 @@ function CoursesPageContent() {
     },
   )
   const homepageFilteredCourses = homepageFilteredData?.courses ?? []
+  const {
+    data: searchResultsData,
+    isLoading: searchResultsLoading,
+  } = trpc.course.list.useQuery(
+    {
+      search: searchQuery,
+      levels: filters.levels,
+      minGPA: filters.minGPA,
+      maxGPA: filters.maxGPA,
+      sortBy: effectiveSortBy,
+      limit: 100,
+      offset: 0,
+    },
+    {
+      enabled: hasSearchQuery,
+    },
+  )
+  const searchResultsCourses = searchResultsData?.courses ?? []
 
   // Handle department selection
   const handleSelectDept = (deptCode: string | null) => {
-    setSelectedDept(deptCode)
-    // Update URL
-    const params = new URLSearchParams(searchParams)
+    const params = new URLSearchParams(searchParams.toString())
     if (deptCode) {
       params.set('dept', deptCode)
     } else {
       params.delete('dept')
     }
-    router.replace(`/courses?${params.toString()}`, { scroll: false })
+    const query = params.toString()
+    router.replace(query ? `/courses?${query}` : '/courses', { scroll: false })
   }
 
   return (
@@ -150,7 +170,7 @@ function CoursesPageContent() {
                   <span>{selectedDept}</span>
                 </span>
               ) : (
-                'Browse Courses'
+                hasSearchQuery ? 'Search Results' : 'Browse Courses'
               )}
             </h1>
             {selectedDept && deptStats && (
@@ -158,9 +178,17 @@ function CoursesPageContent() {
                 {deptStats.name} • {deptStats.courseCount} courses
               </p>
             )}
+            {!selectedDept && hasSearchQuery && (
+              <p className="text-sm text-text-secondary mt-1">
+                Search results for &quot;{searchQuery}&quot;
+              </p>
+            )}
           </div>
           <div className="w-80">
-            <SearchWithPreview placeholder="Search all courses..." />
+            <SearchWithPreview
+              initialQuery={selectedDept ? '' : searchQuery}
+              placeholder="Search all courses..."
+            />
           </div>
         </div>
 
@@ -212,43 +240,72 @@ function CoursesPageContent() {
                   <CourseList courses={filteredCourses} />
                 </div>
               )
-            ) : (
-              hasHomepageFilters ? (
-                homepageFilteredLoading ? (
-                  <div className="space-y-3 animate-pulse">
-                    {[1, 2, 3, 4, 5].map(i => (
-                      <div key={i} className="h-20 bg-surface-tertiary rounded-lg" />
-                    ))}
-                  </div>
-                ) : (
-                  <div>
-                    <div className="text-sm text-text-secondary mb-4">
-                      Showing {homepageFilteredData?.total || 0} courses
-                      {filters.levels && filters.levels.length > 0 && (
-                        <span> • Level: {filters.levels.join(', ')}</span>
-                      )}
-                      {(filters.minGPA !== undefined || filters.maxGPA !== undefined) && (
-                        <span>
-                          {' '}
-                          • GPA: {filters.minGPA?.toFixed(1) ?? '0.0'} - {filters.maxGPA?.toFixed(1) ?? '4.0'}
-                        </span>
-                      )}
-                    </div>
-                    {homepageFilteredCourses.length > 0 ? (
-                      <CourseList courses={homepageFilteredCourses} />
-                    ) : (
-                      <div className="bg-surface-primary border border-surface-tertiary rounded-xl p-12 text-center text-text-secondary">
-                        No courses match your filters.
-                      </div>
+            ) : hasSearchQuery ? (
+              searchResultsLoading ? (
+                <div className="space-y-3 animate-pulse">
+                  {[1, 2, 3, 4, 5].map(i => (
+                    <div key={i} className="h-20 bg-surface-tertiary rounded-lg" />
+                  ))}
+                </div>
+              ) : (
+                <div>
+                  <div className="text-sm text-text-secondary mb-4">
+                    Showing {searchResultsData?.total || 0} courses
+                    <span> • Query: &quot;{searchQuery}&quot;</span>
+                    {filters.levels && filters.levels.length > 0 && (
+                      <span> • Level: {filters.levels.join(', ')}</span>
+                    )}
+                    {(filters.minGPA !== undefined || filters.maxGPA !== undefined) && (
+                      <span>
+                        {' '}
+                        • GPA: {filters.minGPA?.toFixed(1) ?? '0.0'} - {filters.maxGPA?.toFixed(1) ?? '4.0'}
+                      </span>
                     )}
                   </div>
-                )
-              ) : (
-                // Show featured content
-                <FeaturedContent onLevelSelect={(level) => {
-                  setFilters(prev => ({ ...prev, levels: [level] }))
-                }} />
+                  {searchResultsCourses.length > 0 ? (
+                    <CourseList courses={searchResultsCourses} />
+                  ) : (
+                    <div className="bg-surface-primary border border-surface-tertiary rounded-xl p-12 text-center text-text-secondary">
+                      No courses found for &quot;{searchQuery}&quot; with the current filters.
+                    </div>
+                  )}
+                </div>
               )
+            ) : hasHomepageFilters ? (
+              homepageFilteredLoading ? (
+                <div className="space-y-3 animate-pulse">
+                  {[1, 2, 3, 4, 5].map(i => (
+                    <div key={i} className="h-20 bg-surface-tertiary rounded-lg" />
+                  ))}
+                </div>
+              ) : (
+                <div>
+                  <div className="text-sm text-text-secondary mb-4">
+                    Showing {homepageFilteredData?.total || 0} courses
+                    {filters.levels && filters.levels.length > 0 && (
+                      <span> • Level: {filters.levels.join(', ')}</span>
+                    )}
+                    {(filters.minGPA !== undefined || filters.maxGPA !== undefined) && (
+                      <span>
+                        {' '}
+                        • GPA: {filters.minGPA?.toFixed(1) ?? '0.0'} - {filters.maxGPA?.toFixed(1) ?? '4.0'}
+                      </span>
+                    )}
+                  </div>
+                  {homepageFilteredCourses.length > 0 ? (
+                    <CourseList courses={homepageFilteredCourses} />
+                  ) : (
+                    <div className="bg-surface-primary border border-surface-tertiary rounded-xl p-12 text-center text-text-secondary">
+                      No courses match your filters.
+                    </div>
+                  )}
+                </div>
+              )
+            ) : (
+              // Show featured content
+              <FeaturedContent onLevelSelect={(level) => {
+                setFilters(prev => ({ ...prev, levels: [level] }))
+              }} />
             )}
           </div>
 

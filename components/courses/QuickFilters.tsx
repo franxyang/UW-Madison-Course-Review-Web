@@ -1,6 +1,6 @@
 'use client'
 
-import { SlidersHorizontal, X } from 'lucide-react'
+import { SlidersHorizontal } from 'lucide-react'
 
 export interface QuickFilterValues {
   levels?: string[]
@@ -79,6 +79,42 @@ export function QuickFilters({ filters, onChange }: QuickFiltersProps) {
         </div>
       </div>
 
+      {/* Breadth (coming soon) */}
+      <div className="mb-4">
+        <div className="flex items-center justify-between mb-2">
+          <div className="text-xs font-medium text-text-tertiary uppercase tracking-wider">
+            Breadth
+          </div>
+          <span className="text-[10px] uppercase tracking-wide text-wf-crimson font-semibold">
+            Coming soon
+          </span>
+        </div>
+        <select
+          disabled
+          className="w-full px-2 py-1.5 text-xs border border-surface-tertiary rounded-lg bg-surface-secondary text-text-tertiary cursor-not-allowed opacity-80"
+        >
+          <option>Official breadth data pending</option>
+        </select>
+      </div>
+
+      {/* General Education (coming soon) */}
+      <div className="mb-4">
+        <div className="flex items-center justify-between mb-2">
+          <div className="text-xs font-medium text-text-tertiary uppercase tracking-wider">
+            General Education
+          </div>
+          <span className="text-[10px] uppercase tracking-wide text-wf-crimson font-semibold">
+            Coming soon
+          </span>
+        </div>
+        <select
+          disabled
+          className="w-full px-2 py-1.5 text-xs border border-surface-tertiary rounded-lg bg-surface-secondary text-text-tertiary cursor-not-allowed opacity-80"
+        >
+          <option>Official gen ed data pending</option>
+        </select>
+      </div>
+
       {/* GPA Range */}
       <div className="mb-4">
         <div className="text-xs font-medium text-text-tertiary uppercase tracking-wider mb-2">
@@ -130,6 +166,10 @@ export function QuickFilters({ filters, onChange }: QuickFiltersProps) {
           <option value="code">Course Code (A-Z)</option>
         </select>
       </div>
+
+      <p className="mt-4 text-[11px] leading-relaxed text-text-tertiary">
+        Breadth and General Education filters are disabled for now. We are backfilling official course designation data and will enable these filters after data coverage is complete.
+      </p>
     </div>
   )
 }

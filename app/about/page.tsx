@@ -1,15 +1,11 @@
 'use client'
 
-import { Header } from '@/components/Header'
 import { Logo } from '@/components/Logo'
 import { BookOpen, Users, Shield, Heart, Code2, AlertTriangle, Github } from 'lucide-react'
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-surface-secondary">
-      {/* Header */}
-      <Header currentPath="/about" />
-
+    <>
       {/* Content */}
       <main className="max-w-4xl mx-auto px-6 py-12">
         {/* Hero */}
@@ -173,6 +169,6 @@ export default function AboutPage() {
           </div>
         </div>
       </footer>
-    </div>
+    </>
   )
 }

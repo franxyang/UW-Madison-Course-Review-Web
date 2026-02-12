@@ -145,6 +145,188 @@ export const adminRouter = router({
     }),
 
   // ============================================================
+  // SITE UPDATES (ADMIN ONLY)
+  // ============================================================
+
+  listSiteUpdates: superAdminProcedure
+    .input(
+      z.object({
+        status: z.enum(['all', 'DRAFT', 'PUBLISHED', 'ARCHIVED']).default('all'),
+        search: z.string().optional(),
+        page: z.number().min(1).default(1),
+        limit: z.number().min(1).max(100).default(20),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const where: any = {}
+      if (input.status !== 'all') {
+        where.status = input.status
+      }
+      if (input.search) {
+        where.OR = [
+          { title: { contains: input.search, mode: 'insensitive' } },
+          { summary: { contains: input.search, mode: 'insensitive' } },
+          { content: { contains: input.search, mode: 'insensitive' } },
+          { versionTag: { contains: input.search, mode: 'insensitive' } },
+        ]
+      }
+
+      const [items, total] = await Promise.all([
+        ctx.prisma.siteUpdate.findMany({
+          where,
+          include: {
+            author: { select: { id: true, nickname: true, name: true, email: true } },
+          },
+          orderBy: [{ publishedAt: 'desc' }, { createdAt: 'desc' }],
+          skip: (input.page - 1) * input.limit,
+          take: input.limit,
+        }),
+        ctx.prisma.siteUpdate.count({ where }),
+      ])
+
+      return {
+        items,
+        total,
+        pages: Math.ceil(total / input.limit),
+        page: input.page,
+      }
+    }),
+
+  createSiteUpdate: superAdminProcedure
+    .input(
+      z.object({
+        title: z.string().min(1).max(120),
+        summary: z.string().max(300).optional(),
+        content: z.string().min(1).max(20000),
+        versionTag: z.string().max(30).optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const actorId = ctx.session.user.id!
+
+      const created = await ctx.prisma.siteUpdate.create({
+        data: {
+          title: input.title.trim(),
+          summary: input.summary?.trim() || null,
+          content: input.content.trim(),
+          versionTag: input.versionTag?.trim() || null,
+          status: 'DRAFT',
+          authorId: actorId,
+        },
+      })
+
+      await writeAuditLog(ctx.prisma, actorId, 'CREATE_SITE_UPDATE', 'SiteUpdate', created.id, {
+        title: created.title,
+        status: created.status,
+      })
+
+      return created
+    }),
+
+  updateSiteUpdate: superAdminProcedure
+    .input(
+      z
+        .object({
+          id: z.string(),
+          title: z.string().min(1).max(120).optional(),
+          summary: z.string().max(300).optional(),
+          content: z.string().min(1).max(20000).optional(),
+          versionTag: z.string().max(30).optional(),
+        })
+        .refine(
+          (value) =>
+            value.title !== undefined ||
+            value.summary !== undefined ||
+            value.content !== undefined ||
+            value.versionTag !== undefined,
+          { message: 'At least one field must be updated' },
+        ),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const actorId = ctx.session.user.id!
+      const existing = await ctx.prisma.siteUpdate.findUnique({
+        where: { id: input.id },
+        select: { id: true },
+      })
+
+      if (!existing) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Site update not found' })
+      }
+
+      const data: any = {}
+      if (input.title !== undefined) data.title = input.title.trim()
+      if (input.summary !== undefined) data.summary = input.summary.trim() || null
+      if (input.content !== undefined) data.content = input.content.trim()
+      if (input.versionTag !== undefined) data.versionTag = input.versionTag.trim() || null
+
+      const updated = await ctx.prisma.siteUpdate.update({
+        where: { id: input.id },
+        data,
+      })
+
+      await writeAuditLog(ctx.prisma, actorId, 'UPDATE_SITE_UPDATE', 'SiteUpdate', updated.id, {
+        changedFields: Object.keys(data),
+      })
+
+      return updated
+    }),
+
+  publishSiteUpdate: superAdminProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const actorId = ctx.session.user.id!
+
+      const existing = await ctx.prisma.siteUpdate.findUnique({
+        where: { id: input.id },
+        select: { id: true, status: true },
+      })
+      if (!existing) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Site update not found' })
+      }
+
+      const published = await ctx.prisma.siteUpdate.update({
+        where: { id: input.id },
+        data: {
+          status: 'PUBLISHED',
+          publishedAt: new Date(),
+        },
+      })
+
+      await writeAuditLog(ctx.prisma, actorId, 'PUBLISH_SITE_UPDATE', 'SiteUpdate', published.id, {
+        fromStatus: existing.status,
+        toStatus: published.status,
+      })
+
+      return published
+    }),
+
+  archiveSiteUpdate: superAdminProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const actorId = ctx.session.user.id!
+
+      const existing = await ctx.prisma.siteUpdate.findUnique({
+        where: { id: input.id },
+        select: { id: true, status: true },
+      })
+      if (!existing) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Site update not found' })
+      }
+
+      const archived = await ctx.prisma.siteUpdate.update({
+        where: { id: input.id },
+        data: { status: 'ARCHIVED' },
+      })
+
+      await writeAuditLog(ctx.prisma, actorId, 'ARCHIVE_SITE_UPDATE', 'SiteUpdate', archived.id, {
+        fromStatus: existing.status,
+        toStatus: archived.status,
+      })
+
+      return archived
+    }),
+
+  // ============================================================
   // REPORTS
   // ============================================================
 

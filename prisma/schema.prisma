@@ -73,6 +73,7 @@ model User {
   bans                  UserBan[]              @relation("BannedUser")
   bansIssued            UserBan[]              @relation("BanIssuer")
   resolvedReports       Report[]               @relation("ResolvedBy")
+  siteUpdates           SiteUpdate[]
 }
 
 model UserEmail {
@@ -125,6 +126,23 @@ model AppSetting {
   value     String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model SiteUpdate {
+  id          String           @id @default(cuid())
+  title       String
+  summary     String?
+  content     String
+  versionTag  String?
+  status      SiteUpdateStatus @default(DRAFT)
+  publishedAt DateTime?
+  authorId    String
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  author      User             @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([status, publishedAt])
+  @@index([authorId, createdAt])
 }
 
 model School {
@@ -408,6 +426,12 @@ enum EligibilityStatus {
   UNVERIFIED
   STUDENT_VERIFIED
   ALUMNI_VERIFIED
+}
+
+enum SiteUpdateStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
 }
 
 model AuditLog {

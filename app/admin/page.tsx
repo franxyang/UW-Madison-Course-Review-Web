@@ -201,7 +201,12 @@ export default function AdminDashboard() {
       </div>
 
       {/* Quick Links */}
-      <div className="grid md:grid-cols-3 gap-4">
+      <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-4">
+        <QuickLink
+          href="/admin/updates"
+          label="Push Site Update"
+          description="Create and publish updates for About page"
+        />
         <QuickLink
           href="/admin/reports"
           label="Review Reports"

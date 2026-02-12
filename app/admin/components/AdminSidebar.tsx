@@ -9,6 +9,7 @@ import {
   MessageSquare,
   Users,
   ScrollText,
+  Megaphone,
   ChevronLeft,
   Shield,
   Menu,
@@ -22,6 +23,7 @@ interface AdminSidebarProps {
 
 const navItems = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/admin/updates', label: 'Site Updates', icon: Megaphone, adminOnly: true },
   { href: '/admin/reports', label: 'Reports', icon: Flag },
   { href: '/admin/reviews', label: 'Reviews', icon: MessageSquare },
   { href: '/admin/users', label: 'Users', icon: Users },
@@ -66,7 +68,9 @@ export function AdminSidebar({ role }: AdminSidebarProps) {
 
       {/* Navigation */}
       <nav className="flex-1 px-3 py-2 space-y-1">
-        {navItems.map((item) => {
+        {navItems
+          .filter((item) => !item.adminOnly || role === 'ADMIN')
+          .map((item) => {
           const active = isActive(item.href)
           return (
             <Link
